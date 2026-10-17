@@ -1,0 +1,62 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Leopold <77323443+MadebyLeopold@users.noreply.github.com>
+Date: Sat, 17 Oct 2026 21:26:37 +0200
+Subject: [PATCH] Skip POI searches known to be empty
+
+
+diff --git a/ca/spottedleaf/moonrise/patches/poi_lookup/PoiAccess.java b/ca/spottedleaf/moonrise/patches/poi_lookup/PoiAccess.java
+index 85d80b3952a76b0ca7f67401a659cf35dd55b082..da25ff03ccfecf6291e59ce606e03cbdfaa32e2e 100644
+--- a/ca/spottedleaf/moonrise/patches/poi_lookup/PoiAccess.java
++++ b/ca/spottedleaf/moonrise/patches/poi_lookup/PoiAccess.java
+@@ -358,6 +358,11 @@ public final class PoiAccess {
+         final int centerY = Mth.clamp(sourcePosition.getY() >> 4, lowerY, upperY);
+         final int centerZ = sourcePosition.getZ() >> 4;
+         final long centerKey = CoordinateUtils.getChunkSectionKey(centerX, centerY, centerZ);
++        final kirigami.parallel.PoiSearchCache mtCache = poiStorage.mtSearchCache; // MT
++        final Object mtKey = kirigami.parallel.PoiSearchCache.key(villagePlaceType, maxDistanceSquared, lowerX, lowerZ, upperX, upperZ); // MT
++        final long mtVersion = mtCache.version(); // MT
++        if (mtCache.knownEmpty(mtKey, mtVersion)) return; // MT
++        boolean mtFound = false; // MT
+ 
+         final LongArrayFIFOQueue queue = new LongArrayFIFOQueue();
+         final LongOpenHashSet seen = new LongOpenHashSet();
+@@ -430,6 +435,7 @@ public final class PoiAccess {
+                     // filter out by poi type
+                     continue;
+                 }
++                if (!entry.getValue().isEmpty()) mtFound = true; // MT
+ 
+                 // now we can look at the poi data
+                 for (final PoiRecord poiData : entry.getValue()) {
+@@ -499,6 +505,7 @@ public final class PoiAccess {
+             }
+         }
+ 
++        if (!mtFound) mtCache.markEmpty(mtKey, mtVersion); // MT
+         final List<PoiRecord> closestRecordsUnsorted = new ArrayList<>();
+ 
+         // we're done here, so now just flatten the map and sort it.
+diff --git a/net/minecraft/world/entity/ai/village/poi/PoiManager.java b/net/minecraft/world/entity/ai/village/poi/PoiManager.java
+index 3e3ac994317d2fcbfb52b880e6ecd940243d32a5..2828797a796d63b80ebbcfde599e0a654ee60b93 100644
+--- a/net/minecraft/world/entity/ai/village/poi/PoiManager.java
++++ b/net/minecraft/world/entity/ai/village/poi/PoiManager.java
+@@ -445,8 +445,11 @@ public class PoiManager extends SectionStorage<PoiSection, PoiSection.Packed> im
+         synchronized (this.villageDistanceTracker) { this.villageDistanceTracker.propagateUpdates(); } // Paper - rewrite chunk system // MT
+     }
+ 
++    public final kirigami.parallel.PoiSearchCache mtSearchCache = new kirigami.parallel.PoiSearchCache(); // MT
++
+     @Override
+     public void setDirty(final long sectionPos) { // Paper - public
++        this.mtSearchCache.changed(); // MT
+         // Paper start - rewrite chunk system
+         final int chunkX = ca.spottedleaf.moonrise.common.util.CoordinateUtils.getChunkSectionX(sectionPos);
+         final int chunkZ = ca.spottedleaf.moonrise.common.util.CoordinateUtils.getChunkSectionZ(sectionPos);
+@@ -461,6 +464,7 @@ public class PoiManager extends SectionStorage<PoiSection, PoiSection.Packed> im
+ 
+     @Override
+     protected void onSectionLoad(final long sectionPos) {
++        this.mtSearchCache.changed(); // MT
+         this.updateDistanceTracking(sectionPos); // Paper - rewrite chunk system
+     }
+ 
