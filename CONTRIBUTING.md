@@ -73,5 +73,6 @@ When Paper moves to a new Minecraft version, the update workflow opens an issue 
 - Commit messages use `<type>: <description>`, for example `fix: keep hopper order across cell borders`. Types: feat, fix, perf, refactor, test, docs, ci, chore.
 - Write code that reads like the surrounding code. Avoid comments other than the `// MT` markers.
 - Behaviour that differs from vanilla must be optional and off by default.
+- Every pull request runs the Build workflow (including the vanilla parity check) and the Security workflow (CodeQL for Java, Python and GitHub Actions, a secret scan and a dependency review). Fix or explain every finding before asking for review.
 
 By contributing, you agree that your contribution is licensed under the GNU General Public License v3.0, like the rest of Kirigami.
