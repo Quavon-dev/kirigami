@@ -27,6 +27,10 @@ public final class RegionTicking {
     public static final boolean ENABLED = Boolean.parseBoolean(System.getProperty("kirigami.regionTicking", "true"));
     private static final int CELL_SHIFT = 3;
     private static final int SCHEDULED_TICK_REACH = 24;
+    private static final int MAX_PAUSES_PER_RUN = 64;
+    private static final int PAUSE_FALLBACK_TICKS = 600;
+    private static final java.util.Set<String> WARNED = new java.util.HashSet<>();
+    private static int trackerSerialUntilTick;
     private static final int COLORS = 4;
     private static final int MIN_PARALLEL_ITEMS = Integer.getInteger("kirigami.minParallelItems", 256);
     private static final int WORKERS = Integer.getInteger("kirigami.regionWorkers", Math.max(0, Runtime.getRuntime().availableProcessors() - 1));
@@ -43,10 +47,11 @@ public final class RegionTicking {
         private long cells;
         private long boundaryBlockEntities;
         private long boundaryScheduledTicks;
+        private long pauseFallbacks;
 
         public long[] snapshot() {
             final int phases = Phase.values().length;
-            final long[] values = new long[2 * phases + 3];
+            final long[] values = new long[2 * phases + 4];
             for (int i = 0; i < phases; i++) {
                 values[2 * i] = this.parallel[i];
                 values[2 * i + 1] = this.serial[i];
@@ -54,6 +59,7 @@ public final class RegionTicking {
             values[2 * phases] = this.cells;
             values[2 * phases + 1] = this.boundaryBlockEntities;
             values[2 * phases + 2] = this.boundaryScheduledTicks;
+            values[2 * phases + 3] = this.pauseFallbacks;
             return values;
         }
 
@@ -77,6 +83,7 @@ public final class RegionTicking {
         private final String label;
         private final long salt;
         private final boolean enabled;
+        private int serialUntilTick;
 
         Phase(final String label, final long salt) {
             this.label = label;
@@ -173,7 +180,8 @@ public final class RegionTicking {
     private static <T> void run(final ServerLevel level, final Phase phase, final List<T> items, final java.util.function.ToLongFunction<T> chunkKey,
                                 final java.util.function.Predicate<T> serialPredicate, final Consumer<T> action, final int maxChainedNeighborUpdates,
                                 final @org.jspecify.annotations.Nullable Runnable betweenColors) {
-        if (POOL == null || !PluginGuard.parallelAllowed() || !phase.enabled || items.size() < MIN_PARALLEL_ITEMS) {
+        if (POOL == null || !PluginGuard.parallelAllowed() || !phase.enabled || items.size() < MIN_PARALLEL_ITEMS
+            || net.minecraft.server.MinecraftServer.currentTick < phase.serialUntilTick) {
             STATS.serial[phase.ordinal()] += items.size();
             items.forEach(action);
             return;
@@ -196,6 +204,7 @@ public final class RegionTicking {
             byColor[color].computeIfAbsent(ChunkPos.pack(cellX, cellZ), unused -> new ArrayList<>()).add(item);
         }
 
+        final long pausesBefore = WorldPause.pauses();
         final long baseSeed = level.getSeed() ^ SeedSalt.VALUE ^ level.getGameTime() * phase.salt;
         for (int color = 0; color < COLORS; color++) {
             final List<Cell<T>> cells = new ArrayList<>(byColor[color].size());
@@ -214,6 +223,10 @@ public final class RegionTicking {
             }
         }
 
+        if (pausedTooOften(pausesBefore, phase.label)) {
+            phase.serialUntilTick = net.minecraft.server.MinecraftServer.currentTick + PAUSE_FALLBACK_TICKS;
+        }
+
         STATS.serial[phase.ordinal()] += serial.size();
         for (final T item : serial) {
             action.accept(item);
@@ -221,9 +234,11 @@ public final class RegionTicking {
     }
 
     public static <T> boolean forEachParallel(final ServerLevel level, final T[] items, final int size, final Consumer<T> action) {
-        if (!ENABLED || !PARALLEL_TRACKER || POOL == null || size < Math.max(2, MIN_PARALLEL_ITEMS) || !PluginGuard.parallelAllowed()) {
+        if (!ENABLED || !PARALLEL_TRACKER || POOL == null || size < Math.max(2, MIN_PARALLEL_ITEMS) || !PluginGuard.parallelAllowed()
+            || net.minecraft.server.MinecraftServer.currentTick < trackerSerialUntilTick) {
             return false;
         }
+        final long pausesBefore = WorldPause.pauses();
         final int slices = Math.min(size, (WORKERS + 1) * 4);
         final AtomicInteger next = new AtomicInteger();
         runOnWorkers(slices, () -> {
@@ -239,6 +254,22 @@ public final class RegionTicking {
                 }
             }
         });
+        if (pausedTooOften(pausesBefore, "entityTracker")) {
+            trackerSerialUntilTick = net.minecraft.server.MinecraftServer.currentTick + PAUSE_FALLBACK_TICKS;
+        }
+        return true;
+    }
+
+    private static boolean pausedTooOften(final long pausesBefore, final String label) {
+        final long pauses = WorldPause.pauses() - pausesBefore;
+        if (pauses <= MAX_PAUSES_PER_RUN) {
+            return false;
+        }
+        STATS.pauseFallbacks++;
+        if (WARNED.add(label)) {
+            net.minecraft.server.MinecraftServer.LOGGER.warn("Plugin code paused the world {} times while running {} in parallel; {} now runs serially for {} ticks each time this happens. /kirigami lists the events that cause it.",
+                pauses, label, label, PAUSE_FALLBACK_TICKS);
+        }
         return true;
     }
 
@@ -254,6 +285,7 @@ public final class RegionTicking {
             || entity instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragon
             || entity instanceof net.minecraft.world.entity.boss.wither.WitherBoss
             || entity instanceof net.minecraft.world.entity.vehicle.minecart.MinecartHopper
+            || entity instanceof net.minecraft.world.entity.vehicle.minecart.MinecartCommandBlock
             || entity.isRemoved();
     }
 

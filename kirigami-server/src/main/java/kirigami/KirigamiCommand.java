@@ -30,7 +30,6 @@ public final class KirigamiCommand {
     private long[] baseSpawn = ParallelSpawning.STATS.snapshot();
     private long basePauses = WorldPause.pauses();
     private long baseLoads = CellContext.blockingLoads();
-    private java.util.Map<String, Long> baseReasons = WorldPause.reasons();
 
     private KirigamiCommand() {
     }
@@ -49,8 +48,8 @@ public final class KirigamiCommand {
         this.baseRegion = RegionTicking.STATS.snapshot();
         this.baseSpawn = ParallelSpawning.STATS.snapshot();
         this.basePauses = WorldPause.pauses();
+        WorldPause.resetSources();
         this.baseLoads = CellContext.blockingLoads();
-        this.baseReasons = WorldPause.reasons();
         ctx.getSource().getSender().sendMessage(Component.text("Kirigami statistics reset.", NamedTextColor.GREEN));
         return Command.SINGLE_SUCCESS;
     }
@@ -80,14 +79,12 @@ public final class KirigamiCommand {
         final long speculated = spawn[1] - this.baseSpawn[1];
         text.append(String.format(Locale.ROOT, "  Spawn searches: %.0f, %.1f%% precomputed in parallel, %d mismatches%n",
             per(searches, ticks), speculated == 0 ? 0.0 : 100.0 * (spawn[2] - this.baseSpawn[2]) / speculated, spawn[5] - this.baseSpawn[5]));
-        text.append(String.format(Locale.ROOT, "  World pauses (plugin code, blocking chunk loads): %.2f, blocking loads in total: %d",
-            per(WorldPause.pauses() - this.basePauses, ticks), CellContext.blockingLoads() - this.baseLoads));
-        WorldPause.reasons().entrySet().stream()
-            .map(entry -> java.util.Map.entry(entry.getKey(), entry.getValue() - this.baseReasons.getOrDefault(entry.getKey(), 0L)))
-            .filter(entry -> entry.getValue() > 0)
-            .sorted(java.util.Map.Entry.<String, Long>comparingByValue().reversed())
+        text.append(String.format(Locale.ROOT, "  World pauses (plugin code, blocking chunk loads): %.2f, blocking loads in total: %d, phases switched to serial by pauses: %d",
+            per(WorldPause.pauses() - this.basePauses, ticks), CellContext.blockingLoads() - this.baseLoads, region[cells + 3] - this.baseRegion[cells + 3]));
+        WorldPause.sources().entrySet().stream()
+            .sorted(java.util.Map.Entry.<Object, Long>comparingByValue().reversed())
             .limit(5)
-            .forEach(entry -> text.append(String.format(Locale.ROOT, "%n    %s: %.3f per tick", entry.getKey(), per(entry.getValue(), ticks))));
+            .forEach(entry -> text.append(String.format(Locale.ROOT, "%n    %s: %.2f", WorldPause.describe(entry.getKey()), per(entry.getValue(), ticks))));
         ctx.getSource().getSender().sendMessage(Component.text(text.toString()));
         return Command.SINGLE_SUCCESS;
     }

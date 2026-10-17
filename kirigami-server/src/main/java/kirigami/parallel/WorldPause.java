@@ -16,6 +16,7 @@ public final class WorldPause {
     private static final ThreadLocal<Integer> SLOT = ThreadLocal.withInitial(WorldPause::claimSlot);
     private static final ReentrantLock EXCLUSIVE = new ReentrantLock();
     private static final java.util.concurrent.atomic.AtomicLong PAUSES = new java.util.concurrent.atomic.AtomicLong();
+    private static final java.util.Map<Object, long[]> SOURCES = new java.util.HashMap<>();
     private static volatile boolean requested;
 
     private WorldPause() {
@@ -47,20 +48,6 @@ public final class WorldPause {
         BUSY.set(SLOT.get(), 0);
     }
 
-    private static final java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.atomic.LongAdder> REASONS = new java.util.concurrent.ConcurrentHashMap<>();
-
-    public static void reason(final String reason) {
-        if (insideItem()) {
-            REASONS.computeIfAbsent(reason, unused -> new java.util.concurrent.atomic.LongAdder()).increment();
-        }
-    }
-
-    public static java.util.Map<String, Long> reasons() {
-        final java.util.Map<String, Long> copy = new java.util.HashMap<>();
-        REASONS.forEach((reason, count) -> copy.put(reason, count.sum()));
-        return copy;
-    }
-
     public static long pauses() {
         return PAUSES.get();
     }
@@ -69,7 +56,45 @@ public final class WorldPause {
         return BUSY.get(SLOT.get()) != 0;
     }
 
-    public static <T> T exclusive(final Supplier<T> action) {
+    public static java.util.Map<Object, Long> sources() {
+        EXCLUSIVE.lock();
+        try {
+            final java.util.Map<Object, Long> copy = new java.util.HashMap<>();
+            SOURCES.forEach((source, count) -> copy.put(source, count[0]));
+            return copy;
+        } finally {
+            EXCLUSIVE.unlock();
+        }
+    }
+
+    public static void resetSources() {
+        EXCLUSIVE.lock();
+        try {
+            SOURCES.clear();
+        } finally {
+            EXCLUSIVE.unlock();
+        }
+    }
+
+    public static String describe(final Object source) {
+        if (source instanceof Class<?> type && org.bukkit.event.Event.class.isAssignableFrom(type)) {
+            final java.util.Set<String> plugins = new java.util.TreeSet<>();
+            try {
+                final org.bukkit.event.HandlerList handlers = (org.bukkit.event.HandlerList) type.getMethod("getHandlerList").invoke(null);
+                for (final org.bukkit.plugin.RegisteredListener listener : handlers.getRegisteredListeners()) {
+                    plugins.add(listener.getPlugin().getName());
+                }
+            } catch (final ReflectiveOperationException | ClassCastException ignored) {
+            }
+            return type.getSimpleName() + (plugins.isEmpty() ? "" : " " + plugins);
+        }
+        if (source instanceof Class<?> type) {
+            return "mob goal " + type.getName();
+        }
+        return source.toString();
+    }
+
+    public static <T> T exclusive(final Object source, final Supplier<T> action) {
         if (!insideItem()) {
             return action.get();
         }
@@ -77,6 +102,7 @@ public final class WorldPause {
         exitItem();
         EXCLUSIVE.lock();
         PAUSES.incrementAndGet();
+        SOURCES.computeIfAbsent(source, unused -> new long[1])[0]++;
         try {
             requested = true;
             final int slots = Math.min(NEXT_SLOT.get(), MAX_THREADS);
@@ -94,8 +120,8 @@ public final class WorldPause {
         }
     }
 
-    public static void exclusiveRun(final Runnable action) {
-        exclusive(() -> {
+    public static void exclusiveRun(final Object source, final Runnable action) {
+        exclusive(source, () -> {
             action.run();
             return null;
         });

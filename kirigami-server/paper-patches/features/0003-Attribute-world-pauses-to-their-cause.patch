@@ -5,26 +5,60 @@ Subject: [PATCH] Attribute world pauses to their cause
 
 
 diff --git a/src/main/java/com/destroystokyo/paper/entity/ai/PaperCustomGoal.java b/src/main/java/com/destroystokyo/paper/entity/ai/PaperCustomGoal.java
-index bfd829562c2415bbb18b649164161236ccd9ccd3..fd44f6143fb5f7902e81d2de80c7cd5ed512c752 100644
+index bfd829562c2415bbb18b649164161236ccd9ccd3..219391b39f8679519b5ac9ce8708bc92bbbf0a9c 100644
 --- a/src/main/java/com/destroystokyo/paper/entity/ai/PaperCustomGoal.java
 +++ b/src/main/java/com/destroystokyo/paper/entity/ai/PaperCustomGoal.java
-@@ -20,6 +20,7 @@ public class PaperCustomGoal<T extends Mob> extends net.minecraft.world.entity.a
+@@ -20,27 +20,27 @@ public class PaperCustomGoal<T extends Mob> extends net.minecraft.world.entity.a
  
      @Override
      public boolean canUse() {
-+        kirigami.parallel.WorldPause.reason("plugin mob goals"); // MT
-         return kirigami.parallel.WorldPause.exclusive(handle::shouldActivate);
+-        return kirigami.parallel.WorldPause.exclusive(handle::shouldActivate);
++        return kirigami.parallel.WorldPause.exclusive(handle.getClass(), handle::shouldActivate);
      }
  
+     @Override
+     public boolean canContinueToUse() {
+-        return kirigami.parallel.WorldPause.exclusive(handle::shouldStayActive);
++        return kirigami.parallel.WorldPause.exclusive(handle.getClass(), handle::shouldStayActive);
+     }
+ 
+     @Override
+     public void start() {
+-        kirigami.parallel.WorldPause.exclusiveRun(handle::start);
++        kirigami.parallel.WorldPause.exclusiveRun(handle.getClass(), handle::start);
+     }
+ 
+     @Override
+     public void stop() {
+-        kirigami.parallel.WorldPause.exclusiveRun(handle::stop);
++        kirigami.parallel.WorldPause.exclusiveRun(handle.getClass(), handle::stop);
+     }
+ 
+     @Override
+     public void tick() {
+-        kirigami.parallel.WorldPause.exclusiveRun(handle::tick);
++        kirigami.parallel.WorldPause.exclusiveRun(handle.getClass(), handle::tick);
+     }
+ 
+     public Goal<T> getHandle() {
 diff --git a/src/main/java/io/papermc/paper/plugin/manager/PaperEventManager.java b/src/main/java/io/papermc/paper/plugin/manager/PaperEventManager.java
-index 6b96962539ef23d59d0688cec94938c7b0364ff0..30a5d5d3ba01949a008accf5d0c12cae007d811e 100644
+index 6b96962539ef23d59d0688cec94938c7b0364ff0..d34f328677666bb246c5ba1504206d4f7dfbfbda 100644
 --- a/src/main/java/io/papermc/paper/plugin/manager/PaperEventManager.java
 +++ b/src/main/java/io/papermc/paper/plugin/manager/PaperEventManager.java
-@@ -43,6 +43,7 @@ class PaperEventManager {
+@@ -34,6 +34,7 @@ class PaperEventManager {
+ 
+     // SimplePluginManager
+     public void callEvent(@NotNull Event event) {
++        kirigami.parallel.Speculation.abortIfActive(); // MT
+         if (event.isAsynchronous() && this.server.isPrimaryThread()) {
+             throw new IllegalStateException(event.getEventName() + " may only be triggered asynchronously.");
+         } else if (!event.isAsynchronous() && !this.server.isPrimaryThread() && !this.server.isStopping()) {
+@@ -43,7 +44,7 @@ class PaperEventManager {
          HandlerList handlers = event.getHandlers();
          RegisteredListener[] listeners = handlers.getRegisteredListeners();
          if (listeners.length > 0 && kirigami.parallel.WorldPause.insideItem()) {
-+            kirigami.parallel.WorldPause.reason(event.getEventName());
-             kirigami.parallel.WorldPause.exclusiveRun(() -> this.callEvent(event));
+-            kirigami.parallel.WorldPause.exclusiveRun(() -> this.callEvent(event));
++            kirigami.parallel.WorldPause.exclusiveRun(event.getClass(), () -> this.callEvent(event));
              return;
          }
+ 

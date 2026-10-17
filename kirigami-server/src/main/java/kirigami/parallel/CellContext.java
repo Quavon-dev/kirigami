@@ -150,8 +150,7 @@ public final class CellContext {
     }
 
     public static <T> T exclusive(final Level level, final java.util.function.Supplier<T> action) {
-        WorldPause.reason("blocking chunk loads");
-        return WorldPause.exclusive(action);
+        return WorldPause.exclusive("blocking chunk loads", action);
     }
 
     static @Nullable CellContext detach() {
