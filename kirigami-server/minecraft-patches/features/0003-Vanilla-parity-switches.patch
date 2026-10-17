@@ -70,22 +70,13 @@ index 6c9ec44a46b6f40a2b8b008cc50c0cafe5e909e6..bf46ae1fc567a1d4341304334371ca1f
                  this.lastYd = 0.0;
              }
 diff --git a/net/minecraft/world/level/block/entity/ContainerOpenersCounter.java b/net/minecraft/world/level/block/entity/ContainerOpenersCounter.java
-index 52737172ccfa0c7c977e4f2fe1db242e0bb92d25..f168c836899a78079e5099881ad410396ab02cd9 100644
+index 6aed471bbf59330d58677bb0334e14ca23dadeff..6bb69b72e74aed54b9519dd56461d3c6e85cd757 100644
 --- a/net/minecraft/world/level/block/entity/ContainerOpenersCounter.java
 +++ b/net/minecraft/world/level/block/entity/ContainerOpenersCounter.java
-@@ -49,7 +49,7 @@ public abstract class ContainerOpenersCounter {
-         final LivingEntity entity, final Level level, final BlockPos pos, final BlockState blockState, final double maxInteractionRange
-     ) {
-         // Paper start - delay open/close callbacks
--        if (this.delayCallbacks()) {
-+        if (this.delayCallbacks() && mtserver.VanillaParity.PAPER_CHEST_DELAY) { // MT
-             scheduleRecheck(level, pos, blockState, 1);
-             return;
-         }
-@@ -79,7 +79,7 @@ public abstract class ContainerOpenersCounter {
+@@ -73,7 +73,7 @@ public abstract class ContainerOpenersCounter {
  
      public void decrementOpeners(final LivingEntity entity, final Level level, final BlockPos pos, final BlockState blockState) {
-         // Paper start - delay open/close callbacks
+         // Paper start - delay close callbacks
 -        if (this.delayCallbacks()) {
 +        if (this.delayCallbacks() && mtserver.VanillaParity.PAPER_CHEST_DELAY) { // MT
              scheduleRecheck(level, pos, blockState, 1);

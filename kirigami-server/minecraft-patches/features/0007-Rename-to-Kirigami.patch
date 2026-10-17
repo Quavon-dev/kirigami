@@ -203,7 +203,7 @@ index ebe7ffeb512ffb20120ac52772e4792966fc7eeb..1f98a0bdf490c788a59b9967dbc2d9e1
          return this.pathTypesByPosCache;
      }
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index 6ea273bacff93a3e6c2963b46ae84c0e3f2e3986..318a626d249178a25cc836af54d247e4cc4b9417 100644
+index 70d17f401ce14585ea1694060ba925de4148c680..8ddde8fdf8d9ef7019dc6202302f594fcad28c4f 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
 @@ -5334,11 +5334,11 @@ public abstract class Entity
@@ -476,29 +476,20 @@ index b120a13930ebc15b69e283d37190bbdb79a507c1..16d4542331277d445c0dd254e3142928
          }
      }
 diff --git a/net/minecraft/world/level/block/entity/ContainerOpenersCounter.java b/net/minecraft/world/level/block/entity/ContainerOpenersCounter.java
-index f168c836899a78079e5099881ad410396ab02cd9..ba81edf48807a9d8d7c46d79317552a32c47c660 100644
+index 6bb69b72e74aed54b9519dd56461d3c6e85cd757..56197b6b3e1905eae9223a6b8043d75ec7d501e0 100644
 --- a/net/minecraft/world/level/block/entity/ContainerOpenersCounter.java
 +++ b/net/minecraft/world/level/block/entity/ContainerOpenersCounter.java
-@@ -49,7 +49,7 @@ public abstract class ContainerOpenersCounter {
-         final LivingEntity entity, final Level level, final BlockPos pos, final BlockState blockState, final double maxInteractionRange
-     ) {
-         // Paper start - delay open/close callbacks
--        if (this.delayCallbacks() && mtserver.VanillaParity.PAPER_CHEST_DELAY) { // MT
-+        if (this.delayCallbacks() && kirigami.VanillaParity.PAPER_CHEST_DELAY) { // MT
-             scheduleRecheck(level, pos, blockState, 1);
-             return;
-         }
-@@ -79,7 +79,7 @@ public abstract class ContainerOpenersCounter {
+@@ -73,7 +73,7 @@ public abstract class ContainerOpenersCounter {
  
      public void decrementOpeners(final LivingEntity entity, final Level level, final BlockPos pos, final BlockState blockState) {
-         // Paper start - delay open/close callbacks
+         // Paper start - delay close callbacks
 -        if (this.delayCallbacks() && mtserver.VanillaParity.PAPER_CHEST_DELAY) { // MT
 +        if (this.delayCallbacks() && kirigami.VanillaParity.PAPER_CHEST_DELAY) { // MT
              scheduleRecheck(level, pos, blockState, 1);
              return;
          }
 diff --git a/net/minecraft/world/level/block/entity/HopperBlockEntity.java b/net/minecraft/world/level/block/entity/HopperBlockEntity.java
-index 26771a3abf17696f29d56174162e66e2bf888e62..ab9a8ef6fcb472728008e25ab2fc425b2560add7 100644
+index 62f12f83f8765d5b82b0f2c48382c06ab0e0a538..d0aedb56aeae413be8a4af69bde73f74a8fd0a20 100644
 --- a/net/minecraft/world/level/block/entity/HopperBlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/HopperBlockEntity.java
 @@ -223,28 +223,28 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
@@ -535,10 +526,10 @@ index 26771a3abf17696f29d56174162e66e2bf888e62..ab9a8ef6fcb472728008e25ab2fc425b
      private static boolean hopperPush(final Level level, final Container destination, final Direction direction, final HopperBlockEntity hopper) {
 -        mtSetFlag(mtserver.parallel.ThreadFlags.SKIP_PUSH_EVENT, skipHopperEvents);
 +        mtSetFlag(kirigami.parallel.ThreadFlags.SKIP_PUSH_EVENT, skipHopperEvents);
+         final long disallowedSlots = callPrepareTransferEvent(level, hopper, destination, true); // Paper - Add PrepareHopperTransferEvent
          boolean foundItem = false;
          for (int i = 0; i < hopper.getContainerSize(); ++i) {
-             final ItemStack item = hopper.getItem(i);
-@@ -259,7 +259,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
+@@ -261,7 +261,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
  
                  // We only need to fire the event once to give protection plugins a chance to cancel this event
                  // Because nothing uses getItem, every event call should end up the same result.
@@ -547,7 +538,7 @@ index 26771a3abf17696f29d56174162e66e2bf888e62..ab9a8ef6fcb472728008e25ab2fc425b
                      movedItem = callPushMoveEvent(destination, movedItem, hopper);
                      if (movedItem == null) { // cancelled
                          origItemStack.setCount(originalItemCount);
-@@ -294,7 +294,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
+@@ -296,7 +296,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
          final int movedItemCount = Math.min(level.spigotConfig.hopperAmount, originalItemCount);
          movedItem.setCount(movedItemCount);
  
@@ -556,7 +547,7 @@ index 26771a3abf17696f29d56174162e66e2bf888e62..ab9a8ef6fcb472728008e25ab2fc425b
              movedItem = callPullMoveEvent(hopper, container, movedItem);
              if (movedItem == null) { // cancelled
                  origItemStack.setCount(originalItemCount);
-@@ -314,9 +314,9 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
+@@ -316,9 +316,9 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
                  origItemStack.setCount(originalItemCount - movedItemCount + remainingItemCount);
              }
  
@@ -568,7 +559,7 @@ index 26771a3abf17696f29d56174162e66e2bf888e62..ab9a8ef6fcb472728008e25ab2fc425b
              container.setChanged();
              return true;
          }
-@@ -346,7 +346,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
+@@ -348,7 +348,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
          );
          final boolean result = event.callEvent();
          if (!event.calledGetItem && !event.calledSetItem) {
@@ -577,7 +568,7 @@ index 26771a3abf17696f29d56174162e66e2bf888e62..ab9a8ef6fcb472728008e25ab2fc425b
          }
          if (!result) {
              applyCooldown(hopper);
-@@ -369,7 +369,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
+@@ -371,7 +371,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
          final io.papermc.paper.event.inventory.PaperInventoryMoveItemEvent event = new io.papermc.paper.event.inventory.PaperInventoryMoveItemEvent(sourceInventory, org.bukkit.craftbukkit.inventory.CraftItemStack.asBukkitMirror(itemstack), destination, false);
          final boolean result = event.callEvent();
          if (!event.calledGetItem && !event.calledSetItem) {
@@ -586,16 +577,16 @@ index 26771a3abf17696f29d56174162e66e2bf888e62..ab9a8ef6fcb472728008e25ab2fc425b
          }
          if (!result) {
              applyCooldown(hopper);
-@@ -507,7 +507,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
+@@ -526,7 +526,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
          Container container = getSourceContainer(level, hopper, blockPos, blockState);
          if (container != null) {
              Direction direction = Direction.DOWN;
 -            mtSetFlag(mtserver.parallel.ThreadFlags.SKIP_PULL_EVENT, skipHopperEvents); // Paper - Perf: Optimize Hoppers
 +            mtSetFlag(kirigami.parallel.ThreadFlags.SKIP_PULL_EVENT, skipHopperEvents); // Paper - Perf: Optimize Hoppers
+             final long disallowedSlots = callPrepareTransferEvent(level, container, hopper, false); // Paper - Add PrepareHopperTransferEvent
  
              for (int slot : getSlots(container, direction)) {
-                 if (tryTakeInItemFromSlot(hopper, container, slot, direction, level)) { // Spigot
-@@ -611,9 +611,9 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
+@@ -632,9 +632,9 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
                      itemStack = itemStack.split(container.getMaxStackSize());
                  }
                  // Spigot end

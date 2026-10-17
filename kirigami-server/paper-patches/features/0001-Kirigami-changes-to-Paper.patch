@@ -219,7 +219,7 @@ index 0b35a293f3436bcf8a39c4f07a88340cd9d33bcb..1483691e2e462719fb5e4d106cecf510
          public boolean skipVanillaDamageTickWhenShieldBlocked = false;
          @Comment("This setting controls if equipment should be updated when handling certain player actions.")
 diff --git a/src/main/java/io/papermc/paper/configuration/WorldConfiguration.java b/src/main/java/io/papermc/paper/configuration/WorldConfiguration.java
-index 2c510c365c46bd2d3db61ee6ecc662daa25225c7..01ec8d9bd4e944c28ddc47f0cec16d1eef6bdcd2 100644
+index c710819bcd422f062a10127090ecfa6b222fe4f7..a6b2e098812a88f3c0492841ca707a4efef4dd79 100644
 --- a/src/main/java/io/papermc/paper/configuration/WorldConfiguration.java
 +++ b/src/main/java/io/papermc/paper/configuration/WorldConfiguration.java
 @@ -176,7 +176,7 @@ public class WorldConfiguration extends ConfigurationPart {
@@ -260,10 +260,10 @@ index 2c510c365c46bd2d3db61ee6ecc662daa25225c7..01ec8d9bd4e944c28ddc47f0cec16d1e
              @Comment("The delay before retrying POI acquisition when entity navigation is stuck. This will reduce pathfinding performance impact. Measured in ticks.")
 -            public IntOr.Disabled stuckEntityPoiRetryDelay = new IntOr.Disabled(OptionalInt.of(200));
 +            public IntOr.Disabled stuckEntityPoiRetryDelay = IntOr.Disabled.DISABLED;
+             @Comment("If specified, this setting controls how often to tick inactive mobs' goal selectors. Higher values reduce the performance impact of ticking mobs that are far away. Measured in ticks.")
+             public IntOr.Disabled inactiveMobGoalSelectorThrottleRate = IntOr.Disabled.DISABLED;
          }
- 
-         public TrackingRangeY trackingRangeY;
-@@ -476,7 +476,7 @@ public class WorldConfiguration extends ConfigurationPart {
+@@ -478,7 +478,7 @@ public class WorldConfiguration extends ConfigurationPart {
      public UnsupportedSettings unsupportedSettings;
  
      public class UnsupportedSettings extends ConfigurationPart {
@@ -272,7 +272,7 @@ index 2c510c365c46bd2d3db61ee6ecc662daa25225c7..01ec8d9bd4e944c28ddc47f0cec16d1e
          public boolean disableWorldTickingWhenEmpty = false;
          public Ticking ticking;
  
-@@ -501,8 +501,8 @@ public class WorldConfiguration extends ConfigurationPart {
+@@ -503,8 +503,8 @@ public class WorldConfiguration extends ConfigurationPart {
          public boolean allowVehicleCollisions = true;
          public boolean fixClimbingBypassingCrammingRule = false;
          @RequiresSpigotInitialization(MaxEntityCollisionsInitializer.class)
