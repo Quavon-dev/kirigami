@@ -59,7 +59,7 @@ srv() {
 
 srv start "$dir" "$jar" > /dev/null
 trap 'srv stop "$dir"' EXIT
-srv cmd "$dir" "forceload add -32 -16 64 64"
+srv cmd "$dir" "forceload add -32 -16 224 84"
 sleep 8
 srv cmd "$dir" "function mtdet:build"
 sleep 2

@@ -127,9 +127,20 @@ index f72d96b34c14cb37693b6f6899aa5ad27beb1b87..59b009829edc63c7abb92e840a9aec53
      }
  
 diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
-index ea4cc487002a0edc54cc49bfbecf72be156b6af7..282624fb8284d99bff3a69df5dff294caf72384c 100644
+index ea4cc487002a0edc54cc49bfbecf72be156b6af7..57b62d680423622b4d39c6be4ca44a81afd980f2 100644
 --- a/net/minecraft/server/level/ServerLevel.java
 +++ b/net/minecraft/server/level/ServerLevel.java
+@@ -206,8 +206,8 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
+     private final SleepStatus sleepStatus;
+     private int emptyTime;
+     private final PortalForcer portalForcer;
+-    private final LevelTicks<Block> blockTicks = new LevelTicks<>(this::isPositionTickingWithEntitiesLoaded);
+-    private final LevelTicks<Fluid> fluidTicks = new LevelTicks<>(this::isPositionTickingWithEntitiesLoaded);
++    private final LevelTicks<Block> blockTicks = new LevelTicks<>(this::isPositionTickingWithEntitiesLoaded, this); // MT
++    private final LevelTicks<Fluid> fluidTicks = new LevelTicks<>(this::isPositionTickingWithEntitiesLoaded, this); // MT
+     private final PathTypeCache pathTypesByPosCache = new PathTypeCache();
+     private final Set<Mob> navigatingMobs = new ObjectOpenHashSet<>();
+     private volatile boolean isUpdatingNavigations;
 @@ -889,8 +889,7 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
              }
  
@@ -183,6 +194,24 @@ index ea4cc487002a0edc54cc49bfbecf72be156b6af7..282624fb8284d99bff3a69df5dff294c
          ChunkPos chunkPos = chunk.getPos();
          int minX = chunkPos.getMinBlockX();
          int minZ = chunkPos.getMinBlockZ();
+@@ -1362,7 +1372,7 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
+             fluidState.tick(this, pos, blockState);
+         }
+         // Paper start - rewrite chunk system
+-        if ((++this.tickedBlocksOrFluids & 7L) != 0L) {
++        if (kirigami.parallel.CellContext.current() == null && (++this.tickedBlocksOrFluids & 7L) != 0L) { // MT
+             ((ca.spottedleaf.moonrise.patches.chunk_system.server.ChunkSystemMinecraftServer)this.server).moonrise$executeMidTickTasks();
+         }
+         // Paper end - rewrite chunk system
+@@ -1375,7 +1385,7 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
+             state.tick(this, pos, this.random);
+         }
+         // Paper start - rewrite chunk system
+-        if ((++this.tickedBlocksOrFluids & 7L) != 0L) {
++        if (kirigami.parallel.CellContext.current() == null && (++this.tickedBlocksOrFluids & 7L) != 0L) { // MT
+             ((ca.spottedleaf.moonrise.patches.chunk_system.server.ChunkSystemMinecraftServer)this.server).moonrise$executeMidTickTasks();
+         }
+         // Paper end - rewrite chunk system
 @@ -1635,6 +1645,7 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
  
      // CraftBukkit start
@@ -695,10 +724,30 @@ index 1a50ec0d56bb4b9c3b0958a0281028c8eff1000c..43140ac442bb3369faefc0bf2371d3e3
          return (int)HashCommon.mix(pos) & 4095;
      }
 diff --git a/net/minecraft/world/ticks/LevelTicks.java b/net/minecraft/world/ticks/LevelTicks.java
-index 7bf9e93692debcef511bfa316aeef32ae8a7d3b7..c625730c6c390c7dd7f36c1fa9fbe484ef316ee0 100644
+index 7bf9e93692debcef511bfa316aeef32ae8a7d3b7..e4f851e9bb4b8e1ac98588dfd7290d80f54ba60c 100644
 --- a/net/minecraft/world/ticks/LevelTicks.java
 +++ b/net/minecraft/world/ticks/LevelTicks.java
-@@ -69,6 +69,16 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
+@@ -43,8 +43,19 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
+         }
+     };
+ 
++    private final net.minecraft.server.level.@org.jspecify.annotations.Nullable ServerLevel mtLevel; // MT
++    private volatile java.util.@org.jspecify.annotations.Nullable Set<MtTickKey> mtPending; // MT
++
++    private record MtTickKey(long pos, Object type) { // MT
++    }
++
+     public LevelTicks(final LongPredicate tickCheck) {
++        this(tickCheck, null); // MT
++    }
++
++    public LevelTicks(final LongPredicate tickCheck, final net.minecraft.server.level.@org.jspecify.annotations.Nullable ServerLevel mtLevel) { // MT
+         this.tickCheck = tickCheck;
++        this.mtLevel = mtLevel; // MT
+     }
+ 
+     public void addContainer(final ChunkPos pos, final LevelChunkTicks<T> container) {
+@@ -69,6 +80,16 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
  
      @Override
      public void schedule(final ScheduledTick<T> tick) {
@@ -715,3 +764,39 @@ index 7bf9e93692debcef511bfa316aeef32ae8a7d3b7..c625730c6c390c7dd7f36c1fa9fbe484
          long chunkKey = ChunkPos.pack(tick.pos());
          LevelChunkTicks<T> tickContainer = this.allContainers.get(chunkKey);
          if (tickContainer == null) {
+@@ -180,6 +201,26 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
+     }
+ 
+     private void runCollectedTicks(final BiConsumer<BlockPos, T> output) {
++        if (this.mtLevel != null && kirigami.parallel.RegionTicking.ENABLED) { // MT
++            final List<ScheduledTick<T>> ticks = new ArrayList<>(this.toRunThisTick);
++            this.toRunThisTick.clear();
++            this.toRunThisTickSet.clear();
++            final java.util.Set<MtTickKey> pending = java.util.concurrent.ConcurrentHashMap.newKeySet(ticks.size());
++            for (final ScheduledTick<T> tick : ticks) {
++                pending.add(new MtTickKey(tick.pos().asLong(), tick.type()));
++            }
++            this.mtPending = pending;
++            try {
++                kirigami.parallel.RegionTicking.tickScheduled(this.mtLevel, ticks, tick -> {
++                    pending.remove(new MtTickKey(tick.pos().asLong(), tick.type()));
++                    output.accept(tick.pos(), tick.type());
++                });
++            } finally {
++                this.mtPending = null;
++            }
++            this.alreadyRunThisTick.addAll(ticks);
++            return;
++        } // MT
+         while (!this.toRunThisTick.isEmpty()) {
+             ScheduledTick<T> entry = this.toRunThisTick.poll();
+             if (!this.toRunThisTickSet.isEmpty()) {
+@@ -206,6 +247,8 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
+ 
+     @Override
+     public boolean willTickThisTick(final BlockPos pos, final T type) {
++        final java.util.Set<MtTickKey> mtPending = this.mtPending; // MT
++        if (mtPending != null) return mtPending.contains(new MtTickKey(pos.asLong(), type)); // MT
+         this.calculateTickSetIfNeeded();
+         return this.toRunThisTickSet.contains(ScheduledTick.probe(type, pos));
+     }

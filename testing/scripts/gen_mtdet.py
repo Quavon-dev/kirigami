@@ -168,6 +168,35 @@ def furnace(build: list[str], fill: list[str], tick: list[str]) -> list[str]:
     return ["fiing", "fisrc", "fiin"]
 
 
+def duel(tag: str, xc: int, z: int, mirror: bool, build: list[str], fill: list[str], tick: list[str]) -> list[str]:
+    def x(offset: int) -> int:
+        return xc - offset if mirror else xc + offset
+
+    def facing(direction: str) -> str:
+        return {"east": "west", "west": "east"}.get(direction, direction) if mirror else direction
+
+    build += [
+        f"fill {min(x(-14), x(4))} 99 {z - 1} {max(x(-14), x(4))} 99 {z + 3} minecraft:stone",
+        f"fill {x(-10)} 100 {z} {x(-4)} 100 {z} minecraft:redstone_wire",
+        f"fill {x(-5)} 100 {z + 1} {x(-5)} 100 {z + 2} minecraft:redstone_wire",
+        f"fill {x(-4)} 100 {z + 2} {x(2)} 100 {z + 2} minecraft:redstone_wire",
+        f"setblock {x(-3)} 100 {z} minecraft:repeater[facing={facing('west')}]",
+        f"setblock {x(2)} 100 {z + 1} minecraft:repeater[facing=south]",
+        f"setblock {x(-2)} 100 {z} minecraft:sticky_piston[facing={facing('east')}]",
+        f"setblock {x(2)} 100 {z} minecraft:sticky_piston[facing={facing('west')}]",
+        f"setblock {x(-1)} 100 {z} minecraft:stone",
+        f"setblock {x(1)} 100 {z} minecraft:cobblestone",
+    ]
+    fill += [f"setblock {x(-12)} 100 {z} minecraft:observer[facing={facing('east')}]", f"setblock {x(-11)} 100 {z} minecraft:observer[facing={facing('west')}]"]
+    keys = []
+    for block in ("stone", "cobblestone"):
+        key = f"{tag}{block[0]}"
+        keys.append(key)
+        fill.append(f"scoreboard players set #{key} mt_det 0")
+        tick.append(f"execute if score #t mt_det matches 100..{MEASURE_TICK} if block {xc} 100 {z} minecraft:{block} run scoreboard players add #{key} mt_det 1")
+    return keys
+
+
 def main() -> None:
     build: list[str] = []
     fill: list[str] = []
@@ -184,6 +213,10 @@ def main() -> None:
     keys += minecart(build, fill, tick)
     keys += piston_race(build, fill, tick)
     keys += furnace(build, fill, tick)
+    keys += duel("db", 0, 70, False, build, fill, tick)
+    keys += duel("dm", 0, 76, True, build, fill, tick)
+    keys += duel("di", 192, 70, False, build, fill, tick)
+    keys += duel("dj", 192, 76, True, build, fill, tick)
     for name, lines in (("build", build), ("fill", fill), ("tick", tick)):
         (ROOT / f"{name}.mcfunction").write_text("\n".join(lines) + "\n")
     (ROOT.parent.parent.parent / "keys.txt").write_text(" ".join(keys) + "\n")

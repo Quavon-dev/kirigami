@@ -54,6 +54,71 @@ final class BoundaryClusters {
         return result;
     }
 
+    static boolean[] spanningClusters(final List<? extends net.minecraft.world.ticks.ScheduledTick<?>> ticks, final int cellShiftBlocks, final int bucketSize,
+                                      final int[] bucketOfTick) {
+        final Long2IntOpenHashMap buckets = new Long2IntOpenHashMap();
+        buckets.defaultReturnValue(-1);
+        final it.unimi.dsi.fastutil.longs.LongArrayList keys = new it.unimi.dsi.fastutil.longs.LongArrayList();
+        final it.unimi.dsi.fastutil.longs.LongArrayList cells = new it.unimi.dsi.fastutil.longs.LongArrayList();
+        final it.unimi.dsi.fastutil.booleans.BooleanArrayList spanning = new it.unimi.dsi.fastutil.booleans.BooleanArrayList();
+        for (int i = 0; i < ticks.size(); i++) {
+            final BlockPos pos = ticks.get(i).pos();
+            final long key = cellOf(Math.floorDiv(pos.getX(), bucketSize), Math.floorDiv(pos.getZ(), bucketSize), 0);
+            final long cell = cellOf(pos.getX(), pos.getZ(), cellShiftBlocks);
+            int bucket = buckets.get(key);
+            if (bucket < 0) {
+                bucket = keys.size();
+                buckets.put(key, bucket);
+                keys.add(key);
+                cells.add(cell);
+                spanning.add(false);
+            } else if (cells.getLong(bucket) != cell) {
+                spanning.set(bucket, true);
+            }
+            bucketOfTick[i] = bucket;
+        }
+        final int[] parent = new int[keys.size()];
+        for (int i = 0; i < parent.length; i++) {
+            parent[i] = i;
+        }
+        for (int i = 0; i < keys.size(); i++) {
+            final int bucketX = (int) (keys.getLong(i) >> 32);
+            final int bucketZ = (int) keys.getLong(i);
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    final int other = buckets.get(cellOf(bucketX + dx, bucketZ + dz, 0));
+                    if (other > i) {
+                        parent[find(parent, other)] = find(parent, i);
+                    }
+                }
+            }
+        }
+        final boolean[] rootSpans = new boolean[parent.length];
+        final long[] rootCell = new long[parent.length];
+        final boolean[] rootSeen = new boolean[parent.length];
+        for (int i = 0; i < parent.length; i++) {
+            final int root = find(parent, i);
+            if (!rootSeen[root]) {
+                rootSeen[root] = true;
+                rootCell[root] = cells.getLong(i);
+            }
+            rootSpans[root] |= spanning.getBoolean(i) || rootCell[root] != cells.getLong(i);
+        }
+        final boolean[] result = new boolean[parent.length];
+        for (int i = 0; i < parent.length; i++) {
+            result[i] = rootSpans[find(parent, i)];
+        }
+        return result;
+    }
+
+    private static int find(final int[] parent, int index) {
+        while (parent[index] != index) {
+            parent[index] = parent[parent[index]];
+            index = parent[index];
+        }
+        return index;
+    }
+
     private static void mark(final int index, final boolean[] marked, final IntArrayList queue) {
         if (!marked[index]) {
             marked[index] = true;
@@ -66,7 +131,7 @@ final class BoundaryClusters {
         return local < LINK || local >= cellSize - LINK;
     }
 
-    private static long cellOf(final int x, final int z, final int cellShiftBlocks) {
+    static long cellOf(final int x, final int z, final int cellShiftBlocks) {
         return ((long) (x >> cellShiftBlocks) << 32) | ((z >> cellShiftBlocks) & 0xFFFFFFFFL);
     }
 

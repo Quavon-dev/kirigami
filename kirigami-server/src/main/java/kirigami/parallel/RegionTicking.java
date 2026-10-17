@@ -26,6 +26,7 @@ public final class RegionTicking {
 
     public static final boolean ENABLED = Boolean.parseBoolean(System.getProperty("kirigami.regionTicking", "true"));
     private static final int CELL_SHIFT = 3;
+    private static final int SCHEDULED_TICK_REACH = 24;
     private static final int COLORS = 4;
     private static final int MIN_PARALLEL_ITEMS = Integer.getInteger("kirigami.minParallelItems", 256);
     private static final int WORKERS = Integer.getInteger("kirigami.regionWorkers", Math.max(0, Runtime.getRuntime().availableProcessors() - 1));
@@ -41,11 +42,19 @@ public final class RegionTicking {
         private final long[] serial = new long[Phase.values().length];
         private long cells;
         private long boundaryBlockEntities;
+        private long boundaryScheduledTicks;
 
         public long[] snapshot() {
-            return new long[] {
-                this.parallel[0], this.serial[0], this.parallel[1], this.serial[1], this.parallel[2], this.serial[2], this.cells, this.boundaryBlockEntities
-            };
+            final int phases = Phase.values().length;
+            final long[] values = new long[2 * phases + 3];
+            for (int i = 0; i < phases; i++) {
+                values[2 * i] = this.parallel[i];
+                values[2 * i + 1] = this.serial[i];
+            }
+            values[2 * phases] = this.cells;
+            values[2 * phases + 1] = this.boundaryBlockEntities;
+            values[2 * phases + 2] = this.boundaryScheduledTicks;
+            return values;
         }
 
         public String format() {
@@ -53,7 +62,8 @@ public final class RegionTicking {
             for (final Phase phase : Phase.values()) {
                 builder.append(' ').append(phase.label).append('=').append(this.parallel[phase.ordinal()]).append('/').append(this.serial[phase.ordinal()]);
             }
-            return builder.append(" cells=").append(this.cells).append(" boundaryBlockEntities=").append(this.boundaryBlockEntities).append(" violations=").append(CellContext.violations())
+            return builder.append(" cells=").append(this.cells).append(" boundaryBlockEntities=").append(this.boundaryBlockEntities)
+                .append(" boundaryScheduledTicks=").append(this.boundaryScheduledTicks).append(" violations=").append(CellContext.violations())
                 .append(' ').append(CellContext.violationReport()).toString();
         }
     }
@@ -61,7 +71,8 @@ public final class RegionTicking {
     private enum Phase {
         ENTITIES("entities", 0x9E3779B97F4A7C15L),
         CHUNKS("chunks", 0xC6BC279692B5C323L),
-        BLOCK_ENTITIES("blockEntities", 0xD6E8FEB86659FD93L);
+        BLOCK_ENTITIES("blockEntities", 0xD6E8FEB86659FD93L),
+        SCHEDULED_TICKS("scheduledTicks", 0xA0761D6478BD642FL);
 
         private final String label;
         private final long salt;
@@ -127,6 +138,36 @@ public final class RegionTicking {
             ticker -> SERIAL_BLOCK_ENTITIES.contains(ticker.getType()) || crossing.contains(ticker),
             net.minecraft.world.level.block.entity.TickingBlockEntity::tick, level.mtMaxChainedNeighborUpdates,
             () -> ((ca.spottedleaf.moonrise.patches.chunk_system.server.ChunkSystemMinecraftServer) level.getServer()).moonrise$executeMidTickTasks());
+    }
+
+    public static <T> void tickScheduled(final ServerLevel level, final List<net.minecraft.world.ticks.ScheduledTick<T>> ticks,
+                                         final Consumer<net.minecraft.world.ticks.ScheduledTick<T>> action) {
+        final java.util.function.Predicate<net.minecraft.world.ticks.ScheduledTick<T>> serial;
+        if (ticks.size() < MIN_PARALLEL_ITEMS || runsCommands(ticks)) {
+            serial = tick -> true;
+        } else {
+            final int[] bucketOfTick = new int[ticks.size()];
+            final boolean[] spanning = BoundaryClusters.spanningClusters(ticks, CELL_SHIFT + 4, 2 * SCHEDULED_TICK_REACH, bucketOfTick);
+            final java.util.Set<net.minecraft.world.ticks.ScheduledTick<T>> serialTicks = new it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet<>();
+            for (int i = 0; i < ticks.size(); i++) {
+                if (spanning[bucketOfTick[i]]) {
+                    serialTicks.add(ticks.get(i));
+                }
+            }
+            STATS.boundaryScheduledTicks += serialTicks.size();
+            serial = serialTicks::contains;
+        }
+        run(level, Phase.SCHEDULED_TICKS, ticks, tick -> ChunkPos.pack(tick.pos()), serial, action, level.mtMaxChainedNeighborUpdates,
+            () -> ((ca.spottedleaf.moonrise.patches.chunk_system.server.ChunkSystemMinecraftServer) level.getServer()).moonrise$executeMidTickTasks());
+    }
+
+    private static boolean runsCommands(final List<? extends net.minecraft.world.ticks.ScheduledTick<?>> ticks) {
+        for (final net.minecraft.world.ticks.ScheduledTick<?> tick : ticks) {
+            if (tick.type() instanceof net.minecraft.world.level.block.CommandBlock) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static <T> void run(final ServerLevel level, final Phase phase, final List<T> items, final java.util.function.ToLongFunction<T> chunkKey,

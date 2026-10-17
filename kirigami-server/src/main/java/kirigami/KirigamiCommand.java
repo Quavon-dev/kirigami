@@ -23,7 +23,7 @@ import org.jspecify.annotations.NullMarked;
 public final class KirigamiCommand {
 
     public static final String DESCRIPTION = "Shows how Kirigami spreads the server tick across threads";
-    private static final String[] PHASES = {"Entities", "Random ticks", "Block entities"};
+    private static final String[] PHASES = {"Entities", "Random ticks", "Block entities", "Scheduled ticks"};
 
     private long baseTick;
     private long[] baseRegion = RegionTicking.STATS.snapshot();
@@ -72,8 +72,10 @@ public final class KirigamiCommand {
                 per(region[2 * i] - this.baseRegion[2 * i], ticks), per(region[2 * i + 1] - this.baseRegion[2 * i + 1], ticks),
                 RegionTicking.phaseEnabled(i) ? "" : " (phase disabled)"));
         }
-        text.append(String.format(Locale.ROOT, "  Cell runs across all phases: %.1f, block entities kept serial at cell borders: %.1f%n",
-            per(region[6] - this.baseRegion[6], ticks), per(region[7] - this.baseRegion[7], ticks)));
+        final int cells = 2 * PHASES.length;
+        text.append(String.format(Locale.ROOT, "  Cell runs across all phases: %.1f, kept serial at cell borders: %.1f block entities, %.1f scheduled ticks%n",
+            per(region[cells] - this.baseRegion[cells], ticks), per(region[cells + 1] - this.baseRegion[cells + 1], ticks),
+            per(region[cells + 2] - this.baseRegion[cells + 2], ticks)));
         final long searches = spawn[0] - this.baseSpawn[0];
         final long speculated = spawn[1] - this.baseSpawn[1];
         text.append(String.format(Locale.ROOT, "  Spawn searches: %.0f, %.1f%% precomputed in parallel, %d mismatches%n",

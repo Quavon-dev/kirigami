@@ -48,3 +48,11 @@ execute if score #t mt_det matches 6020 if block 14 100 0 minecraft:air run scor
 execute if score #t mt_det matches 6020 store result score #fiing mt_det if items block 20 99 2 container.* minecraft:iron_ingot
 execute if score #t mt_det matches 6020 store result score #fisrc mt_det if items block 20 103 -6 container.* minecraft:raw_iron
 execute if score #t mt_det matches 6020 store result score #fiin mt_det if items block 20 101 2 container.0 minecraft:raw_iron
+execute if score #t mt_det matches 100..6020 if block 0 100 70 minecraft:stone run scoreboard players add #dbs mt_det 1
+execute if score #t mt_det matches 100..6020 if block 0 100 70 minecraft:cobblestone run scoreboard players add #dbc mt_det 1
+execute if score #t mt_det matches 100..6020 if block 0 100 76 minecraft:stone run scoreboard players add #dms mt_det 1
+execute if score #t mt_det matches 100..6020 if block 0 100 76 minecraft:cobblestone run scoreboard players add #dmc mt_det 1
+execute if score #t mt_det matches 100..6020 if block 192 100 70 minecraft:stone run scoreboard players add #dis mt_det 1
+execute if score #t mt_det matches 100..6020 if block 192 100 70 minecraft:cobblestone run scoreboard players add #dic mt_det 1
+execute if score #t mt_det matches 100..6020 if block 192 100 76 minecraft:stone run scoreboard players add #djs mt_det 1
+execute if score #t mt_det matches 100..6020 if block 192 100 76 minecraft:cobblestone run scoreboard players add #djc mt_det 1
