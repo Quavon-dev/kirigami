@@ -5,15 +5,15 @@ Subject: [PATCH] Region based parallel entity ticking
 
 
 diff --git a/ca/spottedleaf/moonrise/patches/chunk_system/level/entity/EntityLookup.java b/ca/spottedleaf/moonrise/patches/chunk_system/level/entity/EntityLookup.java
-index 328784ba08236553e49d62320b79f7222292412f..a5adf165a8e3cb3606feffe53a95c1b573acebe8 100644
+index 328784ba08236553e49d62320b79f7222292412f..2bf6bd2f833cc2e675fbc5d43252e5edda5d86aa 100644
 --- a/ca/spottedleaf/moonrise/patches/chunk_system/level/entity/EntityLookup.java
 +++ b/ca/spottedleaf/moonrise/patches/chunk_system/level/entity/EntityLookup.java
 @@ -534,6 +534,16 @@ public abstract class EntityLookup implements LevelEntityGetter<Entity> {
              return null;
          }
  
-+        if (mtserver.parallel.CellContext.current() != null) { // MT
-+            synchronized (mtserver.parallel.CellContext.GLOBAL_LOCK) {
++        if (kirigami.parallel.CellContext.current() != null) { // MT
++            synchronized (kirigami.parallel.CellContext.GLOBAL_LOCK) {
 +                return this.moveEntitySection(entity, sectionX, sectionY, sectionZ, newSectionX, newSectionY, newSectionZ);
 +            }
 +        }
@@ -29,7 +29,7 @@ index 328784ba08236553e49d62320b79f7222292412f..a5adf165a8e3cb3606feffe53a95c1b5
      }
  
      public void getEntities(final Entity except, final AABB box, final List<Entity> into, final Predicate<? super Entity> predicate) {
-+        mtserver.parallel.CellContext.checkBox(this.world, box); // MT
++        kirigami.parallel.CellContext.checkBox(this.world, box); // MT
          final int minChunkX = (Mth.floor(box.minX) - 2) >> 4;
          final int minChunkZ = (Mth.floor(box.minZ) - 2) >> 4;
          final int maxChunkX = (Mth.floor(box.maxX) + 2) >> 4;
@@ -37,7 +37,7 @@ index 328784ba08236553e49d62320b79f7222292412f..a5adf165a8e3cb3606feffe53a95c1b5
  
      public <T extends Entity> void getEntities(final EntityType<?> type, final AABB box, final List<? super T> into,
                                                 final Predicate<? super T> predicate) {
-+        mtserver.parallel.CellContext.checkBox(this.world, box); // MT
++        kirigami.parallel.CellContext.checkBox(this.world, box); // MT
          final int minChunkX = (Mth.floor(box.minX) - 2) >> 4;
          final int minChunkZ = (Mth.floor(box.minZ) - 2) >> 4;
          final int maxChunkX = (Mth.floor(box.maxX) + 2) >> 4;
@@ -45,7 +45,7 @@ index 328784ba08236553e49d62320b79f7222292412f..a5adf165a8e3cb3606feffe53a95c1b5
  
      public <T extends Entity> void getEntities(final Class<? extends T> clazz, final Entity except, final AABB box, final List<? super T> into,
                                                 final Predicate<? super T> predicate) {
-+        mtserver.parallel.CellContext.checkBox(this.world, box); // MT
++        kirigami.parallel.CellContext.checkBox(this.world, box); // MT
          final int minChunkX = (Mth.floor(box.minX) - 2) >> 4;
          final int minChunkZ = (Mth.floor(box.minZ) - 2) >> 4;
          final int maxChunkX = (Mth.floor(box.maxX) + 2) >> 4;
@@ -53,7 +53,7 @@ index 328784ba08236553e49d62320b79f7222292412f..a5adf165a8e3cb3606feffe53a95c1b5
  
      public void getEntities(final Entity except, final AABB box, final List<Entity> into, final Predicate<? super Entity> predicate,
                              final int maxCount) {
-+        mtserver.parallel.CellContext.checkBox(this.world, box); // MT
++        kirigami.parallel.CellContext.checkBox(this.world, box); // MT
          final int minChunkX = (Mth.floor(box.minX) - 2) >> 4;
          final int minChunkZ = (Mth.floor(box.minZ) - 2) >> 4;
          final int maxChunkX = (Mth.floor(box.maxX) + 2) >> 4;
@@ -61,7 +61,7 @@ index 328784ba08236553e49d62320b79f7222292412f..a5adf165a8e3cb3606feffe53a95c1b5
  
      public <T extends Entity> void getEntities(final EntityType<?> type, final AABB box, final List<? super T> into,
                                                 final Predicate<? super T> predicate, final int maxCount) {
-+        mtserver.parallel.CellContext.checkBox(this.world, box); // MT
++        kirigami.parallel.CellContext.checkBox(this.world, box); // MT
          final int minChunkX = (Mth.floor(box.minX) - 2) >> 4;
          final int minChunkZ = (Mth.floor(box.minZ) - 2) >> 4;
          final int maxChunkX = (Mth.floor(box.maxX) + 2) >> 4;
@@ -69,7 +69,7 @@ index 328784ba08236553e49d62320b79f7222292412f..a5adf165a8e3cb3606feffe53a95c1b5
  
      public <T extends Entity> void getEntities(final Class<? extends T> clazz, final Entity except, final AABB box, final List<? super T> into,
                                                 final Predicate<? super T> predicate, final int maxCount) {
-+        mtserver.parallel.CellContext.checkBox(this.world, box); // MT
++        kirigami.parallel.CellContext.checkBox(this.world, box); // MT
          final int minChunkX = (Mth.floor(box.minX) - 2) >> 4;
          final int minChunkZ = (Mth.floor(box.minZ) - 2) >> 4;
          final int maxChunkX = (Mth.floor(box.maxX) + 2) >> 4;
@@ -95,14 +95,14 @@ index f7820568b78f630e4d234d3dfb36c2167149777a..d0f747c183e55f5c7da61d8e3d09b581
          // The variable 'k' holds the maximum redstone power value of any adjacent blocks.
          // If 'k' has the highest level of all neighbors, then the power level of this
 diff --git a/net/minecraft/server/level/ServerChunkCache.java b/net/minecraft/server/level/ServerChunkCache.java
-index f4cbc584de92d1e809c3f684d5293831661f0819..b437c66a9136162ac2367f4773bd0f2e21c17e99 100644
+index f72d96b34c14cb37693b6f6899aa5ad27beb1b87..59b009829edc63c7abb92e840a9aec53f01f5ba5 100644
 --- a/net/minecraft/server/level/ServerChunkCache.java
 +++ b/net/minecraft/server/level/ServerChunkCache.java
 @@ -104,6 +104,7 @@ public class ServerChunkCache extends ChunkSource implements ca.spottedleaf.moon
      }
  
      private ChunkAccess syncLoad(final int chunkX, final int chunkZ, final ChunkStatus toStatus) {
-+        mtserver.parallel.CellContext.recordBlockingLoad(this.level); // MT
++        kirigami.parallel.CellContext.recordBlockingLoad(this.level); // MT
          final ca.spottedleaf.moonrise.patches.chunk_system.scheduling.ChunkTaskScheduler chunkTaskScheduler = ((ca.spottedleaf.moonrise.patches.chunk_system.level.ChunkSystemServerLevel)this.level).moonrise$getChunkTaskScheduler();
          final CompletableFuture<ChunkAccess> completable = new CompletableFuture<>();
          chunkTaskScheduler.scheduleChunkLoad(
@@ -110,8 +110,8 @@ index f4cbc584de92d1e809c3f684d5293831661f0819..b437c66a9136162ac2367f4773bd0f2e
          final int size = entityTickingChunks.size();
  
          java.util.Objects.checkFromToIndex(0, size, raw.length);
-+        if (mtserver.parallel.RegionTicking.ENABLED) { // MT
-+            mtserver.parallel.RegionTicking.tickChunks(world, raw, size, randomTickSpeed);
++        if (kirigami.parallel.RegionTicking.ENABLED) { // MT
++            kirigami.parallel.RegionTicking.tickChunks(world, raw, size, randomTickSpeed);
 +            return;
 +        } // MT
          for (int i = 0; i < size; ++i) {
@@ -127,7 +127,7 @@ index f4cbc584de92d1e809c3f684d5293831661f0819..b437c66a9136162ac2367f4773bd0f2e
      }
  
 diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
-index ea4cc487002a0edc54cc49bfbecf72be156b6af7..ebe7ffeb512ffb20120ac52772e4792966fc7eeb 100644
+index ea4cc487002a0edc54cc49bfbecf72be156b6af7..1f98a0bdf490c788a59b9967dbc2d9e1ab4b4c7f 100644
 --- a/net/minecraft/server/level/ServerLevel.java
 +++ b/net/minecraft/server/level/ServerLevel.java
 @@ -889,8 +889,7 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
@@ -147,10 +147,10 @@ index ea4cc487002a0edc54cc49bfbecf72be156b6af7..ebe7ffeb512ffb20120ac52772e47929
 -                    }
 -                );
 +                    }; // MT
-+            if (mtserver.parallel.RegionTicking.ENABLED) { // MT
++            if (kirigami.parallel.RegionTicking.ENABLED) { // MT
 +                final List<Entity> mtSnapshot = new java.util.ArrayList<>();
 +                this.entityTickList.forEach(mtSnapshot::add);
-+                mtserver.parallel.RegionTicking.tickEntities(this, mtEntityTick, mtSnapshot, this.mtMaxChainedNeighborUpdates);
++                kirigami.parallel.RegionTicking.tickEntities(this, mtEntityTick, mtSnapshot, this.mtMaxChainedNeighborUpdates);
 +            } else {
 +                this.entityTickList.forEach(mtEntityTick);
 +            } // MT
@@ -162,7 +162,7 @@ index ea4cc487002a0edc54cc49bfbecf72be156b6af7..ebe7ffeb512ffb20120ac52772e47929
      private final ca.spottedleaf.moonrise.common.util.SimpleThreadUnsafeRandom simpleRandom = new ca.spottedleaf.moonrise.common.util.SimpleThreadUnsafeRandom(net.minecraft.world.level.levelgen.RandomSupport.generateUniqueSeed());
  
 +    private ca.spottedleaf.moonrise.common.util.SimpleThreadUnsafeRandom mtSimpleRandom() { // MT
-+        final mtserver.parallel.CellContext context = mtserver.parallel.CellContext.currentFor(this);
++        final kirigami.parallel.CellContext context = kirigami.parallel.CellContext.currentFor(this);
 +        return context == null ? this.simpleRandom : context.simpleRandom();
 +    }
 +
@@ -187,7 +187,7 @@ index ea4cc487002a0edc54cc49bfbecf72be156b6af7..ebe7ffeb512ffb20120ac52772e47929
  
      // CraftBukkit start
      private boolean addEntity(final Entity entity, final org.bukkit.event.entity.CreatureSpawnEvent.@Nullable SpawnReason spawnReason) {
-+        if (mtserver.parallel.CellContext.defer(this, () -> this.addEntity(entity, spawnReason))) return !entity.isRemoved(); // MT
++        if (kirigami.parallel.CellContext.defer(this, () -> this.addEntity(entity, spawnReason))) return !entity.isRemoved(); // MT
          org.spigotmc.AsyncCatcher.catchOp("entity add"); // Spigot
          entity.generation = false; // Paper - Don't fire sync event during generation; Reset flag if it was added during a ServerLevel generation process
          // Paper start - extra debug info
@@ -195,10 +195,10 @@ index ea4cc487002a0edc54cc49bfbecf72be156b6af7..ebe7ffeb512ffb20120ac52772e47929
  
      @Override
      public void sendBlockUpdated(final BlockPos pos, final BlockState old, final BlockState current, final @Block.UpdateFlags int updateFlags) {
-+        final mtserver.parallel.CellContext mtContext = mtserver.parallel.CellContext.currentFor(this); // MT
++        final kirigami.parallel.CellContext mtContext = kirigami.parallel.CellContext.currentFor(this); // MT
 +        if (mtContext != null) {
 +            mtContext.pathTypeCache().invalidate(pos);
-+            mtserver.parallel.CellContext.defer(this, () -> this.sendBlockUpdated(pos, old, current, updateFlags));
++            kirigami.parallel.CellContext.defer(this, () -> this.sendBlockUpdated(pos, old, current, updateFlags));
 +            return;
 +        } // MT
          if (this.isUpdatingNavigations) {
@@ -249,13 +249,13 @@ index ea4cc487002a0edc54cc49bfbecf72be156b6af7..ebe7ffeb512ffb20120ac52772e47929
      }
  
      public PathTypeCache getPathTypeCache() {
-+        final mtserver.parallel.CellContext context = mtserver.parallel.CellContext.currentFor(this); // MT
++        final kirigami.parallel.CellContext context = kirigami.parallel.CellContext.currentFor(this); // MT
 +        if (context != null) return context.pathTypeCache(); // MT
          return this.pathTypesByPosCache;
      }
  
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index 5cc94652112c67ca4e7ae6e8b324e9c9f8908d7d..70d17f401ce14585ea1694060ba925de4148c680 100644
+index 5cc94652112c67ca4e7ae6e8b324e9c9f8908d7d..8ddde8fdf8d9ef7019dc6202302f594fcad28c4f 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
 @@ -301,7 +301,7 @@ public abstract class Entity
@@ -271,11 +271,11 @@ index 5cc94652112c67ca4e7ae6e8b324e9c9f8908d7d..70d17f401ce14585ea1694060ba925de
  
      @Override
      public final void setRemoved(final Entity.RemovalReason reason, org.bukkit.event.entity.EntityRemoveEvent.@Nullable Cause cause) { // CraftBukkit - add Bukkit remove cause
-+        if (mtserver.parallel.CellContext.currentFor(this.level) != null) { // MT
++        if (kirigami.parallel.CellContext.currentFor(this.level) != null) { // MT
 +            if (this.removalReason == null) {
 +                this.removalReason = reason;
 +                this.removeEventCause = cause;
-+                mtserver.parallel.CellContext.defer(this.level, () -> {
++                kirigami.parallel.CellContext.defer(this.level, () -> {
 +                    this.removalReason = null;
 +                    this.setRemoved(reason, cause);
 +                });
@@ -286,14 +286,14 @@ index 5cc94652112c67ca4e7ae6e8b324e9c9f8908d7d..70d17f401ce14585ea1694060ba925de
          if (!((ca.spottedleaf.moonrise.patches.chunk_system.level.ChunkSystemLevel)this.level).moonrise$getEntityLookup().canRemoveEntity((Entity)(Object)this)) {
              LOGGER.warn("Entity " + this + " is currently prevented from being removed from the world since it is processing section status updates", new Throwable());
 diff --git a/net/minecraft/world/entity/ai/village/poi/PoiManager.java b/net/minecraft/world/entity/ai/village/poi/PoiManager.java
-index 3b07e731e8d16c2b71cb55b85163029cf56fd02e..1e9a9e78dc278d4a686049a1b898c03b8167ba6e 100644
+index 3b07e731e8d16c2b71cb55b85163029cf56fd02e..824e9faaee081773936b9f7d99d13598d187b940 100644
 --- a/net/minecraft/world/entity/ai/village/poi/PoiManager.java
 +++ b/net/minecraft/world/entity/ai/village/poi/PoiManager.java
 @@ -73,6 +73,7 @@ public class PoiManager extends SectionStorage<PoiSection, PoiSection.Packed> im
          final int chunkY = ca.spottedleaf.moonrise.common.util.CoordinateUtils.getChunkSectionY(pos);
          final int chunkZ = ca.spottedleaf.moonrise.common.util.CoordinateUtils.getChunkSectionZ(pos);
  
-+        if (mtserver.parallel.CellContext.currentFor(this.world) != null) mtserver.parallel.CellContext.checkRead(this.world, chunkX, chunkZ); else // MT
++        if (kirigami.parallel.CellContext.currentFor(this.world) != null) kirigami.parallel.CellContext.checkRead(this.world, chunkX, chunkZ); else // MT
          ca.spottedleaf.moonrise.common.util.TickThread.ensureTickThread(this.world, chunkX, chunkZ, "Accessing poi chunk off-main");
  
          final ca.spottedleaf.moonrise.patches.chunk_system.level.poi.PoiChunk ret = ((ca.spottedleaf.moonrise.patches.chunk_system.level.ChunkSystemServerLevel)this.world).moonrise$getChunkTaskScheduler().chunkHolderManager.getPoiChunkIfLoaded(chunkX, chunkZ, true);
@@ -301,7 +301,7 @@ index 3b07e731e8d16c2b71cb55b85163029cf56fd02e..1e9a9e78dc278d4a686049a1b898c03b
          final int chunkY = ca.spottedleaf.moonrise.common.util.CoordinateUtils.getChunkSectionY(pos);
          final int chunkZ = ca.spottedleaf.moonrise.common.util.CoordinateUtils.getChunkSectionZ(pos);
  
-+        if (mtserver.parallel.CellContext.currentFor(this.world) != null) mtserver.parallel.CellContext.checkRead(this.world, chunkX, chunkZ); else // MT
++        if (kirigami.parallel.CellContext.currentFor(this.world) != null) kirigami.parallel.CellContext.checkRead(this.world, chunkX, chunkZ); else // MT
          ca.spottedleaf.moonrise.common.util.TickThread.ensureTickThread(this.world, chunkX, chunkZ, "Accessing poi chunk off-main");
  
          final ca.spottedleaf.moonrise.patches.chunk_system.scheduling.ChunkHolderManager manager = ((ca.spottedleaf.moonrise.patches.chunk_system.level.ChunkSystemServerLevel)this.world).moonrise$getChunkTaskScheduler().chunkHolderManager;
@@ -309,12 +309,12 @@ index 3b07e731e8d16c2b71cb55b85163029cf56fd02e..1e9a9e78dc278d4a686049a1b898c03b
              if (ret != null) {
                  return ret.getSectionForVanilla(chunkY);
              } else {
-+                mtserver.parallel.CellContext.recordBlockingLoad(this.world); // MT
++                kirigami.parallel.CellContext.recordBlockingLoad(this.world); // MT
                  return manager.loadPoiChunk(chunkX, chunkZ).getSectionForVanilla(chunkY);
              }
          }
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index 21878bd770f6c0bc10dd0a67be5bd94d7e16f741..9394d5555dc50e406ee2fb6e9e8901ccafffb801 100644
+index 21878bd770f6c0bc10dd0a67be5bd94d7e16f741..ebac07948da060343ae63e3f21545114cbeefa0c 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
 @@ -119,6 +119,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
@@ -330,7 +330,7 @@ index 21878bd770f6c0bc10dd0a67be5bd94d7e16f741..9394d5555dc50e406ee2fb6e9e8901cc
      protected float oThunderLevel;
      public float thunderLevel;
 -    protected final RandomSource random = new ca.spottedleaf.moonrise.common.util.ThreadUnsafeRandom(net.minecraft.world.level.levelgen.RandomSupport.generateUniqueSeed()); // Paper - replace random
-+    protected final RandomSource random = new mtserver.parallel.LevelRandom(this, net.minecraft.world.level.levelgen.RandomSupport.generateUniqueSeed()); // Paper - replace random // MT
++    protected final RandomSource random = new kirigami.parallel.LevelRandom(this, net.minecraft.world.level.levelgen.RandomSupport.generateUniqueSeed()); // Paper - replace random // MT
      @Deprecated
      private final RandomSource soundSeedGenerator = RandomSource.createThreadSafe();
      private final Holder<DimensionType> dimensionTypeRegistration;
@@ -355,7 +355,7 @@ index 21878bd770f6c0bc10dd0a67be5bd94d7e16f741..9394d5555dc50e406ee2fb6e9e8901cc
  
      @Override
      public boolean setBlock(final BlockPos pos, final BlockState blockState, final @Block.UpdateFlags int updateFlags, final int updateLimit) {
-+        mtserver.parallel.CellContext.ownsChunk(this, pos.getX() >> 4, pos.getZ() >> 4); // MT
++        kirigami.parallel.CellContext.ownsChunk(this, pos.getX() >> 4, pos.getZ() >> 4); // MT
          // CraftBukkit start - tree generation
          if (this.captureTreeGeneration) {
              // Paper start - Protect Bedrock and End Portal/Frames from being destroyed
@@ -372,7 +372,7 @@ index 21878bd770f6c0bc10dd0a67be5bd94d7e16f741..9394d5555dc50e406ee2fb6e9e8901cc
  
      @Override
      public BlockState getBlockState(final BlockPos pos) {
-+        if (mtserver.parallel.CellContext.CHECK_READS) mtserver.parallel.CellContext.checkRead(this, pos.getX() >> 4, pos.getZ() >> 4); // MT
++        if (kirigami.parallel.CellContext.CHECK_READS) kirigami.parallel.CellContext.checkRead(this, pos.getX() >> 4, pos.getZ() >> 4); // MT
          // CraftBukkit start - tree generation
          if (this.captureTreeGeneration) {
              CraftBlockState previous = this.capturedBlockStates.get(pos); // Paper
@@ -380,8 +380,8 @@ index 21878bd770f6c0bc10dd0a67be5bd94d7e16f741..9394d5555dc50e406ee2fb6e9e8901cc
  
      public void addBlockEntityTicker(final TickingBlockEntity ticker) {
          if (!this.paperConfig().unsupportedSettings.ticking.blockEntities) return; // Paper - option to disable ticking
-+        if (mtserver.parallel.CellContext.current() != null) { // MT
-+            synchronized (mtserver.parallel.CellContext.GLOBAL_LOCK) {
++        if (kirigami.parallel.CellContext.current() != null) { // MT
++            synchronized (kirigami.parallel.CellContext.GLOBAL_LOCK) {
 +                (this.tickingBlockEntities ? this.pendingBlockEntityTickers : this.blockEntityTickers).add(ticker);
 +            }
 +            return;
@@ -393,8 +393,8 @@ index 21878bd770f6c0bc10dd0a67be5bd94d7e16f741..9394d5555dc50e406ee2fb6e9e8901cc
          // Paper start - Fix MC-117075 use removeAll
          final it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet<@Nullable TickingBlockEntity> toRemove = new it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet<>();
          toRemove.add(null);
-+        if (mtserver.parallel.RegionTicking.ENABLED && this instanceof ServerLevel serverLevel) { // MT
-+            mtserver.parallel.RegionTicking.tickBlockEntities(serverLevel, this.blockEntityTickers, tickBlockEntities, toRemove);
++        if (kirigami.parallel.RegionTicking.ENABLED && this instanceof ServerLevel serverLevel) { // MT
++            kirigami.parallel.RegionTicking.tickBlockEntities(serverLevel, this.blockEntityTickers, tickBlockEntities, toRemove);
 +        } else // MT
          for (int tickerIndex = 0; tickerIndex < this.blockEntityTickers.size(); tickerIndex++) {
              final TickingBlockEntity ticker = this.blockEntityTickers.get(tickerIndex);
@@ -404,7 +404,7 @@ index 21878bd770f6c0bc10dd0a67be5bd94d7e16f741..9394d5555dc50e406ee2fb6e9e8901cc
              // Paper end - Prevent block entity and entity crashes
          }
 -        this.moonrise$midTickTasks(); // Paper - rewrite chunk system
-+        if (mtserver.parallel.CellContext.current() == null) this.moonrise$midTickTasks(); // Paper - rewrite chunk system // MT
++        if (kirigami.parallel.CellContext.current() == null) this.moonrise$midTickTasks(); // Paper - rewrite chunk system // MT
      }
  
      // Paper start - Option to prevent armor stands from doing entity lookups
@@ -413,7 +413,7 @@ index 21878bd770f6c0bc10dd0a67be5bd94d7e16f741..9394d5555dc50e406ee2fb6e9e8901cc
      }
  
 +    public final CollectingNeighborUpdater mtNeighborUpdater() { // MT
-+        final mtserver.parallel.CellContext context = mtserver.parallel.CellContext.currentFor(this);
++        final kirigami.parallel.CellContext context = kirigami.parallel.CellContext.currentFor(this);
 +        return context == null ? this.neighborUpdater : context.neighborUpdater();
 +    }
 +
@@ -424,7 +424,7 @@ index 21878bd770f6c0bc10dd0a67be5bd94d7e16f741..9394d5555dc50e406ee2fb6e9e8901cc
      public abstract RecipeAccess recipeAccess();
  
      public BlockPos getBlockRandomPos(final int xo, final int yo, final int zo, final int yMask) {
-+        final mtserver.parallel.CellContext mtContext = mtserver.parallel.CellContext.currentFor(this); // MT
++        final kirigami.parallel.CellContext mtContext = kirigami.parallel.CellContext.currentFor(this); // MT
 +        final int val;
 +        if (mtContext != null) {
 +            val = mtContext.nextRandValue() >> 2;
@@ -440,8 +440,8 @@ index 21878bd770f6c0bc10dd0a67be5bd94d7e16f741..9394d5555dc50e406ee2fb6e9e8901cc
  
      @Override
      public long nextSubTickCount() {
-+        if (mtserver.parallel.CellContext.current() != null) { // MT
-+            synchronized (mtserver.parallel.CellContext.GLOBAL_LOCK) {
++        if (kirigami.parallel.CellContext.current() != null) { // MT
++            synchronized (kirigami.parallel.CellContext.GLOBAL_LOCK) {
 +                return this.subTickCount++;
 +            }
 +        }
@@ -449,7 +449,7 @@ index 21878bd770f6c0bc10dd0a67be5bd94d7e16f741..9394d5555dc50e406ee2fb6e9e8901cc
      }
  
 diff --git a/net/minecraft/world/level/block/RedstoneWireBlock.java b/net/minecraft/world/level/block/RedstoneWireBlock.java
-index ede64a0afbcdc41e60c3f2f5917c89f09b888433..379532a7aa4d6ddbea5a0c0528d2171c8038ebfa 100644
+index ede64a0afbcdc41e60c3f2f5917c89f09b888433..4b897dd16844b9c210e53d332bd0e93da1c000b1 100644
 --- a/net/minecraft/world/level/block/RedstoneWireBlock.java
 +++ b/net/minecraft/world/level/block/RedstoneWireBlock.java
 @@ -64,6 +64,19 @@ public class RedstoneWireBlock extends Block {
@@ -459,11 +459,11 @@ index ede64a0afbcdc41e60c3f2f5917c89f09b888433..379532a7aa4d6ddbea5a0c0528d2171c
 +    private static final ThreadLocal<boolean[]> MT_SUPPRESSED = ThreadLocal.withInitial(() -> new boolean[1]); // MT
 +
 +    public boolean mtShouldSignal() { // MT
-+        return mtserver.parallel.CellContext.current() == null ? this.shouldSignal : !MT_SUPPRESSED.get()[0];
++        return kirigami.parallel.CellContext.current() == null ? this.shouldSignal : !MT_SUPPRESSED.get()[0];
 +    }
 +
 +    public void mtSetShouldSignal(final boolean shouldSignal) { // MT
-+        if (mtserver.parallel.CellContext.current() == null) {
++        if (kirigami.parallel.CellContext.current() == null) {
 +            this.shouldSignal = shouldSignal;
 +        } else {
 +            MT_SUPPRESSED.get()[0] = !shouldSignal;
@@ -509,14 +509,14 @@ index ede64a0afbcdc41e60c3f2f5917c89f09b888433..379532a7aa4d6ddbea5a0c0528d2171c
  
      public static int getColorForPower(final int power) {
 diff --git a/net/minecraft/world/level/block/SaplingBlock.java b/net/minecraft/world/level/block/SaplingBlock.java
-index 5564a54f23aab158b9506325953ec70cab55c961..a655eb22a8e39f81ca61062e8b684293f1557e8a 100644
+index 5564a54f23aab158b9506325953ec70cab55c961..1ce44a8922a88c412ea1c5d0d747188272fd6d2b 100644
 --- a/net/minecraft/world/level/block/SaplingBlock.java
 +++ b/net/minecraft/world/level/block/SaplingBlock.java
 @@ -42,6 +42,10 @@ public class SaplingBlock extends VegetationBlock implements BonemealableBlock {
      }
  
      public void advanceTree(final ServerLevel level, final BlockPos pos, final BlockState state, final RandomSource random) {
-+        if (mtserver.parallel.CellContext.defer(level, () -> { // MT
++        if (kirigami.parallel.CellContext.defer(level, () -> { // MT
 +            final BlockState current = level.getBlockState(pos);
 +            if (current.is(this)) this.advanceTree(level, pos, current, random);
 +        })) return; // MT
@@ -524,7 +524,7 @@ index 5564a54f23aab158b9506325953ec70cab55c961..a655eb22a8e39f81ca61062e8b684293
              level.setBlock(pos, state.cycle(STAGE), Block.UPDATE_NONE);
          } else {
 diff --git a/net/minecraft/world/level/block/entity/BlockEntity.java b/net/minecraft/world/level/block/entity/BlockEntity.java
-index ddda24a55201de2136fc6dd2cb863d609925d0ca..b120a13930ebc15b69e283d37190bbdb79a507c1 100644
+index ddda24a55201de2136fc6dd2cb863d609925d0ca..16d4542331277d445c0dd254e3142928d6c69fd8 100644
 --- a/net/minecraft/world/level/block/entity/BlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/BlockEntity.java
 @@ -210,7 +210,7 @@ public abstract class BlockEntity implements DebugValueSource, TypedInstance<Blo
@@ -532,12 +532,12 @@ index ddda24a55201de2136fc6dd2cb863d609925d0ca..b120a13930ebc15b69e283d37190bbdb
      public void setChanged() {
          if (this.level != null) {
 -            if (ignoreBlockEntityUpdates) return; // Paper - Perf: Optimize Hoppers
-+            if (mtserver.parallel.CellContext.current() != null ? mtserver.parallel.ThreadFlags.get(mtserver.parallel.ThreadFlags.IGNORE_BLOCK_ENTITY_UPDATES) : ignoreBlockEntityUpdates) return; // Paper - Perf: Optimize Hoppers // MT
++            if (kirigami.parallel.CellContext.current() != null ? kirigami.parallel.ThreadFlags.get(kirigami.parallel.ThreadFlags.IGNORE_BLOCK_ENTITY_UPDATES) : ignoreBlockEntityUpdates) return; // Paper - Perf: Optimize Hoppers // MT
              setChanged(this.level, this.worldPosition, this.blockState);
          }
      }
 diff --git a/net/minecraft/world/level/block/entity/HopperBlockEntity.java b/net/minecraft/world/level/block/entity/HopperBlockEntity.java
-index 803e36f33c706d8484739cb21af25b9289dc8808..62f12f83f8765d5b82b0f2c48382c06ab0e0a538 100644
+index 803e36f33c706d8484739cb21af25b9289dc8808..d0aedb56aeae413be8a4af69bde73f74a8fd0a20 100644
 --- a/net/minecraft/world/level/block/entity/HopperBlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/HopperBlockEntity.java
 @@ -222,8 +222,29 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
@@ -545,29 +545,29 @@ index 803e36f33c706d8484739cb21af25b9289dc8808..62f12f83f8765d5b82b0f2c48382c06a
      private static boolean skipPushModeEventFire;
  
 +    private static boolean mtFlag(final int flag) { // MT
-+        if (mtserver.parallel.CellContext.current() != null) return mtserver.parallel.ThreadFlags.get(flag);
++        if (kirigami.parallel.CellContext.current() != null) return kirigami.parallel.ThreadFlags.get(flag);
 +        return switch (flag) {
-+            case mtserver.parallel.ThreadFlags.SKIP_PULL_EVENT -> skipPullModeEventFire;
-+            case mtserver.parallel.ThreadFlags.SKIP_PUSH_EVENT -> skipPushModeEventFire;
++            case kirigami.parallel.ThreadFlags.SKIP_PULL_EVENT -> skipPullModeEventFire;
++            case kirigami.parallel.ThreadFlags.SKIP_PUSH_EVENT -> skipPushModeEventFire;
 +            default -> ignoreBlockEntityUpdates;
 +        };
 +    }
 +
 +    private static void mtSetFlag(final int flag, final boolean value) { // MT
-+        if (mtserver.parallel.CellContext.current() != null) {
-+            mtserver.parallel.ThreadFlags.set(flag, value);
++        if (kirigami.parallel.CellContext.current() != null) {
++            kirigami.parallel.ThreadFlags.set(flag, value);
 +            return;
 +        }
 +        switch (flag) {
-+            case mtserver.parallel.ThreadFlags.SKIP_PULL_EVENT -> skipPullModeEventFire = value;
-+            case mtserver.parallel.ThreadFlags.SKIP_PUSH_EVENT -> skipPushModeEventFire = value;
++            case kirigami.parallel.ThreadFlags.SKIP_PULL_EVENT -> skipPullModeEventFire = value;
++            case kirigami.parallel.ThreadFlags.SKIP_PUSH_EVENT -> skipPushModeEventFire = value;
 +            default -> ignoreBlockEntityUpdates = value;
 +        }
 +    }
 +
      private static boolean hopperPush(final Level level, final Container destination, final Direction direction, final HopperBlockEntity hopper) {
 -        skipPushModeEventFire = skipHopperEvents;
-+        mtSetFlag(mtserver.parallel.ThreadFlags.SKIP_PUSH_EVENT, skipHopperEvents);
++        mtSetFlag(kirigami.parallel.ThreadFlags.SKIP_PUSH_EVENT, skipHopperEvents);
          final long disallowedSlots = callPrepareTransferEvent(level, hopper, destination, true); // Paper - Add PrepareHopperTransferEvent
          boolean foundItem = false;
          for (int i = 0; i < hopper.getContainerSize(); ++i) {
@@ -576,7 +576,7 @@ index 803e36f33c706d8484739cb21af25b9289dc8808..62f12f83f8765d5b82b0f2c48382c06a
                  // We only need to fire the event once to give protection plugins a chance to cancel this event
                  // Because nothing uses getItem, every event call should end up the same result.
 -                if (!skipPushModeEventFire) {
-+                if (!mtFlag(mtserver.parallel.ThreadFlags.SKIP_PUSH_EVENT)) {
++                if (!mtFlag(kirigami.parallel.ThreadFlags.SKIP_PUSH_EVENT)) {
                      movedItem = callPushMoveEvent(destination, movedItem, hopper);
                      if (movedItem == null) { // cancelled
                          origItemStack.setCount(originalItemCount);
@@ -585,7 +585,7 @@ index 803e36f33c706d8484739cb21af25b9289dc8808..62f12f83f8765d5b82b0f2c48382c06a
          movedItem.setCount(movedItemCount);
  
 -        if (!skipPullModeEventFire) {
-+        if (!mtFlag(mtserver.parallel.ThreadFlags.SKIP_PULL_EVENT)) {
++        if (!mtFlag(kirigami.parallel.ThreadFlags.SKIP_PULL_EVENT)) {
              movedItem = callPullMoveEvent(hopper, container, movedItem);
              if (movedItem == null) { // cancelled
                  origItemStack.setCount(originalItemCount);
@@ -594,10 +594,10 @@ index 803e36f33c706d8484739cb21af25b9289dc8808..62f12f83f8765d5b82b0f2c48382c06a
              }
  
 -            ignoreBlockEntityUpdates = true;
-+            mtSetFlag(mtserver.parallel.ThreadFlags.IGNORE_BLOCK_ENTITY_UPDATES, true);
++            mtSetFlag(kirigami.parallel.ThreadFlags.IGNORE_BLOCK_ENTITY_UPDATES, true);
              container.setItem(i, origItemStack);
 -            ignoreBlockEntityUpdates = false;
-+            mtSetFlag(mtserver.parallel.ThreadFlags.IGNORE_BLOCK_ENTITY_UPDATES, false);
++            mtSetFlag(kirigami.parallel.ThreadFlags.IGNORE_BLOCK_ENTITY_UPDATES, false);
              container.setChanged();
              return true;
          }
@@ -606,7 +606,7 @@ index 803e36f33c706d8484739cb21af25b9289dc8808..62f12f83f8765d5b82b0f2c48382c06a
          final boolean result = event.callEvent();
          if (!event.calledGetItem && !event.calledSetItem) {
 -            skipPushModeEventFire = true;
-+            mtSetFlag(mtserver.parallel.ThreadFlags.SKIP_PUSH_EVENT, true);
++            mtSetFlag(kirigami.parallel.ThreadFlags.SKIP_PUSH_EVENT, true);
          }
          if (!result) {
              applyCooldown(hopper);
@@ -615,7 +615,7 @@ index 803e36f33c706d8484739cb21af25b9289dc8808..62f12f83f8765d5b82b0f2c48382c06a
          final boolean result = event.callEvent();
          if (!event.calledGetItem && !event.calledSetItem) {
 -            skipPullModeEventFire = true;
-+            mtSetFlag(mtserver.parallel.ThreadFlags.SKIP_PULL_EVENT, true);
++            mtSetFlag(kirigami.parallel.ThreadFlags.SKIP_PULL_EVENT, true);
          }
          if (!result) {
              applyCooldown(hopper);
@@ -624,7 +624,7 @@ index 803e36f33c706d8484739cb21af25b9289dc8808..62f12f83f8765d5b82b0f2c48382c06a
          if (container != null) {
              Direction direction = Direction.DOWN;
 -            skipPullModeEventFire = skipHopperEvents; // Paper - Perf: Optimize Hoppers
-+            mtSetFlag(mtserver.parallel.ThreadFlags.SKIP_PULL_EVENT, skipHopperEvents); // Paper - Perf: Optimize Hoppers
++            mtSetFlag(kirigami.parallel.ThreadFlags.SKIP_PULL_EVENT, skipHopperEvents); // Paper - Perf: Optimize Hoppers
              final long disallowedSlots = callPrepareTransferEvent(level, container, hopper, false); // Paper - Add PrepareHopperTransferEvent
  
              for (int slot : getSlots(container, direction)) {
@@ -633,10 +633,10 @@ index 803e36f33c706d8484739cb21af25b9289dc8808..62f12f83f8765d5b82b0f2c48382c06a
                  }
                  // Spigot end
 -                ignoreBlockEntityUpdates = true; // Paper - Perf: Optimize Hoppers
-+                mtSetFlag(mtserver.parallel.ThreadFlags.IGNORE_BLOCK_ENTITY_UPDATES, true); // Paper - Perf: Optimize Hoppers
++                mtSetFlag(kirigami.parallel.ThreadFlags.IGNORE_BLOCK_ENTITY_UPDATES, true); // Paper - Perf: Optimize Hoppers
                  container.setItem(slot, itemStack);
 -                ignoreBlockEntityUpdates = false; // Paper - Perf: Optimize Hoppers
-+                mtSetFlag(mtserver.parallel.ThreadFlags.IGNORE_BLOCK_ENTITY_UPDATES, false); // Paper - Perf: Optimize Hoppers
++                mtSetFlag(kirigami.parallel.ThreadFlags.IGNORE_BLOCK_ENTITY_UPDATES, false); // Paper - Perf: Optimize Hoppers
                  itemStack = leftover; // Paper - Make hoppers respect inventory max stack size
                  success = true;
              } else if (canMergeItems(current, itemStack)) {
@@ -656,15 +656,15 @@ index 1a50ec0d56bb4b9c3b0958a0281028c8eff1000c..43140ac442bb3369faefc0bf2371d3e3
          return (int)HashCommon.mix(pos) & 4095;
      }
 diff --git a/net/minecraft/world/ticks/LevelTicks.java b/net/minecraft/world/ticks/LevelTicks.java
-index 7bf9e93692debcef511bfa316aeef32ae8a7d3b7..bdc05dfa76ddb66e9ba44c22a50259ccc37fecb2 100644
+index 7bf9e93692debcef511bfa316aeef32ae8a7d3b7..c625730c6c390c7dd7f36c1fa9fbe484ef316ee0 100644
 --- a/net/minecraft/world/ticks/LevelTicks.java
 +++ b/net/minecraft/world/ticks/LevelTicks.java
 @@ -69,6 +69,16 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
  
      @Override
      public void schedule(final ScheduledTick<T> tick) {
-+        if (mtserver.parallel.CellContext.current() != null) { // MT
-+            synchronized (mtserver.parallel.CellContext.GLOBAL_LOCK) {
++        if (kirigami.parallel.CellContext.current() != null) { // MT
++            synchronized (kirigami.parallel.CellContext.GLOBAL_LOCK) {
 +                this.mtSchedule(tick);
 +            }
 +            return;

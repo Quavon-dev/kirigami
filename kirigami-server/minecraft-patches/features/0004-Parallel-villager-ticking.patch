@@ -5,7 +5,7 @@ Subject: [PATCH] Parallel villager ticking
 
 
 diff --git a/net/minecraft/server/level/ServerChunkCache.java b/net/minecraft/server/level/ServerChunkCache.java
-index b437c66a9136162ac2367f4773bd0f2e21c17e99..cd7198fd2b9c15fa3de8db548ed021314190b04a 100644
+index 59b009829edc63c7abb92e840a9aec53f01f5ba5..99ce3febe28bcd7bd44f5002dc603ee19be2a772 100644
 --- a/net/minecraft/server/level/ServerChunkCache.java
 +++ b/net/minecraft/server/level/ServerChunkCache.java
 @@ -103,8 +103,12 @@ public class ServerChunkCache extends ChunkSource implements ca.spottedleaf.moon
@@ -14,8 +14,8 @@ index b437c66a9136162ac2367f4773bd0f2e21c17e99..cd7198fd2b9c15fa3de8db548ed02131
  
 -    private ChunkAccess syncLoad(final int chunkX, final int chunkZ, final ChunkStatus toStatus) {
 +    private ChunkAccess syncLoad(final int chunkX, final int chunkZ, final ChunkStatus toStatus) { // MT
-         mtserver.parallel.CellContext.recordBlockingLoad(this.level); // MT
-+        return mtserver.parallel.CellContext.exclusive(this.level, () -> this.mtSyncLoad(chunkX, chunkZ, toStatus)); // MT
+         kirigami.parallel.CellContext.recordBlockingLoad(this.level); // MT
++        return kirigami.parallel.CellContext.exclusive(this.level, () -> this.mtSyncLoad(chunkX, chunkZ, toStatus)); // MT
 +    } // MT
 +
 +    private ChunkAccess mtSyncLoad(final int chunkX, final int chunkZ, final ChunkStatus toStatus) { // MT
@@ -23,7 +23,7 @@ index b437c66a9136162ac2367f4773bd0f2e21c17e99..cd7198fd2b9c15fa3de8db548ed02131
          final CompletableFuture<ChunkAccess> completable = new CompletableFuture<>();
          chunkTaskScheduler.scheduleChunkLoad(
 diff --git a/net/minecraft/world/entity/ai/village/poi/PoiManager.java b/net/minecraft/world/entity/ai/village/poi/PoiManager.java
-index 1e9a9e78dc278d4a686049a1b898c03b8167ba6e..8320d07c60b2600094fcfc9c845c892f879f2d68 100644
+index 824e9faaee081773936b9f7d99d13598d187b940..3e3ac994317d2fcbfb52b880e6ecd940243d32a5 100644
 --- a/net/minecraft/world/entity/ai/village/poi/PoiManager.java
 +++ b/net/minecraft/world/entity/ai/village/poi/PoiManager.java
 @@ -60,11 +60,14 @@ public class PoiManager extends SectionStorage<PoiSection, PoiSection.Packed> im
@@ -45,9 +45,9 @@ index 1e9a9e78dc278d4a686049a1b898c03b8167ba6e..8320d07c60b2600094fcfc9c845c892f
 @@ -98,7 +101,7 @@ public class PoiManager extends SectionStorage<PoiSection, PoiSection.Packed> im
                  return ret.getSectionForVanilla(chunkY);
              } else {
-                 mtserver.parallel.CellContext.recordBlockingLoad(this.world); // MT
+                 kirigami.parallel.CellContext.recordBlockingLoad(this.world); // MT
 -                return manager.loadPoiChunk(chunkX, chunkZ).getSectionForVanilla(chunkY);
-+                return mtserver.parallel.CellContext.exclusive(this.world, () -> manager.loadPoiChunk(chunkX, chunkZ)).getSectionForVanilla(chunkY); // MT
++                return kirigami.parallel.CellContext.exclusive(this.world, () -> manager.loadPoiChunk(chunkX, chunkZ)).getSectionForVanilla(chunkY); // MT
              }
          }
          // retain vanilla behavior: do not load section if out of bounds!
@@ -56,7 +56,7 @@ index 1e9a9e78dc278d4a686049a1b898c03b8167ba6e..8320d07c60b2600094fcfc9c845c892f
              return ret.getOrCreateSection(chunkY);
          } else {
 -            return manager.loadPoiChunk(chunkX, chunkZ).getOrCreateSection(chunkY);
-+            return mtserver.parallel.CellContext.exclusive(this.world, () -> manager.loadPoiChunk(chunkX, chunkZ)).getOrCreateSection(chunkY); // MT
++            return kirigami.parallel.CellContext.exclusive(this.world, () -> manager.loadPoiChunk(chunkX, chunkZ)).getOrCreateSection(chunkY); // MT
          }
      }
  
