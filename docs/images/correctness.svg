@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 600" width="860" height="600" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 690" width="860" height="690" role="img" aria-labelledby="t d">
 <style>
 svg { --surface:#fcfcfb; --plane:#f4f3ef; --ink:#0b0b0b; --ink2:#52514e; --muted:#77756f; --grid:#e1e0d9; --axis:#c3c2b7;
       --a:#2a78d6; --b:#eb6834; --c:#1baf7a; --d:#eda100; --kiri:#eb6834; --kiri-wash:rgba(235,104,52,.12);
@@ -26,8 +26,8 @@ text { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,s
 .bigl { font-size:12.5px; fill:var(--ink2); }
 </style>
 <title id="t">Correctness: same game, just faster</title>
-<desc id="d">Five deterministic contraptions across cell borders give the same readings as vanilla in all 23 runs since the hopper fix. Farm rates over 120,000 ticks differ from vanilla (Fabric with Carpet) by -1.2 to +2.8 percent, every 95 percent interval includes zero. 0 mismatches in 103 million checked parallel spawn searches; 0 overlapping or off-thread plugin events in 33 runs.</desc>
-<rect width="860" height="600" rx="14" style="fill:var(--surface)"/>
+<desc id="d">Eight deterministic contraptions across cell borders, including a minecart loop through four cells, a piston race and a hopper-fed furnace, give the same 39 readings as the official Minecraft server; CI repeats this check on every push. Farm rates over 120,000 ticks differ from vanilla (Fabric with Carpet) by -1.2 to +2.8 percent, every 95 percent interval includes zero. 0 mismatches in 103 million checked parallel spawn searches; 0 overlapping or off-thread plugin events in 33 runs.</desc>
+<rect width="860" height="690" rx="14" style="fill:var(--surface)"/>
 <text class="t" x="28" y="42">Same game, just faster</text>
 <text class="s" x="28" y="65">Kirigami compared with vanilla Minecraft, tick for tick and farm by farm</text>
 <text class="cap" x="28" y="112">BIT FOR BIT</text>
@@ -35,25 +35,37 @@ text { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,s
 <path d="M-4 0L-1 3L4.5 -3.5" transform="translate(38 144)" style="fill:none;stroke:#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 <text class="ttl" x="58" y="142">Observer clock</text>
 <text class="det" x="58" y="160">vanilla 333 pulses, Kirigami the same</text>
-<circle cx="38" cy="190" r="9" style="fill:var(--good)"/>
-<path d="M-4 0L-1 3L4.5 -3.5" transform="translate(38 190)" style="fill:none;stroke:#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-<text class="ttl" x="58" y="188">39-hopper chains across a cell edge</text>
-<text class="det" x="58" y="206">vanilla 716 moved, 978 left, Kirigami the same</text>
-<circle cx="38" cy="236" r="9" style="fill:var(--good)"/>
-<path d="M-4 0L-1 3L4.5 -3.5" transform="translate(38 236)" style="fill:none;stroke:#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-<text class="ttl" x="58" y="234">Two hoppers racing into one chest</text>
-<text class="det" x="58" y="252">vanilla cobble 64, dirt 0, Kirigami the same</text>
-<circle cx="38" cy="282" r="9" style="fill:var(--good)"/>
-<path d="M-4 0L-1 3L4.5 -3.5" transform="translate(38 282)" style="fill:none;stroke:#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-<text class="ttl" x="58" y="280">Item sorters across a cell edge</text>
-<text class="det" x="58" y="298">vanilla 210 / 35 / 18 sorted, Kirigami the same</text>
-<circle cx="38" cy="328" r="9" style="fill:var(--good)"/>
-<path d="M-4 0L-1 3L4.5 -3.5" transform="translate(38 328)" style="fill:none;stroke:#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-<text class="ttl" x="58" y="326">Item pickup on a cell border</text>
-<text class="det" x="58" y="344">vanilla 749 per side, Kirigami the same</text>
-<text class="det" x="28" y="384">23 of 23 runs since the fix match vanilla exactly.</text>
-<text class="det" x="28" y="402">The hopper race caught one bug: chains that cross</text>
-<text class="det" x="28" y="420">a cell border now tick serially in vanilla order.</text>
+<circle cx="38" cy="184" r="9" style="fill:var(--good)"/>
+<path d="M-4 0L-1 3L4.5 -3.5" transform="translate(38 184)" style="fill:none;stroke:#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text class="ttl" x="58" y="182">39-hopper chains across a cell edge</text>
+<text class="det" x="58" y="200">vanilla 716 moved, 978 left, Kirigami the same</text>
+<circle cx="38" cy="224" r="9" style="fill:var(--good)"/>
+<path d="M-4 0L-1 3L4.5 -3.5" transform="translate(38 224)" style="fill:none;stroke:#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text class="ttl" x="58" y="222">Two hoppers racing into one chest</text>
+<text class="det" x="58" y="240">vanilla cobble 64, dirt 0, Kirigami the same</text>
+<circle cx="38" cy="264" r="9" style="fill:var(--good)"/>
+<path d="M-4 0L-1 3L4.5 -3.5" transform="translate(38 264)" style="fill:none;stroke:#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text class="ttl" x="58" y="262">Item sorters across a cell edge</text>
+<text class="det" x="58" y="280">vanilla 210 / 35 / 18 sorted, Kirigami the same</text>
+<circle cx="38" cy="304" r="9" style="fill:var(--good)"/>
+<path d="M-4 0L-1 3L4.5 -3.5" transform="translate(38 304)" style="fill:none;stroke:#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text class="ttl" x="58" y="302">Item pickup on a cell border</text>
+<text class="det" x="58" y="320">vanilla 749 per side, Kirigami the same</text>
+<circle cx="38" cy="344" r="9" style="fill:var(--good)"/>
+<path d="M-4 0L-1 3L4.5 -3.5" transform="translate(38 344)" style="fill:none;stroke:#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text class="ttl" x="58" y="342">Minecart loop through four cells</text>
+<text class="det" x="58" y="360">same cart position at all three checkpoints</text>
+<circle cx="38" cy="384" r="9" style="fill:var(--good)"/>
+<path d="M-4 0L-1 3L4.5 -3.5" transform="translate(38 384)" style="fill:none;stroke:#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text class="ttl" x="58" y="382">Two pistons racing across a cell edge</text>
+<text class="det" x="58" y="400">the firing order decides the winner, as in vanilla</text>
+<circle cx="38" cy="424" r="9" style="fill:var(--good)"/>
+<path d="M-4 0L-1 3L4.5 -3.5" transform="translate(38 424)" style="fill:none;stroke:#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text class="ttl" x="58" y="422">Hopper-fed furnace across a cell edge</text>
+<text class="det" x="58" y="440">vanilla 29 ingots in 6,000 ticks, Kirigami the same</text>
+<text class="det" x="28" y="480">All 39 readings match the official server exactly;</text>
+<text class="det" x="28" y="498">CI repeats the check on every push. The hopper race</text>
+<text class="det" x="28" y="516">caught one bug: chains across a border now tick serially.</text>
 <text class="cap" x="436" y="112">FARM RATES VS VANILLA</text>
 <line x1="600" y1="132" x2="600" y2="392" style="stroke:var(--grid)" stroke-width="1"/>
 <text class="n" x="600" y="410" text-anchor="middle">-10 %</text>
@@ -106,15 +118,16 @@ text { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,s
 <circle cx="710" cy="374" r="4.5" style="fill:var(--kiri)"/>
 <text class="det" x="436" y="434">Dot: difference in rate, line: 95 % interval. All intervals</text>
 <text class="det" x="436" y="452">include zero: no measurable difference. Golems identical.</text>
-<rect x="16" y="470" width="828" height="84" rx="12" style="fill:var(--plane)"/>
-<text class="big" x="36" y="520">0</text>
-<text class="bigl" x="79" y="506">mismatches in 103 million</text>
-<text class="bigl" x="79" y="524">checked parallel spawn searches</text>
-<text class="big" x="312" y="520">0</text>
-<text class="bigl" x="355" y="506">overlapping or off-thread</text>
-<text class="bigl" x="355" y="524">plugin events in 33 runs</text>
-<text class="big" x="588" y="520">±3 %</text>
-<text class="bigl" x="682" y="506">every farm rate is within</text>
-<text class="bigl" x="682" y="524">3 % of vanilla</text>
-<text class="a" x="28" y="580">Vanilla = Fabric with Carpet. Farm rates: 10–32 runs per side, Welch t-test; intervals from the logged t or p values (normal approximation).</text>
+<rect x="16" y="546" width="828" height="84" rx="12" style="fill:var(--plane)"/>
+<text class="big" x="36" y="596">0</text>
+<text class="bigl" x="79" y="582">mismatches in 103 million</text>
+<text class="bigl" x="79" y="600">checked parallel spawn searches</text>
+<text class="big" x="312" y="596">0</text>
+<text class="bigl" x="355" y="582">overlapping or off-thread</text>
+<text class="bigl" x="355" y="600">plugin events in 33 runs</text>
+<text class="big" x="588" y="596">±3 %</text>
+<text class="bigl" x="682" y="582">every farm rate is within</text>
+<text class="bigl" x="682" y="600">3 % of vanilla</text>
+<text class="a" x="28" y="652">Contraptions: compared with the official Minecraft server. Farm rates: vanilla = Fabric with Carpet, 10–32 runs per side,</text>
+<text class="a" x="28" y="668">Welch t-test; intervals from the logged t or p values (normal approximation).</text>
 </svg>

@@ -109,7 +109,7 @@ Diagnostic settings exist only as JVM flags: `kirigami.checkReads`, `kirigami.re
 | `testing/scripts/soak.sh` | Multi-hour stability run across all three dimensions with plugins |
 | `testing/plugins/mtprobe` | Test plugin that detects overlapping or off-thread event calls |
 
-![Five deterministic contraptions across cell borders match vanilla in all 23 runs since the hopper fix; farm rates differ from vanilla by -1.2 to +2.8 percent with every 95 percent interval including zero; 0 mismatches in 103 million parallel spawn searches; 0 overlapping or off-thread plugin events in 33 runs](docs/images/correctness.svg)
+![Eight deterministic contraptions across cell borders, including a minecart loop through four cells, a piston race and a hopper-fed furnace, give the same 39 readings as the official Minecraft server and CI repeats the check on every push; farm rates differ from vanilla by -1.2 to +2.8 percent with every 95 percent interval including zero; 0 mismatches in 103 million parallel spawn searches; 0 overlapping or off-thread plugin events in 33 runs](docs/images/correctness.svg)
 
 Results are in `testing/results/`, open items in `BACKLOG.md`.
 
