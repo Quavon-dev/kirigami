@@ -34,6 +34,10 @@ if [ -n "$busy" ]; then
 fi
 rsync -a --exclude stdin.fifo --exclude console.log --exclude logs --exclude mtbench --exclude server.pid --exclude fifo.pid --exclude crash-reports --exclude 'world/session.lock' "$template/" "$run/"
 
+if [ -n "${PLUGIN:-}" ]; then
+  mkdir -p "$run/plugins"
+  cp $PLUGIN "$run/plugins/"
+fi
 [ -n "${REDSTONE_IMPL:-}" ] && sed -i '' "s/redstone-implementation: .*/redstone-implementation: $REDSTONE_IMPL/" "$run/config/paper-world-defaults.yml"
 srv start "$run" "$jar"
 trap 'srv stop "$run"' EXIT
@@ -53,6 +57,7 @@ for checkpoint in 10 30 60 120; do
 done
 srv cmd "$run" "mtbench record stop"
 srv cmd "$run" "mtbench regionstats"
+srv cmd "$run" "kirigami"
 sleep 3
 srv stop "$run"
 trap - EXIT
@@ -61,5 +66,6 @@ cp "$run/mtbench/$name.csv" "$results/$name.csv"
 echo "$name load: $(sysctl -n vm.loadavg) busy-before: ${busy:-none}" >> "$results/load.log"
 grep -o "mtbench lab lab .*" "$run/console.log" > "$results/$name.lab.txt" || true
 grep -o "mtbench \(ticks\|regionstats\).*" "$run/console.log" >> "$results/$name.lab.txt" || true
+sed -n '/Kirigami .* TPS/,/^\[/p' "$run/console.log" >> "$results/$name.lab.txt" || true
 echo "errors=$(grep -cE 'ERROR|Exception' "$run/console.log" || true)" >> "$results/$name.lab.txt"
 cat "$results/$name.lab.txt"
