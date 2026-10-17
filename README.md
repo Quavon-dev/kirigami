@@ -99,7 +99,7 @@ Diagnostic settings exist only as JVM flags: `kirigami.checkReads`, `kirigami.re
 Stop the Paper server, replace the jar and start Kirigami in the same folder. Worlds, plugins, plugin data and Paper's configuration files are used as they are; Kirigami only adds `config/kirigami.yml`. Plugins see the Paper API: Kirigami reports itself as compatible with the Paper brand, and `Bukkit.isPrimaryThread()` is true wherever plugin code runs.
 
 - Event listeners, custom mob goals and scheduler tasks never run at the same time as other world code. An event fired from a parallel phase pauses the other workers first.
-- If plugin listeners pause the world very often (for example a `BlockPhysicsEvent` listener during heavy redstone), that phase runs serially for the next 30 seconds instead of getting slower than Paper. A warning in the log and `/kirigami` show which event and plugin cause it.
+- If world pauses take more than half of a parallel phase's time (for example a `BlockPhysicsEvent` listener during heavy redstone), that phase runs serially for the next 30 seconds instead of getting slower than Paper. A warning in the log and `/kirigami` show which event and plugin cause it.
 - Command blocks and command block minecarts run serially, so commands from plugins and datapacks behave as on Paper.
 - Settings that already differ from vanilla in an existing `paper-world-defaults.yml` or `spigot.yml` are kept; only new files get Kirigami's vanilla defaults.
 

@@ -27,8 +27,8 @@ public final class RegionTicking {
     public static final boolean ENABLED = Boolean.parseBoolean(System.getProperty("kirigami.regionTicking", "true"));
     private static final int CELL_SHIFT = 3;
     private static final int SCHEDULED_TICK_REACH = 24;
-    private static final int MAX_PAUSES_PER_RUN = 64;
     private static final int PAUSE_FALLBACK_TICKS = 600;
+    private static final long MIN_FALLBACK_NANOS = 1_000_000L;
     private static final java.util.Set<String> WARNED = new java.util.HashSet<>();
     private static int trackerSerialUntilTick;
     private static final int COLORS = 4;
@@ -204,7 +204,8 @@ public final class RegionTicking {
             byColor[color].computeIfAbsent(ChunkPos.pack(cellX, cellZ), unused -> new ArrayList<>()).add(item);
         }
 
-        final long pausesBefore = WorldPause.pauses();
+        final long startNanos = System.nanoTime();
+        final long pausedBefore = WorldPause.pausedNanos();
         final long baseSeed = level.getSeed() ^ SeedSalt.VALUE ^ level.getGameTime() * phase.salt;
         for (int color = 0; color < COLORS; color++) {
             final List<Cell<T>> cells = new ArrayList<>(byColor[color].size());
@@ -223,7 +224,7 @@ public final class RegionTicking {
             }
         }
 
-        if (pausedTooOften(pausesBefore, phase.label)) {
+        if (mostlyPaused(startNanos, pausedBefore, phase.label)) {
             phase.serialUntilTick = net.minecraft.server.MinecraftServer.currentTick + PAUSE_FALLBACK_TICKS;
         }
 
@@ -238,7 +239,8 @@ public final class RegionTicking {
             || net.minecraft.server.MinecraftServer.currentTick < trackerSerialUntilTick) {
             return false;
         }
-        final long pausesBefore = WorldPause.pauses();
+        final long startNanos = System.nanoTime();
+        final long pausedBefore = WorldPause.pausedNanos();
         final int slices = Math.min(size, (WORKERS + 1) * 4);
         final AtomicInteger next = new AtomicInteger();
         runOnWorkers(slices, () -> {
@@ -254,21 +256,22 @@ public final class RegionTicking {
                 }
             }
         });
-        if (pausedTooOften(pausesBefore, "entityTracker")) {
+        if (mostlyPaused(startNanos, pausedBefore, "entityTracker")) {
             trackerSerialUntilTick = net.minecraft.server.MinecraftServer.currentTick + PAUSE_FALLBACK_TICKS;
         }
         return true;
     }
 
-    private static boolean pausedTooOften(final long pausesBefore, final String label) {
-        final long pauses = WorldPause.pauses() - pausesBefore;
-        if (pauses <= MAX_PAUSES_PER_RUN) {
+    private static boolean mostlyPaused(final long startNanos, final long pausedBefore, final String label) {
+        final long wall = System.nanoTime() - startNanos;
+        final long paused = WorldPause.pausedNanos() - pausedBefore;
+        if (wall < MIN_FALLBACK_NANOS || paused * 2 < wall) {
             return false;
         }
         STATS.pauseFallbacks++;
         if (WARNED.add(label)) {
-            net.minecraft.server.MinecraftServer.LOGGER.warn("Plugin code paused the world {} times while running {} in parallel; {} now runs serially for {} ticks each time this happens. /kirigami lists the events that cause it.",
-                pauses, label, label, PAUSE_FALLBACK_TICKS);
+            net.minecraft.server.MinecraftServer.LOGGER.warn("World pauses for plugin code took {} of {} ms while running {} in parallel; {} now runs serially for {} ticks each time this happens. /kirigami lists the events that cause it.",
+                String.format(java.util.Locale.ROOT, "%.1f", paused / 1e6), String.format(java.util.Locale.ROOT, "%.1f", wall / 1e6), label, label, PAUSE_FALLBACK_TICKS);
         }
         return true;
     }

@@ -17,6 +17,7 @@ public final class WorldPause {
     private static final ReentrantLock EXCLUSIVE = new ReentrantLock();
     private static final java.util.concurrent.atomic.AtomicLong PAUSES = new java.util.concurrent.atomic.AtomicLong();
     private static final java.util.Map<Object, long[]> SOURCES = new java.util.HashMap<>();
+    private static final java.util.concurrent.atomic.AtomicLong PAUSED_NANOS = new java.util.concurrent.atomic.AtomicLong();
     private static volatile boolean requested;
 
     private WorldPause() {
@@ -50,6 +51,10 @@ public final class WorldPause {
 
     public static long pauses() {
         return PAUSES.get();
+    }
+
+    public static long pausedNanos() {
+        return PAUSED_NANOS.get();
     }
 
     public static boolean insideItem() {
@@ -101,6 +106,7 @@ public final class WorldPause {
         final CellContext context = CellContext.detach();
         exitItem();
         EXCLUSIVE.lock();
+        final long start = System.nanoTime();
         PAUSES.incrementAndGet();
         SOURCES.computeIfAbsent(source, unused -> new long[1])[0]++;
         try {
@@ -114,6 +120,7 @@ public final class WorldPause {
             return action.get();
         } finally {
             requested = false;
+            PAUSED_NANOS.addAndGet(System.nanoTime() - start);
             EXCLUSIVE.unlock();
             enterItem();
             CellContext.attach(context);
