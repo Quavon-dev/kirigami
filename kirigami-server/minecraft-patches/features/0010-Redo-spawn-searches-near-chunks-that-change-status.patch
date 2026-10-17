@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Leopold <77323443+MadebyLeopold@users.noreply.github.com>
+Date: Sat, 17 Oct 2026 22:36:19 +0200
+Subject: [PATCH] Redo spawn searches near chunks that change status
+
+
+diff --git a/ca/spottedleaf/moonrise/patches/chunk_system/scheduling/NewChunkHolder.java b/ca/spottedleaf/moonrise/patches/chunk_system/scheduling/NewChunkHolder.java
+index 7a0006f9b56d1e43b06f9f7452e1b5bb0ec53e72..2136a5ae9d5770aa6a860444d6116bb3373b8e58 100644
+--- a/ca/spottedleaf/moonrise/patches/chunk_system/scheduling/NewChunkHolder.java
++++ b/ca/spottedleaf/moonrise/patches/chunk_system/scheduling/NewChunkHolder.java
+@@ -1192,6 +1192,7 @@ public final class NewChunkHolder {
+ 
+     private void updateCurrentState(final FullChunkStatus to) {
+         this.currentFullChunkStatus = to;
++        kirigami.parallel.ParallelSpawning.chunkStatusChanged(this.world, this.chunkX, this.chunkZ); // MT
+     }
+ 
+     // only to be called on the main thread, no locks need to be held

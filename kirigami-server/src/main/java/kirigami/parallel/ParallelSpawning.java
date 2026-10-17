@@ -32,6 +32,8 @@ public final class ParallelSpawning {
     public static final boolean ENABLED = Boolean.parseBoolean(System.getProperty("kirigami.parallelSpawning", "true")) && TickWorkers.workers() > 0;
     private static final boolean VERIFY = Boolean.getBoolean("kirigami.verifySpawning");
     private static final int DIRTY_RADIUS = 3;
+    private static @Nullable LongOpenHashSet committing;
+    private static @Nullable ServerLevel committingLevel;
     private static final int BATCH = 32;
     private static final int MIN_SPECULATIVE_JOBS = Integer.getInteger("kirigami.minSpeculativeJobs", 512);
     private static final int CENSUS_BATCH = 256;
@@ -146,6 +148,25 @@ public final class ParallelSpawning {
         }
 
         final LongOpenHashSet dirty = new LongOpenHashSet();
+        committing = dirty;
+        committingLevel = level;
+        try {
+            commit(level, plans, categories, limits, perPlayer, state, dirty, fireEvents);
+        } finally {
+            committing = null;
+            committingLevel = null;
+        }
+    }
+
+    public static void chunkStatusChanged(final ServerLevel level, final int chunkX, final int chunkZ) {
+        final LongOpenHashSet dirty = committing;
+        if (dirty != null && committingLevel == level) {
+            markDirty(dirty, new ChunkPos(chunkX, chunkZ));
+        }
+    }
+
+    private static void commit(final ServerLevel level, final List<ChunkPlan> plans, final List<MobCategory> categories, final int[] limits,
+                               final boolean perPlayer, final NaturalSpawner.SpawnState state, final LongOpenHashSet dirty, final boolean fireEvents) {
         final Consumer<Entity> track = perPlayer ? level.getChunkSource().chunkMap::updatePlayerMobTypeMap : null;
         for (final ChunkPlan plan : plans) {
             final LevelChunk chunk = plan.chunk;
