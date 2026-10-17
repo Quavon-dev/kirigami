@@ -1,0 +1,54 @@
+name: Behaves differently than vanilla
+description: A farm, contraption or mechanic that works in vanilla but not in Kirigami
+labels: [vanilla-parity]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Kirigami aims to behave exactly like vanilla. Reports with a reproducible build and numbers from both servers help most, for example drops per hour from the same farm on vanilla and on Kirigami.
+  - type: textarea
+    id: mechanic
+    attributes:
+      label: Farm, contraption or mechanic
+      description: What it is and how it should work.
+    validations:
+      required: true
+  - type: textarea
+    id: comparison
+    attributes:
+      label: Vanilla compared to Kirigami
+      description: What you measured on each server, how long, and how often you repeated it.
+      placeholder: |
+        Vanilla 26.3: 1,200 items per hour (3 runs)
+        Kirigami 26.3-4: 900 items per hour (3 runs)
+    validations:
+      required: true
+  - type: input
+    id: download
+    attributes:
+      label: World, schematic or Litematica download
+      description: A link to a world or schematic that shows the difference.
+  - type: input
+    id: version
+    attributes:
+      label: Kirigami version
+      description: Output of `/version`.
+    validations:
+      required: true
+  - type: dropdown
+    id: serial
+    attributes:
+      label: Does it also happen with parallelism switched off?
+      options:
+        - Not tested
+        - "Yes, it also happens with -Dkirigami.regionTicking=false -Dkirigami.parallelSpawning=false"
+        - "No, it only happens with parallelism on"
+    validations:
+      required: true
+  - type: textarea
+    id: plugins
+    attributes:
+      label: Plugins
+      description: Output of `/plugins`, or "none".
+    validations:
+      required: true

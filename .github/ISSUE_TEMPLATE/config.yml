@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and help
+    url: https://github.com/Quavon-dev/kirigami/discussions
+    about: Ask questions and share setups in Discussions.
+  - name: Security vulnerability
+    url: https://github.com/Quavon-dev/kirigami/security/policy
+    about: Please report vulnerabilities privately, not as an issue.

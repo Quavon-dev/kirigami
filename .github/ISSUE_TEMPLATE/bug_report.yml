@@ -1,0 +1,78 @@
+name: Bug report
+description: Crashes, errors, lag or anything that is broken
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please check first whether the problem also happens with parallelism switched off, by starting the server with `-Dkirigami.regionTicking=false -Dkirigami.parallelSpawning=false`. That tells us right away whether Kirigami's threading is involved.
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Build ...
+        2. Wait for ...
+        3. See ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Kirigami version
+      description: Output of `/version`.
+      placeholder: This server is running Kirigami version 26.3-4-...
+    validations:
+      required: true
+  - type: dropdown
+    id: serial
+    attributes:
+      label: Does it also happen with parallelism switched off?
+      options:
+        - Not tested
+        - "Yes, it also happens with -Dkirigami.regionTicking=false -Dkirigami.parallelSpawning=false"
+        - "No, it only happens with parallelism on"
+    validations:
+      required: true
+  - type: dropdown
+    id: paper
+    attributes:
+      label: Does it also happen on Paper?
+      options:
+        - Not tested
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+  - type: textarea
+    id: plugins
+    attributes:
+      label: Plugins
+      description: Output of `/plugins`, or "none".
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: Hardware and system
+      placeholder: 8 cores, 16 GB RAM, Ubuntu 24.04, Docker image 26.3
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and crash reports
+      description: Relevant part of `logs/latest.log` or the crash report. Long logs are best shared through a paste site.
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched the existing issues and this is not a duplicate.
+          required: true
