@@ -84,8 +84,7 @@ final class Lab {
     private static final int PORTAL_ZOMBIES = 10;
     private static final int PORTAL_INTERVAL = 100;
     private static final int CLOCK_Y = Y + 16;
-    private static final int[] MACHINE_X = {3910, 4030, 4150, 4280};
-    private static final int[] MACHINE_Z = {3910, 4030, 4200, 4280};
+    private static final int[] MACHINE_ORIGINS = {3910, 4030, 4150, 4280};
     private static final int MACHINE_CLOCKS = 5;
     private static final int CLOCK_SPACING = 10;
     private static final int CLOCK_WIRE = 7;
@@ -108,8 +107,8 @@ final class Lab {
 
     int buildRedstone(final ServerLevel level) {
         int clocks = 0;
-        for (final int machineX : MACHINE_X) {
-            for (final int machineZ : MACHINE_Z) {
+        for (final int machineX : MACHINE_ORIGINS) {
+            for (final int machineZ : MACHINE_ORIGINS) {
                 for (int i = 0; i < MACHINE_CLOCKS * MACHINE_CLOCKS; i++) {
                     buildClock(level, machineX + i % MACHINE_CLOCKS * CLOCK_SPACING, machineZ + i / MACHINE_CLOCKS * CLOCK_SPACING);
                     clocks++;
