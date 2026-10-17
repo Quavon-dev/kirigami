@@ -98,11 +98,6 @@ public final class RegionTicking {
         return PARALLEL_TRACKER;
     }
 
-    private static boolean serialOnly(final ServerLevel level) {
-        return level.paperConfig().misc.redstoneImplementation != io.papermc.paper.configuration.WorldConfiguration.Misc.RedstoneImplementation.VANILLA
-            || !PluginGuard.parallelAllowed();
-    }
-
     public static void tickEntities(final ServerLevel level, final Consumer<Entity> vanillaTick, final List<Entity> snapshot, final int maxChainedNeighborUpdates) {
         STATS.ticks++;
         run(level, Phase.ENTITIES, snapshot, entity -> entity.chunkPosition().pack(), RegionTicking::requiresSerial, vanillaTick, maxChainedNeighborUpdates, null);
@@ -137,7 +132,7 @@ public final class RegionTicking {
     private static <T> void run(final ServerLevel level, final Phase phase, final List<T> items, final java.util.function.ToLongFunction<T> chunkKey,
                                 final java.util.function.Predicate<T> serialPredicate, final Consumer<T> action, final int maxChainedNeighborUpdates,
                                 final @org.jspecify.annotations.Nullable Runnable betweenColors) {
-        if (POOL == null || serialOnly(level) || !phase.enabled || items.size() < MIN_PARALLEL_ITEMS) {
+        if (POOL == null || !PluginGuard.parallelAllowed() || !phase.enabled || items.size() < MIN_PARALLEL_ITEMS) {
             STATS.serial[phase.ordinal()] += items.size();
             items.forEach(action);
             return;
@@ -185,7 +180,7 @@ public final class RegionTicking {
     }
 
     public static <T> boolean forEachParallel(final ServerLevel level, final T[] items, final int size, final Consumer<T> action) {
-        if (!ENABLED || !PARALLEL_TRACKER || POOL == null || size < Math.max(2, MIN_PARALLEL_ITEMS) || serialOnly(level)) {
+        if (!ENABLED || !PARALLEL_TRACKER || POOL == null || size < Math.max(2, MIN_PARALLEL_ITEMS) || !PluginGuard.parallelAllowed()) {
             return false;
         }
         final int slices = Math.min(size, (WORKERS + 1) * 4);

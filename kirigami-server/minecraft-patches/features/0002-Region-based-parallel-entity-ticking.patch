@@ -127,7 +127,7 @@ index f72d96b34c14cb37693b6f6899aa5ad27beb1b87..59b009829edc63c7abb92e840a9aec53
      }
  
 diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
-index ea4cc487002a0edc54cc49bfbecf72be156b6af7..1f98a0bdf490c788a59b9967dbc2d9e1ab4b4c7f 100644
+index ea4cc487002a0edc54cc49bfbecf72be156b6af7..282624fb8284d99bff3a69df5dff294caf72384c 100644
 --- a/net/minecraft/server/level/ServerLevel.java
 +++ b/net/minecraft/server/level/ServerLevel.java
 @@ -889,8 +889,7 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
@@ -254,6 +254,15 @@ index ea4cc487002a0edc54cc49bfbecf72be156b6af7..1f98a0bdf490c788a59b9967dbc2d9e1
          return this.pathTypesByPosCache;
      }
  
+@@ -3053,6 +3074,8 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
+     // Paper start - optimize redstone (Alternate Current)
+     @Override
+     public alternate.current.wire.WireHandler getWireHandler() {
++        final kirigami.parallel.CellContext mtContext = kirigami.parallel.CellContext.currentFor(this); // MT
++        if (mtContext != null) return mtContext.wireHandler(); // MT
+         return wireHandler;
+     }
+     // Paper end - optimize redstone (Alternate Current)
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
 index 5cc94652112c67ca4e7ae6e8b324e9c9f8908d7d..8ddde8fdf8d9ef7019dc6202302f594fcad28c4f 100644
 --- a/net/minecraft/world/entity/Entity.java
@@ -449,7 +458,7 @@ index 21878bd770f6c0bc10dd0a67be5bd94d7e16f741..ebac07948da060343ae63e3f21545114
      }
  
 diff --git a/net/minecraft/world/level/block/RedstoneWireBlock.java b/net/minecraft/world/level/block/RedstoneWireBlock.java
-index ede64a0afbcdc41e60c3f2f5917c89f09b888433..4b897dd16844b9c210e53d332bd0e93da1c000b1 100644
+index ede64a0afbcdc41e60c3f2f5917c89f09b888433..fd2e4e906e7883e430ee58eabcbe6817b3a242ef 100644
 --- a/net/minecraft/world/level/block/RedstoneWireBlock.java
 +++ b/net/minecraft/world/level/block/RedstoneWireBlock.java
 @@ -64,6 +64,19 @@ public class RedstoneWireBlock extends Block {
@@ -472,7 +481,37 @@ index ede64a0afbcdc41e60c3f2f5917c89f09b888433..4b897dd16844b9c210e53d332bd0e93d
  
      public RedstoneWireBlock(final BlockBehaviour.Properties properties) {
          super(properties);
-@@ -327,9 +340,9 @@ public class RedstoneWireBlock extends Block {
+@@ -265,6 +278,11 @@ public class RedstoneWireBlock extends Block {
+     // Paper start - Optimize redstone (Eigencraft)
+     // The bulk of the new functionality is found in RedstoneWireTurbo.java
+     io.papermc.paper.redstone.RedstoneWireTurbo turbo = new io.papermc.paper.redstone.RedstoneWireTurbo(this);
++    private final ThreadLocal<io.papermc.paper.redstone.RedstoneWireTurbo> mtTurbo = ThreadLocal.withInitial(() -> new io.papermc.paper.redstone.RedstoneWireTurbo(this)); // MT
++
++    private io.papermc.paper.redstone.RedstoneWireTurbo mtTurbo() { // MT
++        return kirigami.parallel.CellContext.current() == null ? this.turbo : this.mtTurbo.get();
++    }
+ 
+     /*
+      * Modified version of pre-existing updateSurroundingRedstone, which is called from
+@@ -280,7 +298,7 @@ public class RedstoneWireBlock extends Block {
+             if (orientation != null) {
+                 source = pos.relative(orientation.getFront().getOpposite());
+             }
+-            turbo.updateSurroundingRedstone(worldIn, pos, state, source);
++            this.mtTurbo().updateSurroundingRedstone(worldIn, pos, state, source); // MT
+             return;
+         }
+         updatePowerStrength(worldIn, pos, state, orientation, blockAdded);
+@@ -304,7 +322,7 @@ public class RedstoneWireBlock extends Block {
+                 // [Space Walker] suppress shape updates and emit those manually to
+                 // bypass the new neighbor update stack.
+                 if (level.setBlock(pos, state, Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_CLIENTS)) {
+-                    turbo.updateNeighborShapes(level, pos, state);
++                    this.mtTurbo().updateNeighborShapes(level, pos, state); // MT
+                 }
+             }
+         }
+@@ -327,9 +345,9 @@ public class RedstoneWireBlock extends Block {
      }
  
      public int getBlockSignal(final Level level, final BlockPos pos) {
@@ -484,7 +523,7 @@ index ede64a0afbcdc41e60c3f2f5917c89f09b888433..4b897dd16844b9c210e53d332bd0e93d
          return blockSignal;
      }
  
-@@ -423,12 +436,12 @@ public class RedstoneWireBlock extends Block {
+@@ -423,12 +441,12 @@ public class RedstoneWireBlock extends Block {
  
      @Override
      protected int getDirectSignal(final BlockState state, final BlockGetter level, final BlockPos pos, final Direction direction) {
@@ -499,7 +538,7 @@ index ede64a0afbcdc41e60c3f2f5917c89f09b888433..4b897dd16844b9c210e53d332bd0e93d
              int power = this.ownSignal(state, level, pos);
              if (power == 0) {
                  return Redstone.SIGNAL_MIN;
-@@ -463,7 +476,7 @@ public class RedstoneWireBlock extends Block {
+@@ -463,7 +481,7 @@ public class RedstoneWireBlock extends Block {
  
      @Override
      protected boolean isSignalSource(final BlockState state) {

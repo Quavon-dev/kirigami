@@ -39,6 +39,8 @@ public final class CellContext {
     private final List<Runnable> deferred = new ArrayList<>();
     private static final ThreadLocal<net.minecraft.world.level.pathfinder.PathTypeCache> PATH_TYPE_CACHE =
         ThreadLocal.withInitial(net.minecraft.world.level.pathfinder.PathTypeCache::new);
+    private static final ThreadLocal<java.util.Map<ServerLevel, alternate.current.wire.WireHandler>> WIRE_HANDLERS =
+        ThreadLocal.withInitial(java.util.WeakHashMap::new);
 
     CellContext(final ServerLevel level, final int cellX, final int cellZ, final int cellShift, final long seed, final int maxChainedNeighborUpdates) {
         this.level = level;
@@ -188,6 +190,10 @@ public final class CellContext {
 
     public net.minecraft.world.level.pathfinder.PathTypeCache pathTypeCache() {
         return PATH_TYPE_CACHE.get();
+    }
+
+    public alternate.current.wire.WireHandler wireHandler() {
+        return WIRE_HANDLERS.get().computeIfAbsent(this.level, alternate.current.wire.WireHandler::new);
     }
 
     public CollectingNeighborUpdater neighborUpdater() {
