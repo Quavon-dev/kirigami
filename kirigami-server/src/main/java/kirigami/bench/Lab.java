@@ -84,10 +84,9 @@ final class Lab {
     private static final int PORTAL_ZOMBIES = 10;
     private static final int PORTAL_INTERVAL = 100;
     private static final int CLOCK_Y = Y + 16;
-    private static final int CLOCK_MIN_X = 4040;
-    private static final int CLOCK_MAX_X = 4300;
-    private static final int CLOCK_MIN_Z = 4040;
-    private static final int CLOCK_MAX_Z = 4340;
+    private static final int[] MACHINE_X = {3910, 4030, 4150, 4280};
+    private static final int[] MACHINE_Z = {3910, 4030, 4200, 4280};
+    private static final int MACHINE_CLOCKS = 5;
     private static final int CLOCK_SPACING = 10;
     private static final int CLOCK_WIRE = 7;
 
@@ -109,22 +108,28 @@ final class Lab {
 
     int buildRedstone(final ServerLevel level) {
         int clocks = 0;
-        for (int x = CLOCK_MIN_X; x <= CLOCK_MAX_X; x += CLOCK_SPACING) {
-            for (int z = CLOCK_MIN_Z; z <= CLOCK_MAX_Z; z += CLOCK_SPACING) {
-                for (int dx = -1; dx <= CLOCK_WIRE + 1; dx++) {
-                    set(level, x + dx, CLOCK_Y - 1, z, Blocks.STONE.defaultBlockState());
+        for (final int machineX : MACHINE_X) {
+            for (final int machineZ : MACHINE_Z) {
+                for (int i = 0; i < MACHINE_CLOCKS * MACHINE_CLOCKS; i++) {
+                    buildClock(level, machineX + i % MACHINE_CLOCKS * CLOCK_SPACING, machineZ + i / MACHINE_CLOCKS * CLOCK_SPACING);
+                    clocks++;
                 }
-                set(level, x - 1, CLOCK_Y, z, Blocks.REDSTONE_WIRE.defaultBlockState());
-                for (int dx = 2; dx <= CLOCK_WIRE; dx++) {
-                    set(level, x + dx, CLOCK_Y, z, Blocks.REDSTONE_WIRE.defaultBlockState());
-                }
-                set(level, x + CLOCK_WIRE + 1, CLOCK_Y, z, Blocks.REDSTONE_LAMP.defaultBlockState());
-                set(level, x, CLOCK_Y, z, Blocks.OBSERVER.defaultBlockState().setValue(ObserverBlock.FACING, Direction.EAST));
-                set(level, x + 1, CLOCK_Y, z, Blocks.OBSERVER.defaultBlockState().setValue(ObserverBlock.FACING, Direction.WEST));
-                clocks++;
             }
         }
         return clocks;
+    }
+
+    private static void buildClock(final ServerLevel level, final int x, final int z) {
+        for (int dx = -1; dx <= CLOCK_WIRE + 1; dx++) {
+            set(level, x + dx, CLOCK_Y - 1, z, Blocks.STONE.defaultBlockState());
+        }
+        set(level, x - 1, CLOCK_Y, z, Blocks.REDSTONE_WIRE.defaultBlockState());
+        for (int dx = 2; dx <= CLOCK_WIRE; dx++) {
+            set(level, x + dx, CLOCK_Y, z, Blocks.REDSTONE_WIRE.defaultBlockState());
+        }
+        set(level, x + CLOCK_WIRE + 1, CLOCK_Y, z, Blocks.REDSTONE_LAMP.defaultBlockState());
+        set(level, x, CLOCK_Y, z, Blocks.OBSERVER.defaultBlockState().setValue(ObserverBlock.FACING, Direction.EAST));
+        set(level, x + 1, CLOCK_Y, z, Blocks.OBSERVER.defaultBlockState().setValue(ObserverBlock.FACING, Direction.WEST));
     }
 
     void start(final ServerLevel level) {
