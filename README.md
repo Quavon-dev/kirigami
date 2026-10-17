@@ -70,7 +70,7 @@ After `applyAllPatches`, edit the generated sources (`kirigami-server/src/minecr
 
 ## Releases
 
-Versions are `<Minecraft version>-<build>`, for example `26.3-4`; the build number starts again at 1 for each Minecraft version. Pushing a tag such as `v26.3-4` builds the release, attaches the jar and checksum, and publishes the Docker tags `26.3-4` and `26.3`, plus `latest` if the tag is on `main`. Every push to `main` updates the `edge` pre-release and the `edge` image.
+Versions are `<Minecraft version>-<build>`, for example `26.3-4`; the build number starts again at 1 for each Minecraft version. Pushing a tag such as `v26.3-4` builds the release, attaches the jar and checksum, and publishes the Docker tags `26.3-4` and `26.3`, plus `latest` if the tag is on `main`. Every push to `main` updates the `edge` pre-release and the `edge` image. Nothing is published unless the vanilla parity check passes.
 
 ## Settings
 
@@ -102,7 +102,8 @@ Diagnostic settings exist only as JVM flags: `kirigami.checkReads`, `kirigami.re
 
 | Script | Purpose |
 |---|---|
-| `testing/scripts/det.sh` | Deterministic contraptions (hopper chains, clock, race, sorters, border pickup), compared bit for bit with vanilla |
+| `testing/scripts/det.sh` | Deterministic contraptions across cell borders (hopper chains, observer clock, hopper race, item sorters, item pickup, minecart loop through four cells, piston race, furnace chain) |
+| `testing/scripts/parity.sh` | Runs the deterministic contraptions on the official Minecraft server and on Kirigami with parallelism forced on, and fails on any difference; CI runs it on every push and pull request |
 | `testing/scripts/farm.sh`, `farm-matrix.sh`, `farm_stats.py` | Statistical farm tests (`testing/farms/mtfarm`, `mtraid`, `mtportal`, `mtvillage`) against Fabric + Carpet vanilla |
 | `testing/scripts/bench.sh` | Tick time benchmarks with bench bots, optional `SETUP` command file and `PLUGIN` jars |
 | `testing/scripts/soak.sh` | Multi-hour stability run across all three dimensions with plugins |

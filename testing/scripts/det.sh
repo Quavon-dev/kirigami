@@ -13,8 +13,9 @@ export JVM_ARGS="-XX:+UseG1GC ${EXTRA_ARGS:-}"
 
 case "$kind" in
   vanilla)
-    dir="$root/servers/vanilla-ref"
-    jar="$dir/fabric-server.jar"
+    dir="${VANILLA_DIR:-$root/servers/vanilla-ref}"
+    jar="${VANILLA_JAR:-$dir/fabric-server.jar}"
+    mkdir -p "$dir"
     ;;
   paper)
     dir="$root/servers/runs/det-$name"
@@ -54,7 +55,7 @@ srv() {
 
 srv start "$dir" "$jar" > /dev/null
 trap 'srv stop "$dir"' EXIT
-srv cmd "$dir" "forceload add -32 16 64 64"
+srv cmd "$dir" "forceload add -32 -16 64 64"
 sleep 8
 srv cmd "$dir" "function mtdet:build"
 sleep 2
@@ -76,4 +77,4 @@ srv stop "$dir"
 trap - EXIT
 
 values="$(tail -n +"$report_line" "$dir/console.log" | grep -oE "#[a-z]+ has -?[0-9]+" | sed -E 's/#([a-z]+) has (-?[0-9]+)/\1=\2/' | tr '\n' ' ')"
-printf "%s\t%s\t%s\n" "$name" "$kind" "$values" | tee -a "$results/summary.tsv"
+printf "%s\t%s\t%s\n" "$name" "$kind" "$values" | tee -a "${DET_SUMMARY:-$results/summary.tsv}"

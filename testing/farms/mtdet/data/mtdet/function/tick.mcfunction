@@ -32,3 +32,19 @@ execute if score #t mt_det matches 20..820 run summon minecraft:item 0.02 101.2 
 execute if score #t mt_det matches 20..820 run summon minecraft:item -1.5 101.2 22.5 {Item:{id:"minecraft:sand",count:1},PickupDelay:0s,Motion:[0.0d,0.0d,0.0d]}
 execute if score #t mt_det matches 20..820 run summon minecraft:item 1.5 101.2 22.5 {Item:{id:"minecraft:gravel",count:1},PickupDelay:0s,Motion:[0.0d,0.0d,0.0d]}
 execute if score #t mt_det matches 20..820 run summon minecraft:item -0.98 101.2 22.5 {Item:{id:"minecraft:stone",count:1},PickupDelay:0s,Motion:[0.0d,0.0d,0.0d]}
+execute if score #t mt_det matches 200 store result score #cxa mt_det run data get entity @e[type=minecraft:minecart,limit=1,x=-8,y=99,z=-8,dx=16,dy=5,dz=16] Pos[0] 100
+execute if score #t mt_det matches 200 store result score #cza mt_det run data get entity @e[type=minecraft:minecart,limit=1,x=-8,y=99,z=-8,dx=16,dy=5,dz=16] Pos[2] 100
+execute if score #t mt_det matches 1000 store result score #cxb mt_det run data get entity @e[type=minecraft:minecart,limit=1,x=-8,y=99,z=-8,dx=16,dy=5,dz=16] Pos[0] 100
+execute if score #t mt_det matches 1000 store result score #czb mt_det run data get entity @e[type=minecraft:minecart,limit=1,x=-8,y=99,z=-8,dx=16,dy=5,dz=16] Pos[2] 100
+execute if score #t mt_det matches 3000 store result score #cxc mt_det run data get entity @e[type=minecraft:minecart,limit=1,x=-8,y=99,z=-8,dx=16,dy=5,dz=16] Pos[0] 100
+execute if score #t mt_det matches 3000 store result score #czc mt_det run data get entity @e[type=minecraft:minecart,limit=1,x=-8,y=99,z=-8,dx=16,dy=5,dz=16] Pos[2] 100
+execute if score #t mt_det matches 6020 store result score #carts mt_det if entity @e[type=minecraft:minecart,x=-8,y=99,z=-8,dx=16,dy=5,dz=16]
+execute if score #t mt_det matches 6020 if block 12 100 0 minecraft:stone run scoreboard players set #prn mt_det 1
+execute if score #t mt_det matches 6020 if block 12 100 0 minecraft:dirt run scoreboard players set #prn mt_det 2
+execute if score #t mt_det matches 6020 if block 12 100 0 minecraft:air run scoreboard players set #prn mt_det 3
+execute if score #t mt_det matches 6020 if block 14 100 0 minecraft:stone run scoreboard players set #prs mt_det 1
+execute if score #t mt_det matches 6020 if block 14 100 0 minecraft:dirt run scoreboard players set #prs mt_det 2
+execute if score #t mt_det matches 6020 if block 14 100 0 minecraft:air run scoreboard players set #prs mt_det 3
+execute if score #t mt_det matches 6020 store result score #fiing mt_det if items block 20 99 2 container.* minecraft:iron_ingot
+execute if score #t mt_det matches 6020 store result score #fisrc mt_det if items block 20 103 -6 container.* minecraft:raw_iron
+execute if score #t mt_det matches 6020 store result score #fiin mt_det if items block 20 101 2 container.0 minecraft:raw_iron

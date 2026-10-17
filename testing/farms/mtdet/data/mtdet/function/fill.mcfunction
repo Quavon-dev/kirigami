@@ -175,3 +175,12 @@ item replace block 40 103 60 container.23 with minecraft:gravel 64
 item replace block 40 103 60 container.24 with minecraft:cobblestone 64
 item replace block 40 103 60 container.25 with minecraft:dirt 64
 item replace block 40 103 60 container.26 with minecraft:sand 64
+summon minecraft:minecart 0.5 101.1 -5.5 {Motion:[0.4d,0.0d,0.0d]}
+setblock 12 101 -2 minecraft:redstone_block
+setblock 12 101 2 minecraft:redstone_block
+setblock 14 101 2 minecraft:redstone_block
+setblock 14 101 -2 minecraft:redstone_block
+item replace block 20 103 -6 container.0 with minecraft:raw_iron 64
+item replace block 20 103 -6 container.1 with minecraft:raw_iron 64
+item replace block 20 103 -6 container.2 with minecraft:raw_iron 64
+item replace block 20 101 2 container.1 with minecraft:coal 64

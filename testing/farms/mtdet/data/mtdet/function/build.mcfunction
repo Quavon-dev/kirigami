@@ -102,3 +102,32 @@ setblock 1 100 22 minecraft:hopper[facing=down]
 setblock 1 99 22 minecraft:barrel
 setblock 2 100 22 minecraft:hopper[facing=down]
 setblock 2 99 22 minecraft:barrel
+fill -7 100 -7 7 100 7 minecraft:stone
+fill -4 100 -6 4 100 -6 minecraft:redstone_block
+fill -4 100 6 4 100 6 minecraft:redstone_block
+fill -5 101 -6 5 101 -6 minecraft:rail[shape=east_west]
+fill -4 101 -6 4 101 -6 minecraft:powered_rail[shape=east_west]
+fill -5 101 6 5 101 6 minecraft:rail[shape=east_west]
+fill -4 101 6 4 101 6 minecraft:powered_rail[shape=east_west]
+fill -6 101 -5 -6 101 5 minecraft:rail[shape=north_south]
+fill 6 101 -5 6 101 5 minecraft:rail[shape=north_south]
+setblock -6 101 -6 minecraft:rail[shape=south_east]
+setblock 6 101 -6 minecraft:rail[shape=south_west]
+setblock 6 101 6 minecraft:rail[shape=north_west]
+setblock -6 101 6 minecraft:rail[shape=north_east]
+fill 12 99 -3 12 99 3 minecraft:glass
+setblock 12 100 -2 minecraft:piston[facing=south]
+setblock 12 100 -1 minecraft:stone
+setblock 12 100 2 minecraft:piston[facing=north]
+setblock 12 100 1 minecraft:dirt
+fill 14 99 -3 14 99 3 minecraft:glass
+setblock 14 100 -2 minecraft:piston[facing=south]
+setblock 14 100 -1 minecraft:stone
+setblock 14 100 2 minecraft:piston[facing=north]
+setblock 14 100 1 minecraft:dirt
+setblock 20 103 -6 minecraft:chest
+fill 20 102 -6 20 102 1 minecraft:hopper[facing=south]
+setblock 20 102 2 minecraft:hopper[facing=down]
+setblock 20 101 2 minecraft:furnace
+setblock 20 100 2 minecraft:hopper[facing=down]
+setblock 20 99 2 minecraft:chest

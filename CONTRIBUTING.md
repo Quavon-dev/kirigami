@@ -36,7 +36,7 @@ Run the tests that match your change. The scripts are in `testing/scripts` and w
 
 | Change | Required check |
 |---|---|
-| Anything that can affect gameplay | `det.sh` must stay identical to vanilla, with parallelism forced on (`-Dkirigami.minParallelItems=0 -Dkirigami.minSpeculativeJobs=0`) |
+| Anything that can affect gameplay | `parity.sh <official-server.jar> <kirigami.jar>` must report all counters identical to vanilla. CI runs the same check on every pull request. |
 | Spawning, mob AI, block ticks | Farm tests with `farm-matrix.sh` and `farm_stats.py`, within noise of vanilla |
 | Plugin interaction | `det.sh` and farm runs with the `testing/plugins/mtprobe` probe plugin, 0 overlaps |
 | Performance | `bench.sh` numbers before and after, measured on an otherwise idle machine |

@@ -103,6 +103,71 @@ def pickup(build: list[str], tick: list[str]) -> list[str]:
     return keys
 
 
+def minecart(build: list[str], fill: list[str], tick: list[str]) -> list[str]:
+    build += [
+        "fill -7 100 -7 7 100 7 minecraft:stone",
+        "fill -4 100 -6 4 100 -6 minecraft:redstone_block",
+        "fill -4 100 6 4 100 6 minecraft:redstone_block",
+        "fill -5 101 -6 5 101 -6 minecraft:rail[shape=east_west]",
+        "fill -4 101 -6 4 101 -6 minecraft:powered_rail[shape=east_west]",
+        "fill -5 101 6 5 101 6 minecraft:rail[shape=east_west]",
+        "fill -4 101 6 4 101 6 minecraft:powered_rail[shape=east_west]",
+        "fill -6 101 -5 -6 101 5 minecraft:rail[shape=north_south]",
+        "fill 6 101 -5 6 101 5 minecraft:rail[shape=north_south]",
+        "setblock -6 101 -6 minecraft:rail[shape=south_east]",
+        "setblock 6 101 -6 minecraft:rail[shape=south_west]",
+        "setblock 6 101 6 minecraft:rail[shape=north_west]",
+        "setblock -6 101 6 minecraft:rail[shape=north_east]",
+    ]
+    fill.append("summon minecraft:minecart 0.5 101.1 -5.5 {Motion:[0.4d,0.0d,0.0d]}")
+    cart = "@e[type=minecraft:minecart,limit=1,x=-8,y=99,z=-8,dx=16,dy=5,dz=16]"
+    keys = []
+    for label, at in (("a", 200), ("b", 1000), ("c", 3000)):
+        keys += [f"cx{label}", f"cz{label}"]
+        tick.append(f"execute if score #t mt_det matches {at} store result score #cx{label} mt_det run data get entity {cart} Pos[0] 100")
+        tick.append(f"execute if score #t mt_det matches {at} store result score #cz{label} mt_det run data get entity {cart} Pos[2] 100")
+    keys.append("carts")
+    tick.append(f"execute if score #t mt_det matches {MEASURE_TICK} store result score #carts mt_det if entity @e[type=minecraft:minecart,x=-8,y=99,z=-8,dx=16,dy=5,dz=16]")
+    return keys
+
+
+def piston_race(build: list[str], fill: list[str], tick: list[str]) -> list[str]:
+    keys = []
+    for key, x, order in (("prn", 12, ("-2", "2")), ("prs", 14, ("2", "-2"))):
+        build += [
+            f"fill {x} 99 -3 {x} 99 3 minecraft:glass",
+            f"setblock {x} 100 -2 minecraft:piston[facing=south]",
+            f"setblock {x} 100 -1 minecraft:stone",
+            f"setblock {x} 100 2 minecraft:piston[facing=north]",
+            f"setblock {x} 100 1 minecraft:dirt",
+        ]
+        fill += [f"setblock {x} 101 {z} minecraft:redstone_block" for z in order]
+        keys.append(key)
+        tick.append(f"execute if score #t mt_det matches {MEASURE_TICK} if block {x} 100 0 minecraft:stone run scoreboard players set #{key} mt_det 1")
+        tick.append(f"execute if score #t mt_det matches {MEASURE_TICK} if block {x} 100 0 minecraft:dirt run scoreboard players set #{key} mt_det 2")
+        tick.append(f"execute if score #t mt_det matches {MEASURE_TICK} if block {x} 100 0 minecraft:air run scoreboard players set #{key} mt_det 3")
+    return keys
+
+
+def furnace(build: list[str], fill: list[str], tick: list[str]) -> list[str]:
+    build += [
+        "setblock 20 103 -6 minecraft:chest",
+        "fill 20 102 -6 20 102 1 minecraft:hopper[facing=south]",
+        "setblock 20 102 2 minecraft:hopper[facing=down]",
+        "setblock 20 101 2 minecraft:furnace",
+        "setblock 20 100 2 minecraft:hopper[facing=down]",
+        "setblock 20 99 2 minecraft:chest",
+    ]
+    fill += [f"item replace block 20 103 -6 container.{slot} with minecraft:raw_iron 64" for slot in range(3)]
+    fill.append("item replace block 20 101 2 container.1 with minecraft:coal 64")
+    tick += [
+        f"execute if score #t mt_det matches {MEASURE_TICK} store result score #fiing mt_det if items block 20 99 2 container.* minecraft:iron_ingot",
+        f"execute if score #t mt_det matches {MEASURE_TICK} store result score #fisrc mt_det if items block 20 103 -6 container.* minecraft:raw_iron",
+        f"execute if score #t mt_det matches {MEASURE_TICK} store result score #fiin mt_det if items block 20 101 2 container.0 minecraft:raw_iron",
+    ]
+    return ["fiing", "fisrc", "fiin"]
+
+
 def main() -> None:
     build: list[str] = []
     fill: list[str] = []
@@ -116,6 +181,9 @@ def main() -> None:
     keys += sorter("sa", -6, 60, build, fill, tick)
     keys += sorter("sb", 40, 60, build, fill, tick)
     keys += pickup(build, tick)
+    keys += minecart(build, fill, tick)
+    keys += piston_race(build, fill, tick)
+    keys += furnace(build, fill, tick)
     for name, lines in (("build", build), ("fill", fill), ("tick", tick)):
         (ROOT / f"{name}.mcfunction").write_text("\n".join(lines) + "\n")
     (ROOT.parent.parent.parent / "keys.txt").write_text(" ".join(keys) + "\n")

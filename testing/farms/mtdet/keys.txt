@@ -1,1 +1,1 @@
-t obs east west eastsrc westsrc racecobble racedirt sacobb sadirt sasand saendcobb saenddirt saendsand saendgrav sbcobb sbdirt sbsand sbendcobb sbenddirt sbendsand sbendgrav pka pkb pkc pkd pke pkf
+t obs east west eastsrc westsrc racecobble racedirt sacobb sadirt sasand saendcobb saenddirt saendsand saendgrav sbcobb sbdirt sbsand sbendcobb sbenddirt sbendsand sbendgrav pka pkb pkc pkd pke pkf cxa cza cxb czb cxc czc carts prn prs fiing fisrc fiin
