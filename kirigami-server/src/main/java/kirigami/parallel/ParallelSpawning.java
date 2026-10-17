@@ -99,7 +99,7 @@ public final class ParallelSpawning {
         final int[] limits = spawnLimits(level, categories);
         final long baseSeed = RandomSupport.mixStafford13(level.getSeed() ^ SeedSalt.VALUE ^ level.getGameTime() * 0x9E3779B97F4A7C15L);
 
-        final boolean speculate = !fireEvents && !thunderPossible && chunks.size() * categories.size() >= MIN_SPECULATIVE_JOBS
+        final boolean speculate = !thunderPossible && chunks.size() * categories.size() >= MIN_SPECULATIVE_JOBS
             && PluginGuard.parallelAllowed();
         final List<ChunkPlan> plans = new ArrayList<>(chunks.size());
         for (final LevelChunk chunk : chunks) {
@@ -136,7 +136,7 @@ public final class ParallelSpawning {
             level.environmentAttributes().prepareForConcurrentReads();
             TickWorkers.forEachSpeculative(jobs, BATCH, job -> {
                 try {
-                    final SpawnSearch search = new SpawnSearch(level, job.chunk, job.category, job.seed, false);
+                    final SpawnSearch search = new SpawnSearch(level, job.chunk, job.category, job.seed, fireEvents);
                     search.speculate();
                     job.search = search;
                 } catch (final RuntimeException e) {
@@ -188,7 +188,7 @@ public final class ParallelSpawning {
             } else {
                 STATS.reused++;
                 if (VERIFY) {
-                    verify(level, job, speculated);
+                    verify(level, job, speculated, fireEvents);
                 }
                 return speculated;
             }
@@ -196,8 +196,8 @@ public final class ParallelSpawning {
         return new SpawnSearch(level, job.chunk, job.category, job.seed, fireEvents);
     }
 
-    private static void verify(final ServerLevel level, final Job job, final SpawnSearch speculated) {
-        final SpawnSearch reference = new SpawnSearch(level, job.chunk, job.category, job.seed, false);
+    private static void verify(final ServerLevel level, final Job job, final SpawnSearch speculated, final boolean fireEvents) {
+        final SpawnSearch reference = new SpawnSearch(level, job.chunk, job.category, job.seed, fireEvents);
         Speculation.enter();
         try {
             reference.speculate();

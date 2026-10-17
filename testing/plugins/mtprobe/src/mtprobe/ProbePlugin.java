@@ -8,6 +8,8 @@ import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
+import com.destroystokyo.paper.event.entity.PreCreatureSpawnEvent;
+import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockRedstoneEvent;
@@ -42,6 +44,20 @@ public final class ProbePlugin extends JavaPlugin implements Listener {
         }
         this.counts.merge(event.getEventName(), 1, Integer::sum);
         this.inside = false;
+    }
+
+    @EventHandler
+    public void onPreSpawn(final PreCreatureSpawnEvent event) {
+        this.count(event);
+        if (!Boolean.getBoolean("mtprobe.cancelSpawns")) {
+            return;
+        }
+        if (event.getType() == EntityType.ZOMBIE) {
+            event.setCancelled(true);
+        } else if (event.getType() == EntityType.SPIDER) {
+            event.setShouldAbortSpawn(true);
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler

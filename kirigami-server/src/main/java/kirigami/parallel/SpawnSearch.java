@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
 @NullMarked
 final class SpawnSearch {
 
-    enum Status { RUNNING, CANDIDATE, DONE, ABORTED }
+    enum Status { RUNNING, CANDIDATE, EVENT, DONE, ABORTED }
 
     record Snapshot(Status status, int groupCount, int step, int x, int z, int max, int draws, @Nullable EntityType<?> type) {
     }
@@ -39,6 +39,7 @@ final class SpawnSearch {
     private final MobCategory category;
     private final CountingRandom random;
     private final boolean fireEvents;
+    private boolean speculating;
     private final StructureManager structureManager;
     private final ChunkGenerator generator;
     private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
@@ -83,16 +84,24 @@ final class SpawnSearch {
     }
 
     void speculate() {
+        this.speculating = true;
         try {
             this.advance();
         } catch (final RuntimeException e) {
             this.status = Status.ABORTED;
+        } finally {
+            this.speculating = false;
         }
     }
 
     void runSerial(final NaturalSpawner.SpawnPredicate extraTest, final NaturalSpawner.AfterSpawnCallback spawnCallback,
                    final int maxSpawns, final @Nullable Consumer<Entity> trackEntity) {
-        if (this.status == Status.RUNNING) {
+        if (this.status == Status.EVENT) {
+            this.status = Status.RUNNING;
+            if (!this.stopAfter(this.checkPosition())) {
+                this.advance();
+            }
+        } else if (this.status == Status.RUNNING) {
             this.advance();
         }
         while (this.status == Status.CANDIDATE) {
@@ -157,22 +166,32 @@ final class SpawnSearch {
                     this.currentSpawnData = next.get();
                     this.max = this.currentSpawnData.count().sample(this.random);
                 }
-                final NaturalSpawner.PreSpawnStatus result = this.checkPosition();
-                if (result == NaturalSpawner.PreSpawnStatus.ABORT || result == NaturalSpawner.PreSpawnStatus.CANCELLED) {
-                    this.level.getChunkSource().chunkMap.updateFailurePlayerMobTypeMap(this.pos.getX() >> 4, this.pos.getZ() >> 4, this.category);
-                }
-                if (result == NaturalSpawner.PreSpawnStatus.ABORT) {
-                    this.status = Status.DONE;
+                if (this.fireEvents && this.speculating) {
+                    this.status = Status.EVENT;
                     return;
                 }
-                if (result == NaturalSpawner.PreSpawnStatus.SUCCESS) {
-                    this.status = Status.CANDIDATE;
+                if (this.stopAfter(this.checkPosition())) {
                     return;
                 }
             }
             this.startGroup(this.groupCount + 1);
         }
         this.status = Status.DONE;
+    }
+
+    private boolean stopAfter(final NaturalSpawner.PreSpawnStatus result) {
+        if (result == NaturalSpawner.PreSpawnStatus.ABORT || result == NaturalSpawner.PreSpawnStatus.CANCELLED) {
+            this.level.getChunkSource().chunkMap.updateFailurePlayerMobTypeMap(this.pos.getX() >> 4, this.pos.getZ() >> 4, this.category);
+        }
+        if (result == NaturalSpawner.PreSpawnStatus.ABORT) {
+            this.status = Status.DONE;
+            return true;
+        }
+        if (result == NaturalSpawner.PreSpawnStatus.SUCCESS) {
+            this.status = Status.CANDIDATE;
+            return true;
+        }
+        return false;
     }
 
     private void startGroup(final int group) {
