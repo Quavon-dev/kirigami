@@ -129,6 +129,10 @@ All numbers from an M2 Max; details and raw data in `testing/results/`.
 
 A single busy area (one farm or trading hall inside one cell) still runs on one thread; see `BACKLOG.md`.
 
+## Contributing and support
+
+Report bugs and differences from vanilla through the [issue templates](https://github.com/Quavon-dev/kirigami/issues/new/choose), ask questions in [Discussions](https://github.com/Quavon-dev/kirigami/discussions), and report security problems privately as described in [SECURITY.md](SECURITY.md). [CONTRIBUTING.md](CONTRIBUTING.md) explains the development setup, the patch workflow and the tests a change needs.
+
 ## License
 
 Kirigami is based on [Paper](https://github.com/PaperMC/Paper) and licensed under the GNU General Public License v3.0, like Paper's server code. See [LICENSE.md](LICENSE.md). It is not affiliated with or supported by PaperMC; please report problems here, not to PaperMC.
