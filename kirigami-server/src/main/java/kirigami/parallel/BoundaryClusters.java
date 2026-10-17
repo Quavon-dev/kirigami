@@ -54,8 +54,10 @@ final class BoundaryClusters {
         return result;
     }
 
-    static boolean[] spanningClusters(final List<? extends net.minecraft.world.ticks.ScheduledTick<?>> ticks, final int cellShiftBlocks, final int bucketSize,
+    static boolean[] spanningClusters(final List<? extends net.minecraft.world.ticks.ScheduledTick<?>> ticks, final int cellShiftBlocks, final int linkDistance,
                                       final int[] bucketOfTick) {
+        final int bucketSize = 16;
+        final int linkBuckets = linkDistance / bucketSize;
         final Long2IntOpenHashMap buckets = new Long2IntOpenHashMap();
         buckets.defaultReturnValue(-1);
         final it.unimi.dsi.fastutil.longs.LongArrayList keys = new it.unimi.dsi.fastutil.longs.LongArrayList();
@@ -84,8 +86,8 @@ final class BoundaryClusters {
         for (int i = 0; i < keys.size(); i++) {
             final int bucketX = (int) (keys.getLong(i) >> 32);
             final int bucketZ = (int) keys.getLong(i);
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dz = -1; dz <= 1; dz++) {
+            for (int dx = -linkBuckets; dx <= linkBuckets; dx++) {
+                for (int dz = -linkBuckets; dz <= linkBuckets; dz++) {
                     final int other = buckets.get(cellOf(bucketX + dx, bucketZ + dz, 0));
                     if (other > i) {
                         parent[find(parent, other)] = find(parent, i);
