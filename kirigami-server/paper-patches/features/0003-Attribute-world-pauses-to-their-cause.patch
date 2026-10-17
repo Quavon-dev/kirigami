@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Leopold <77323443+MadebyLeopold@users.noreply.github.com>
+Date: Sat, 17 Oct 2026 21:11:54 +0200
+Subject: [PATCH] Attribute world pauses to their cause
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/entity/ai/PaperCustomGoal.java b/src/main/java/com/destroystokyo/paper/entity/ai/PaperCustomGoal.java
+index bfd829562c2415bbb18b649164161236ccd9ccd3..fd44f6143fb5f7902e81d2de80c7cd5ed512c752 100644
+--- a/src/main/java/com/destroystokyo/paper/entity/ai/PaperCustomGoal.java
++++ b/src/main/java/com/destroystokyo/paper/entity/ai/PaperCustomGoal.java
+@@ -20,6 +20,7 @@ public class PaperCustomGoal<T extends Mob> extends net.minecraft.world.entity.a
+ 
+     @Override
+     public boolean canUse() {
++        kirigami.parallel.WorldPause.reason("plugin mob goals"); // MT
+         return kirigami.parallel.WorldPause.exclusive(handle::shouldActivate);
+     }
+ 
+diff --git a/src/main/java/io/papermc/paper/plugin/manager/PaperEventManager.java b/src/main/java/io/papermc/paper/plugin/manager/PaperEventManager.java
+index 6b96962539ef23d59d0688cec94938c7b0364ff0..30a5d5d3ba01949a008accf5d0c12cae007d811e 100644
+--- a/src/main/java/io/papermc/paper/plugin/manager/PaperEventManager.java
++++ b/src/main/java/io/papermc/paper/plugin/manager/PaperEventManager.java
+@@ -43,6 +43,7 @@ class PaperEventManager {
+         HandlerList handlers = event.getHandlers();
+         RegisteredListener[] listeners = handlers.getRegisteredListeners();
+         if (listeners.length > 0 && kirigami.parallel.WorldPause.insideItem()) {
++            kirigami.parallel.WorldPause.reason(event.getEventName());
+             kirigami.parallel.WorldPause.exclusiveRun(() -> this.callEvent(event));
+             return;
+         }

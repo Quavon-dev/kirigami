@@ -91,7 +91,7 @@ Diagnostic settings exist only as JVM flags: `kirigami.checkReads`, `kirigami.re
 
 ## Status command
 
-`/kirigami` (permission `kirigami.command`, operators by default) shows whether each parallel phase is on, the number of worker threads, TPS and tick time, and per-tick averages of parallel and serial work, cell runs, spawn searches and world pauses. `/kirigami reset` starts a new measurement, for example right before a farm or event you want to look at.
+`/kirigami` (permission `kirigami.command`, operators by default) shows whether each parallel phase is on, the number of worker threads, TPS and tick time, and per-tick averages of parallel and serial work, cell runs, spawn searches and world pauses, with the five most frequent pause causes (for example a plugin event name). `/kirigami reset` starts a new measurement, for example right before a farm or event you want to look at.
 
 ## Differences from vanilla
 

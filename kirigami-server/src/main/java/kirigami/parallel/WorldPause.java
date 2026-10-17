@@ -47,6 +47,20 @@ public final class WorldPause {
         BUSY.set(SLOT.get(), 0);
     }
 
+    private static final java.util.concurrent.ConcurrentHashMap<String, java.util.concurrent.atomic.LongAdder> REASONS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    public static void reason(final String reason) {
+        if (insideItem()) {
+            REASONS.computeIfAbsent(reason, unused -> new java.util.concurrent.atomic.LongAdder()).increment();
+        }
+    }
+
+    public static java.util.Map<String, Long> reasons() {
+        final java.util.Map<String, Long> copy = new java.util.HashMap<>();
+        REASONS.forEach((reason, count) -> copy.put(reason, count.sum()));
+        return copy;
+    }
+
     public static long pauses() {
         return PAUSES.get();
     }
