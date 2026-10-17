@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: rgxdev <hello@d-aaron.dev>
+Date: Sun, 18 Oct 2026 01:25:55 +0200
+Subject: [PATCH] Skip physics events without listeners
+
+
+diff --git a/net/minecraft/world/level/redstone/NeighborUpdater.java b/net/minecraft/world/level/redstone/NeighborUpdater.java
+index 041ed95948ff6bb4cf3610ce4522a6ba105b6812..9d49cf90ed19e1fd5e87edfa5fc6560718d388dd 100644
+--- a/net/minecraft/world/level/redstone/NeighborUpdater.java
++++ b/net/minecraft/world/level/redstone/NeighborUpdater.java
+@@ -74,12 +74,14 @@ public interface NeighborUpdater {
+         // Paper end - Add source block to BlockPhysicsEvent
+         try {
+             // CraftBukkit start
++            if (!(level instanceof net.minecraft.server.level.ServerLevel serverLevel) || serverLevel.hasPhysicsEvent) { // MT
+             org.bukkit.event.block.BlockPhysicsEvent event = new org.bukkit.event.block.BlockPhysicsEvent(org.bukkit.craftbukkit.block.CraftBlock.at(level, pos), state.asBlockData(), org.bukkit.craftbukkit.block.CraftBlock.at(level, sourcePos)); // Paper - Add source block to BlockPhysicsEvent
+             level.getCraftServer().getPluginManager().callEvent(event);
+ 
+             if (event.isCancelled()) {
+                 return;
+             }
++            } // MT
+             // CraftBukkit end
+             state.handleNeighborChanged(level, pos, changedBlock, orientation, movedByPiston);
+             // Spigot start
