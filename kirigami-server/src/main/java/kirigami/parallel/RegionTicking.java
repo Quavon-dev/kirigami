@@ -84,6 +84,8 @@ public final class RegionTicking {
         private final long salt;
         private final boolean enabled;
         private int serialUntilTick;
+        private long fallbackNanos;
+        private long fallbackItems;
 
         Phase(final String label, final long salt) {
             this.label = label;
@@ -180,12 +182,19 @@ public final class RegionTicking {
     private static <T> void run(final ServerLevel level, final Phase phase, final List<T> items, final java.util.function.ToLongFunction<T> chunkKey,
                                 final java.util.function.Predicate<T> serialPredicate, final Consumer<T> action, final int maxChainedNeighborUpdates,
                                 final @org.jspecify.annotations.Nullable Runnable betweenColors) {
-        if (POOL == null || !PluginGuard.parallelAllowed() || !phase.enabled || items.size() < MIN_PARALLEL_ITEMS
-            || net.minecraft.server.MinecraftServer.currentTick < phase.serialUntilTick) {
+        final boolean fallback = net.minecraft.server.MinecraftServer.currentTick < phase.serialUntilTick;
+        if (POOL == null || !PluginGuard.parallelAllowed() || !phase.enabled || items.size() < MIN_PARALLEL_ITEMS || fallback) {
+            final long start = System.nanoTime();
             STATS.serial[phase.ordinal()] += items.size();
             items.forEach(action);
+            if (fallback) {
+                phase.fallbackNanos += System.nanoTime() - start;
+                phase.fallbackItems += items.size();
+            }
             return;
         }
+        final long startNanos = System.nanoTime();
+        final long pausedBefore = WorldPause.pausedNanos();
         final List<T> serial = new ArrayList<>();
         @SuppressWarnings("unchecked")
         final Long2ObjectLinkedOpenHashMap<List<T>>[] byColor = new Long2ObjectLinkedOpenHashMap[COLORS];
@@ -204,8 +213,6 @@ public final class RegionTicking {
             byColor[color].computeIfAbsent(ChunkPos.pack(cellX, cellZ), unused -> new ArrayList<>()).add(item);
         }
 
-        final long startNanos = System.nanoTime();
-        final long pausedBefore = WorldPause.pausedNanos();
         final long baseSeed = level.getSeed() ^ SeedSalt.VALUE ^ level.getGameTime() * phase.salt;
         for (int color = 0; color < COLORS; color++) {
             final List<Cell<T>> cells = new ArrayList<>(byColor[color].size());
@@ -224,13 +231,17 @@ public final class RegionTicking {
             }
         }
 
-        if (mostlyPaused(startNanos, pausedBefore, phase.label)) {
-            phase.serialUntilTick = net.minecraft.server.MinecraftServer.currentTick + PAUSE_FALLBACK_TICKS;
-        }
-
         STATS.serial[phase.ordinal()] += serial.size();
         for (final T item : serial) {
             action.accept(item);
+        }
+
+        final long wall = System.nanoTime() - startNanos;
+        final boolean serialWasFaster = phase.fallbackItems == 0 || wall * phase.fallbackItems > phase.fallbackNanos * items.size();
+        if (serialWasFaster && mostlyPaused(startNanos, pausedBefore, phase.label)) {
+            phase.serialUntilTick = net.minecraft.server.MinecraftServer.currentTick + PAUSE_FALLBACK_TICKS;
+            phase.fallbackNanos = 0;
+            phase.fallbackItems = 0;
         }
     }
 
