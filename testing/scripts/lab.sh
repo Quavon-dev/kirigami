@@ -34,12 +34,14 @@ if [ -n "$busy" ]; then
 fi
 rsync -a --exclude stdin.fifo --exclude console.log --exclude logs --exclude mtbench --exclude server.pid --exclude fifo.pid --exclude crash-reports --exclude 'world/session.lock' "$template/" "$run/"
 
+[ -n "${REDSTONE_IMPL:-}" ] && sed -i '' "s/redstone-implementation: .*/redstone-implementation: $REDSTONE_IMPL/" "$run/config/paper-world-defaults.yml"
 srv start "$run" "$jar"
 trap 'srv stop "$run"' EXIT
 srv cmd "$run" "mtbench bots add 64 circle 192"
 srv cmd "$run" "mtbench lab observers"
 sleep 25
 srv cmd "$run" "mtbench lab build"
+[ -n "${REDSTONE:-}" ] && srv cmd "$run" "mtbench lab redstone"
 sleep 5
 srv cmd "$run" "mtbench lab start"
 srv cmd "$run" "mtbench record start $name"

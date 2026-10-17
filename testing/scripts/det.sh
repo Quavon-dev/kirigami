@@ -48,6 +48,10 @@ if [ "$kind" = paper ] && [ -n "${PLUGIN:-}" ]; then
   cp $PLUGIN "$dir/plugins/"
 fi
 cp -R "$root/farms/mtdet" "$dir/$world/datapacks/mtdet"
+if [ -n "${REDSTONE_IMPL:-}" ]; then
+  mkdir -p "$dir/config"
+  printf 'misc:\n  redstone-implementation: %s\n' "$REDSTONE_IMPL" > "$dir/config/paper-world-defaults.yml"
+fi
 
 srv() {
   "$root/scripts/server.sh" "$@"

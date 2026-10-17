@@ -52,6 +52,7 @@ public final class MtBenchCommand {
                                 .executes(command::addBotAt))))))
             .then(Commands.literal("lab")
                 .then(Commands.literal("build").executes(ctx -> command.labAction(ctx, "build")))
+                .then(Commands.literal("redstone").executes(ctx -> command.labAction(ctx, "redstone")))
                 .then(Commands.literal("observers").executes(ctx -> command.labAction(ctx, "observers")))
                 .then(Commands.literal("start").executes(ctx -> command.labAction(ctx, "start")))
                 .then(Commands.literal("report").executes(ctx -> command.labAction(ctx, "report"))))
@@ -93,6 +94,7 @@ public final class MtBenchCommand {
                 this.lab.build(level);
                 yield "built";
             }
+            case "redstone" -> "redstone clocks=" + this.lab.buildRedstone(level);
             case "observers" -> {
                 for (final int[] pos : Lab.observerPositions()) {
                     this.players.addAt(server, level, pos[0] + 0.5, pos[1], pos[2] + 0.5);
