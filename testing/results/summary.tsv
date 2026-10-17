@@ -99,3 +99,5 @@ cores4-W3-r1	2026-10-16T23:09:27Z	mtbench ticks=2373 mean=45.52ms p50=43.17ms p9
 cores4-C-r2	2026-10-16T23:12:23Z	mtbench ticks=2342 mean=51.07ms p50=49.85ms p95=60.56ms p99=70.04ms max=92.58ms -> mtbench/cores4-C-r2.csv
 cores12-W11-r1	2026-10-16T23:15:08Z	mtbench ticks=2400 mean=35.56ms p50=34.56ms p95=42.77ms p99=48.62ms max=59.37ms -> mtbench/cores12-W11-r1.csv
 cores12-C-r2	2026-10-16T23:17:53Z	mtbench ticks=2400 mean=35.82ms p50=34.74ms p95=42.58ms p99=50.57ms max=64.53ms -> mtbench/cores12-C-r2.csv
+up-kirigami-3	2026-10-17T18:00:05Z	mtbench ticks=2400 mean=32.06ms p50=31.27ms p95=37.78ms p99=42.08ms max=49.97ms -> mtbench/up-kirigami-3.csv
+up-kirigami-paper29aeb60	2026-10-17T18:02:50Z	mtbench ticks=2400 mean=32.38ms p50=31.58ms p95=38.45ms p99=42.36ms max=50.36ms -> mtbench/up-kirigami-paper29aeb60.csv
