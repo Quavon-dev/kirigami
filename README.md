@@ -39,7 +39,7 @@ Worlds cannot be moved back to an older Minecraft version. `latest` follows new 
 docker run -d --name kirigami -p 25565:25565 -e EULA=true -e MEMORY=8G -v kirigami-data:/data ghcr.io/quavon-dev/kirigami:26.3
 ```
 
-`EULA=true` accepts the [Minecraft EULA](https://aka.ms/MinecraftEULA). `MEMORY` sets the heap size, `JAVA_OPTS` replaces the default G1 flags, and Kirigami settings go into `JAVA_OPTS` as well (`-Dkirigami.…`). The server data lives in `/data`.
+`EULA=true` accepts the [Minecraft EULA](https://aka.ms/MinecraftEULA). `MEMORY` sets the heap size and `JAVA_OPTS` replaces the default G1 flags. The server data lives in `/data`; Kirigami's settings are in `/data/config/kirigami.yml`, and `-Dkirigami.…` flags in `JAVA_OPTS` override them.
 
 ## Building and running
 
@@ -74,19 +74,23 @@ Versions are `<Minecraft version>-<build>`, for example `26.3-4`; the build numb
 
 ## Settings
 
-All settings are JVM system properties (`-Dname=value`). Defaults are the recommended values.
+Kirigami writes `config/kirigami.yml` on first start, next to Paper's configuration files. A JVM flag (`-Dkirigami.…`) overrides the value from the file, so existing start scripts keep working. Defaults are the recommended values.
 
-| Property | Default | Meaning |
-|---|---|---|
-| `kirigami.regionTicking` | `true` | Parallel region ticking |
-| `kirigami.region.entities` / `.chunks` / `.blockEntities` / `.tracker` | `true` | Switch single parallel phases |
-| `kirigami.parallelSpawning` | `true` | Parallel spawn search |
-| `kirigami.regionWorkers` / `kirigami.tickWorkers` | cores − 1 | Worker threads; with 0 the plain serial code paths run |
-| `kirigami.minParallelItems` / `kirigami.minSpeculativeJobs` | `256` / `512` | Below these amounts a phase runs serially |
-| `kirigami.serialWithPlugins` | `false` | Disable parallelism whenever plugins are installed |
-| `kirigami.paper.chestDelay`, `.pathfindingBackoff`, `.fluidRandomTickFix`, `.raidBannerGriefing`, `.boatRiseCollision`, `kirigami.craftbukkit.raidOmenFix` | `false` | Restore Paper or CraftBukkit behaviour instead of vanilla |
-| `kirigami.checkReads`, `kirigami.readReach`, `kirigami.writeReach` | `false`, `6`, `2` | Diagnostics: report accesses outside a cell's reach |
-| `kirigami.verifySpawning`, `kirigami.seedSalt` | off, random | Diagnostics for parallel spawning |
+| `config/kirigami.yml` | JVM flag | Default | Meaning |
+|---|---|---|---|
+| `parallel.region-ticking` | `kirigami.regionTicking` | `true` | Parallel region ticking |
+| `parallel.phases.entities`, `.random-ticks`, `.block-entities`, `.entity-tracker` | `kirigami.region.entities`, `.chunks`, `.blockEntities`, `.tracker` | `true` | Switch single parallel phases |
+| `parallel.spawning` | `kirigami.parallelSpawning` | `true` | Parallel spawn search |
+| `parallel.region-workers`, `parallel.spawn-workers` | `kirigami.regionWorkers`, `kirigami.tickWorkers` | `-1` (cores − 1) | Worker threads; with 0 the plain serial code paths run |
+| `parallel.min-parallel-items`, `parallel.min-speculative-jobs` | `kirigami.minParallelItems`, `kirigami.minSpeculativeJobs` | `256`, `512` | Below these amounts a phase runs serially |
+| `plugins.serial-with-plugins` | `kirigami.serialWithPlugins` | `false` | Disable parallelism whenever plugins are installed |
+| `paper-behaviour.chest-delay`, `.pathfinding-backoff`, `.fluid-random-tick-fix`, `.raid-banner-griefing`, `.boat-rise-collision`, `.raid-omen-fix` | `kirigami.paper.chestDelay`, `.pathfindingBackoff`, `.fluidRandomTickFix`, `.raidBannerGriefing`, `.boatRiseCollision`, `kirigami.craftbukkit.raidOmenFix` | `false` | Restore Paper or CraftBukkit behaviour instead of vanilla |
+
+Diagnostic settings exist only as JVM flags: `kirigami.checkReads`, `kirigami.readReach` and `kirigami.writeReach` report accesses outside a cell's reach, `kirigami.verifySpawning` and `kirigami.seedSalt` help debugging parallel spawning, and `kirigami.benchTools` enables the `/mtbench` benchmark command used by the scripts in `testing/`.
+
+## Status command
+
+`/kirigami` (permission `kirigami.command`, operators by default) shows whether each parallel phase is on, the number of worker threads, TPS and tick time, and per-tick averages of parallel and serial work, cell runs, spawn searches and world pauses. `/kirigami reset` starts a new measurement, for example right before a farm or event you want to look at.
 
 ## Differences from vanilla
 

@@ -42,6 +42,12 @@ public final class RegionTicking {
         private long cells;
         private long boundaryBlockEntities;
 
+        public long[] snapshot() {
+            return new long[] {
+                this.parallel[0], this.serial[0], this.parallel[1], this.serial[1], this.parallel[2], this.serial[2], this.cells, this.boundaryBlockEntities
+            };
+        }
+
         public String format() {
             final StringBuilder builder = new StringBuilder("ticks=").append(this.ticks);
             for (final Phase phase : Phase.values()) {
@@ -78,6 +84,18 @@ public final class RegionTicking {
     }
 
     private RegionTicking() {
+    }
+
+    public static int workers() {
+        return WORKERS;
+    }
+
+    public static boolean phaseEnabled(final int index) {
+        return Phase.values()[index].enabled;
+    }
+
+    public static boolean trackerEnabled() {
+        return PARALLEL_TRACKER;
     }
 
     private static boolean serialOnly(final ServerLevel level) {

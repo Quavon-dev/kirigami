@@ -41,7 +41,7 @@ Run the tests that match your change. The scripts are in `testing/scripts` and w
 | Plugin interaction | `det.sh` and farm runs with the `testing/plugins/mtprobe` probe plugin, 0 overlaps |
 | Performance | `bench.sh` numbers before and after, measured on an otherwise idle machine |
 
-`testing/scripts/soak.sh` runs a multi-hour stability test across all three dimensions.
+`testing/scripts/soak.sh` runs a multi-hour stability test across all three dimensions. The scripts start servers through `testing/scripts/server.sh`, which enables the `/mtbench` benchmark command with `-Dkirigami.benchTools=true`; the command is off on normal servers.
 
 ## Pull requests
 

@@ -69,6 +69,10 @@ public final class ParallelSpawning {
         private long dirty;
         private long mismatches;
 
+        public long[] snapshot() {
+            return new long[] {this.searches, this.speculated, this.reused, this.aborted, this.dirty, this.mismatches};
+        }
+
         public String format() {
             return "searches=" + this.searches + " speculated=" + this.speculated + " reused=" + this.reused
                 + " aborted=" + this.aborted + " dirty=" + this.dirty + " mismatches=" + this.mismatches;

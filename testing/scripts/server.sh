@@ -23,7 +23,7 @@ case "$action" in
     mkfifo -m 600 stdin.fifo
     echo "eula=true" > eula.txt
     : > console.log
-    "$JAVA" -Xms"$HEAP" -Xmx"$HEAP" $JVM_ARGS -jar "$jar" --nogui < stdin.fifo > console.log 2>&1 &
+    "$JAVA" -Xms"$HEAP" -Xmx"$HEAP" $JVM_ARGS -Dkirigami.benchTools=true -jar "$jar" --nogui < stdin.fifo > console.log 2>&1 &
     echo $! > server.pid
     exec 3> stdin.fifo
     tail -f /dev/null >&3 &

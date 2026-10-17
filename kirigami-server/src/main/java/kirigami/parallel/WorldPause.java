@@ -15,6 +15,7 @@ public final class WorldPause {
     private static final AtomicInteger NEXT_SLOT = new AtomicInteger();
     private static final ThreadLocal<Integer> SLOT = ThreadLocal.withInitial(WorldPause::claimSlot);
     private static final ReentrantLock EXCLUSIVE = new ReentrantLock();
+    private static final java.util.concurrent.atomic.AtomicLong PAUSES = new java.util.concurrent.atomic.AtomicLong();
     private static volatile boolean requested;
 
     private WorldPause() {
@@ -46,6 +47,10 @@ public final class WorldPause {
         BUSY.set(SLOT.get(), 0);
     }
 
+    public static long pauses() {
+        return PAUSES.get();
+    }
+
     public static boolean insideItem() {
         return BUSY.get(SLOT.get()) != 0;
     }
@@ -57,6 +62,7 @@ public final class WorldPause {
         final CellContext context = CellContext.detach();
         exitItem();
         EXCLUSIVE.lock();
+        PAUSES.incrementAndGet();
         try {
             requested = true;
             final int slots = Math.min(NEXT_SLOT.get(), MAX_THREADS);

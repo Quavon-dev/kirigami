@@ -135,6 +135,10 @@ public final class CellContext {
         return builder.append('}').toString();
     }
 
+    public static long blockingLoads() {
+        return BLOCKING_LOADS.get();
+    }
+
     public static long violations() {
         long total = 0;
         for (int i = 0; i <= MAX_DISTANCE_BUCKET; i++) {

@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Leopold <77323443+MadebyLeopold@users.noreply.github.com>
+Date: Sat, 17 Oct 2026 19:12:56 +0200
+Subject: [PATCH] Kirigami config file and status command
+
+
+diff --git a/src/main/java/io/papermc/paper/command/PaperCommands.java b/src/main/java/io/papermc/paper/command/PaperCommands.java
+index 353cd66915b6a95bf6c66e368a535fe14253f82a..91cea366cd8ad58176afb3a9e8876c2e2ab35084 100644
+--- a/src/main/java/io/papermc/paper/command/PaperCommands.java
++++ b/src/main/java/io/papermc/paper/command/PaperCommands.java
+@@ -34,7 +34,8 @@ public final class PaperCommands {
+         registerInternalCommand(PaperMSPTCommand.create(), "paper", PaperMSPTCommand.DESCRIPTION, List.of(), Set.of());
+         registerInternalCommand(PaperVersionCommand.create(), "bukkit", PaperVersionCommand.DESCRIPTION, List.of("ver", "about"), Set.of());
+         registerInternalCommand(PaperPluginsCommand.create(), "bukkit", PaperPluginsCommand.DESCRIPTION, List.of("pl"), Set.of());
+-        registerInternalCommand(kirigami.bench.MtBenchCommand.create(), "kirigami", kirigami.bench.MtBenchCommand.DESCRIPTION, List.of(), Set.of());
++        registerInternalCommand(kirigami.KirigamiCommand.create(), "kirigami", kirigami.KirigamiCommand.DESCRIPTION, List.of(), Set.of()); // MT
++        if (Boolean.getBoolean("kirigami.benchTools")) registerInternalCommand(kirigami.bench.MtBenchCommand.create(), "kirigami", kirigami.bench.MtBenchCommand.DESCRIPTION, List.of(), Set.of()); // MT
+     }
+ 
+     private static void registerInternalCommand(final LiteralCommandNode<CommandSourceStack> node, final String namespace, final String description, final List<String> aliases, final Set<CommandRegistrationFlag> flags) {
+diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
+index eb0ac87536692ea1215bdbb4646cfa6589e6fb10..8f599138382e7d0772e91e3a134f80f9e44c1eab 100644
+--- a/src/main/java/org/bukkit/craftbukkit/Main.java
++++ b/src/main/java/org/bukkit/craftbukkit/Main.java
+@@ -206,6 +206,7 @@ public class Main {
+                 System.setProperty("library.jansi.version", "Paper"); // Paper - set meaningless jansi version to prevent git builds from crashing on Windows
+                 System.setProperty("jdk.console", "java.base"); // Paper - revert default console provider back to java.base so we can have our own jline
+ 
++                kirigami.KirigamiConfig.load((File) options.valueOf("paper-settings-directory")); // MT
+                 io.papermc.paper.PaperBootstrap.boot(options);
+             } catch (Throwable t) {
+                 t.printStackTrace();
