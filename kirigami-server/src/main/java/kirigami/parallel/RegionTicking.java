@@ -26,11 +26,22 @@ public final class RegionTicking {
 
     public static final boolean ENABLED = Boolean.parseBoolean(System.getProperty("kirigami.regionTicking", "true"));
     private static final int CELL_SHIFT = 3;
-    private static final int SCHEDULED_TICK_REACH = 24;
+    private static final int SCHEDULED_TICK_REACH = 32;
     private static final int PAUSE_FALLBACK_TICKS = 600;
     private static final long MIN_FALLBACK_NANOS = 1_000_000L;
     private static final java.util.Set<String> WARNED = new java.util.HashSet<>();
-    private static int trackerSerialUntilTick;
+    private static final int TRACKER = Phase.values().length;
+    private static final java.util.Map<ServerLevel, Fallback[]> FALLBACKS = new java.util.WeakHashMap<>();
+
+    private static final class Fallback {
+        private int serialUntilTick;
+        private long serialNanos;
+        private long serialItems;
+
+        private boolean active() {
+            return net.minecraft.server.MinecraftServer.currentTick < this.serialUntilTick;
+        }
+    }
     private static final int COLORS = 4;
     private static final int MIN_PARALLEL_ITEMS = Integer.getInteger("kirigami.minParallelItems", 256);
     private static final int WORKERS = Integer.getInteger("kirigami.regionWorkers", Math.max(0, Runtime.getRuntime().availableProcessors() - 1));
@@ -83,9 +94,6 @@ public final class RegionTicking {
         private final String label;
         private final long salt;
         private final boolean enabled;
-        private int serialUntilTick;
-        private long fallbackNanos;
-        private long fallbackItems;
 
         Phase(final String label, final long salt) {
             this.label = label;
@@ -152,7 +160,7 @@ public final class RegionTicking {
     public static <T> void tickScheduled(final ServerLevel level, final List<net.minecraft.world.ticks.ScheduledTick<T>> ticks,
                                          final Consumer<net.minecraft.world.ticks.ScheduledTick<T>> action) {
         final java.util.function.Predicate<net.minecraft.world.ticks.ScheduledTick<T>> serial;
-        if (POOL == null || !Phase.SCHEDULED_TICKS.enabled || ticks.size() < MIN_PARALLEL_ITEMS || runsCommands(ticks)) {
+        if (!scheduledTicksMayRunParallel(level, ticks.size()) || runsCommands(ticks)) {
             serial = tick -> true;
         } else {
             final int[] bucketOfTick = new int[ticks.size()];
@@ -182,15 +190,15 @@ public final class RegionTicking {
     private static <T> void run(final ServerLevel level, final Phase phase, final List<T> items, final java.util.function.ToLongFunction<T> chunkKey,
                                 final java.util.function.Predicate<T> serialPredicate, final Consumer<T> action, final int maxChainedNeighborUpdates,
                                 final @org.jspecify.annotations.Nullable Runnable betweenColors) {
-        final boolean fallback = net.minecraft.server.MinecraftServer.currentTick < phase.serialUntilTick;
-        if (POOL == null || !PluginGuard.parallelAllowed() || !phase.enabled || items.size() < MIN_PARALLEL_ITEMS || fallback) {
-            final long start = System.nanoTime();
+        final Fallback fallback = fallback(level, phase.ordinal());
+        if (POOL == null || !PluginGuard.parallelAllowed() || !phase.enabled || items.size() < MIN_PARALLEL_ITEMS) {
             STATS.serial[phase.ordinal()] += items.size();
             items.forEach(action);
-            if (fallback) {
-                phase.fallbackNanos += System.nanoTime() - start;
-                phase.fallbackItems += items.size();
-            }
+            return;
+        }
+        if (fallback.active()) {
+            STATS.serial[phase.ordinal()] += items.size();
+            runSerialMeasured(fallback, items.size(), () -> items.forEach(action));
             return;
         }
         final long startNanos = System.nanoTime();
@@ -236,19 +244,57 @@ public final class RegionTicking {
             action.accept(item);
         }
 
+        checkFallback(fallback, startNanos, pausedBefore, items.size(), phase.label);
+    }
+
+    public static boolean onWorker() {
+        return Thread.currentThread() instanceof TickThread && !net.minecraft.server.MinecraftServer.getServer().isSameThread();
+    }
+
+    public static boolean scheduledTicksMayRunParallel(final ServerLevel level, final int size) {
+        return POOL != null && PluginGuard.parallelAllowed() && Phase.SCHEDULED_TICKS.enabled && size >= MIN_PARALLEL_ITEMS
+            && !fallback(level, Phase.SCHEDULED_TICKS.ordinal()).active();
+    }
+
+    private static Fallback fallback(final ServerLevel level, final int index) {
+        return FALLBACKS.computeIfAbsent(level, unused -> {
+            final Fallback[] fallbacks = new Fallback[TRACKER + 1];
+            for (int i = 0; i < fallbacks.length; i++) {
+                fallbacks[i] = new Fallback();
+            }
+            return fallbacks;
+        })[index];
+    }
+
+    private static void runSerialMeasured(final Fallback fallback, final int size, final Runnable serial) {
+        final long start = System.nanoTime();
+        serial.run();
+        fallback.serialNanos += System.nanoTime() - start;
+        fallback.serialItems += size;
+    }
+
+    private static void checkFallback(final Fallback fallback, final long startNanos, final long pausedBefore, final int size, final String label) {
         final long wall = System.nanoTime() - startNanos;
-        final boolean serialWasFaster = phase.fallbackItems == 0 || wall * phase.fallbackItems > phase.fallbackNanos * items.size();
-        if (serialWasFaster && mostlyPaused(startNanos, pausedBefore, phase.label)) {
-            phase.serialUntilTick = net.minecraft.server.MinecraftServer.currentTick + PAUSE_FALLBACK_TICKS;
-            phase.fallbackNanos = 0;
-            phase.fallbackItems = 0;
+        final boolean serialWasFaster = fallback.serialItems == 0 || wall * fallback.serialItems > fallback.serialNanos * size;
+        if (serialWasFaster && mostlyPaused(wall, pausedBefore, label)) {
+            fallback.serialUntilTick = net.minecraft.server.MinecraftServer.currentTick + PAUSE_FALLBACK_TICKS;
+            fallback.serialNanos = 0;
+            fallback.serialItems = 0;
         }
     }
 
     public static <T> boolean forEachParallel(final ServerLevel level, final T[] items, final int size, final Consumer<T> action) {
-        if (!ENABLED || !PARALLEL_TRACKER || POOL == null || size < Math.max(2, MIN_PARALLEL_ITEMS) || !PluginGuard.parallelAllowed()
-            || net.minecraft.server.MinecraftServer.currentTick < trackerSerialUntilTick) {
+        if (!ENABLED || !PARALLEL_TRACKER || POOL == null || size < Math.max(2, MIN_PARALLEL_ITEMS) || !PluginGuard.parallelAllowed()) {
             return false;
+        }
+        final Fallback fallback = fallback(level, TRACKER);
+        if (fallback.active()) {
+            runSerialMeasured(fallback, size, () -> {
+                for (int i = 0; i < size; i++) {
+                    action.accept(items[i]);
+                }
+            });
+            return true;
         }
         final long startNanos = System.nanoTime();
         final long pausedBefore = WorldPause.pausedNanos();
@@ -267,14 +313,11 @@ public final class RegionTicking {
                 }
             }
         });
-        if (mostlyPaused(startNanos, pausedBefore, "entityTracker")) {
-            trackerSerialUntilTick = net.minecraft.server.MinecraftServer.currentTick + PAUSE_FALLBACK_TICKS;
-        }
+        checkFallback(fallback, startNanos, pausedBefore, size, "entityTracker");
         return true;
     }
 
-    private static boolean mostlyPaused(final long startNanos, final long pausedBefore, final String label) {
-        final long wall = System.nanoTime() - startNanos;
+    private static boolean mostlyPaused(final long wall, final long pausedBefore, final String label) {
         final long paused = WorldPause.pausedNanos() - pausedBefore;
         if (wall < MIN_FALLBACK_NANOS || paused * 2 < wall) {
             return false;

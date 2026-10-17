@@ -56,26 +56,19 @@ final class BoundaryClusters {
 
     static boolean[] spanningClusters(final List<? extends net.minecraft.world.ticks.ScheduledTick<?>> ticks, final int cellShiftBlocks, final int linkDistance,
                                       final int[] bucketOfTick) {
-        final int bucketSize = 16;
-        final int linkBuckets = linkDistance / bucketSize;
+        final int bucketShift = 4;
+        final int linkBuckets = (linkDistance + (1 << bucketShift) - 1) >> bucketShift;
         final Long2IntOpenHashMap buckets = new Long2IntOpenHashMap();
         buckets.defaultReturnValue(-1);
         final it.unimi.dsi.fastutil.longs.LongArrayList keys = new it.unimi.dsi.fastutil.longs.LongArrayList();
-        final it.unimi.dsi.fastutil.longs.LongArrayList cells = new it.unimi.dsi.fastutil.longs.LongArrayList();
-        final it.unimi.dsi.fastutil.booleans.BooleanArrayList spanning = new it.unimi.dsi.fastutil.booleans.BooleanArrayList();
         for (int i = 0; i < ticks.size(); i++) {
             final BlockPos pos = ticks.get(i).pos();
-            final long key = cellOf(Math.floorDiv(pos.getX(), bucketSize), Math.floorDiv(pos.getZ(), bucketSize), 0);
-            final long cell = cellOf(pos.getX(), pos.getZ(), cellShiftBlocks);
+            final long key = cellOf(pos.getX(), pos.getZ(), bucketShift);
             int bucket = buckets.get(key);
             if (bucket < 0) {
                 bucket = keys.size();
                 buckets.put(key, bucket);
                 keys.add(key);
-                cells.add(cell);
-                spanning.add(false);
-            } else if (cells.getLong(bucket) != cell) {
-                spanning.set(bucket, true);
             }
             bucketOfTick[i] = bucket;
         }
@@ -100,11 +93,12 @@ final class BoundaryClusters {
         final boolean[] rootSeen = new boolean[parent.length];
         for (int i = 0; i < parent.length; i++) {
             final int root = find(parent, i);
+            final long cell = cellOf((int) (keys.getLong(i) >> 32), (int) keys.getLong(i), cellShiftBlocks - bucketShift);
             if (!rootSeen[root]) {
                 rootSeen[root] = true;
-                rootCell[root] = cells.getLong(i);
+                rootCell[root] = cell;
             }
-            rootSpans[root] |= spanning.getBoolean(i) || rootCell[root] != cells.getLong(i);
+            rootSpans[root] |= rootCell[root] != cell;
         }
         final boolean[] result = new boolean[parent.length];
         for (int i = 0; i < parent.length; i++) {
