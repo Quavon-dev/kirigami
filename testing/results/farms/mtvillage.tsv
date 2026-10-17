@@ -44,3 +44,7 @@ v3-FP-r3	paper	default	ticks=48100	va=12	ea=8	vb=16	eb=8	vc=19	ec=8	vd=24	ed=14
 v3-FP-r4	paper	default	ticks=48100	va=12	ea=8	vb=16	eb=8	vc=19	ec=8	vd=24	ed=14	
 v3-FP-r5	paper	default	ticks=48100	va=12	ea=8	vb=15	eb=8	vc=19	ec=8	vd=24	ed=14	
 v3-FP-r6	paper	default	ticks=48100	va=12	ea=8	vb=16	eb=8	vc=20	ec=8	vd=24	ed=14	
+v4-FP-r1	paper	default	ticks=48100	va=12	ea=8	vb=16	eb=8	vc=19	ec=8	vd=24	ed=14	
+v4-FP-r2	paper	default	ticks=48100	va=12	ea=8	vb=16	eb=8	vc=20	ec=8	vd=24	ed=14	
+v4-FP-r3	paper	default	ticks=48100	va=12	ea=8	vb=16	eb=8	vc=18	ec=8	vd=24	ed=14	
+v4-FP-r4	paper	default	ticks=48100	va=12	ea=8	vb=16	eb=8	vc=19	ec=8	vd=24	ed=14	

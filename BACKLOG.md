@@ -14,11 +14,19 @@ Tried on 2026-10-17: prefilling the per-chunk player lists in parallel (and runn
 
 ## World pauses for plugin events
 
-With LuckPerms, EssentialsX, WorldEdit, WorldGuard, CoreProtect and ViaVersion installed, worker threads spend about 5% of their time waiting at world pauses (spread village benchmark), mostly for WorldGuard's creature spawn check. Every event with listeners pauses the world when it fires from a parallel item.
+Measured on 2026-10-17 in the spread village benchmark (64 bots, 800 villagers) with LuckPerms, EssentialsX, WorldEdit, WorldGuard, CoreProtect and ViaVersion:
 
-Ideas:
-- Count pauses per event type to see which ones matter.
-- Skip the pause for events whose listeners only read the event object (needs a way for plugins to declare it).
+- Before: 61.3 ms median tick, 44.9 ms without plugins. WorldGuard's creature spawn listener turned off parallel spawn search completely.
+- Now the spawn search runs in parallel up to the spawn event and the event fires during the serial commit, in vanilla order: 42.7 ms with all six plugins, 40.6 ms without plugins. 60.9 million searches checked with `-Dkirigami.verifySpawning=true`, 0 mismatches.
+- About 19 pauses per tick remain, 15 of them `BlockPhysicsEvent` (WorldGuard). At about 2 ms per tick in total they are not worth a riskier mechanism yet.
+
+Ideas if pauses matter again:
+- Let admins list events that run under a plugin lock without pausing the world (only safe for listeners that do not touch the world).
+- Fire batches of events in one pause.
+
+## Spawn search mismatch during start-up
+
+With `-Dkirigami.verifySpawning=true`, one or two water mob searches (`WATER_AMBIENT`, `AXOLOTLS`, `UNDERGROUND_WATER_CREATURE`) differ from the serial reference in the first seconds after start, while many players join and their chunks finish loading. Seen before and after the spawn event change (1 in 58 million and 2 in 30 million searches), never later in a run. Likely cause: a neighbouring chunk becomes loaded between the parallel search and the serial commit, so `isLoadedAndInBounds` answers differently. Possible fix: count chunk loads per level and redo a search serially if a load finished since it ran and the search saw an unloaded position.
 
 ## Ticking dimensions in parallel
 
