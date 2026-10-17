@@ -73,7 +73,7 @@ jobs:
           mkdir dist
           cp kirigami-server/build/libs/kirigami-paperclip-*.jar dist/kirigami.jar
           (cd dist && sha256sum kirigami.jar > kirigami.jar.sha256)
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: kirigami-${{ steps.version.outputs.version }}
           path: dist/
