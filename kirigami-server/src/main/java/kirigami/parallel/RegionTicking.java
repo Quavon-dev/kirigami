@@ -150,7 +150,7 @@ public final class RegionTicking {
     public static <T> void tickScheduled(final ServerLevel level, final List<net.minecraft.world.ticks.ScheduledTick<T>> ticks,
                                          final Consumer<net.minecraft.world.ticks.ScheduledTick<T>> action) {
         final java.util.function.Predicate<net.minecraft.world.ticks.ScheduledTick<T>> serial;
-        if (ticks.size() < MIN_PARALLEL_ITEMS || runsCommands(ticks)) {
+        if (POOL == null || !Phase.SCHEDULED_TICKS.enabled || ticks.size() < MIN_PARALLEL_ITEMS || runsCommands(ticks)) {
             serial = tick -> true;
         } else {
             final int[] bucketOfTick = new int[ticks.size()];
