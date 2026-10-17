@@ -92,17 +92,7 @@ jobs:
           name: kirigami-${{ needs.build.outputs.version }}
           path: dist
       - name: Download the official Minecraft server
-        env:
-          MC_VERSION: ${{ needs.build.outputs.mc }}
-        run: |
-          url="$(curl -sSf https://piston-meta.mojang.com/mc/game/version_manifest_v2.json | jq -r --arg mc "$MC_VERSION" '.versions[] | select(.id == $mc) | .url')"
-          if [ -z "$url" ]; then
-            echo "Minecraft $MC_VERSION is not in Mojang's version manifest" >&2
-            exit 1
-          fi
-          read -r server_url server_sha1 < <(curl -sSf "$url" | jq -r '.downloads.server | .url + " " + .sha1')
-          curl -sSfL -o vanilla-server.jar "$server_url"
-          echo "$server_sha1  vanilla-server.jar" | sha1sum -c
+        run: testing/scripts/fetch-vanilla.sh "${{ needs.build.outputs.mc }}" vanilla-server.jar
       - name: Compare deterministic contraptions with vanilla
         env:
           JAVA: java

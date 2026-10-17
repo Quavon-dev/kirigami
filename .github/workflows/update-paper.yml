@@ -1,0 +1,125 @@
+name: Update Paper
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: update-paper
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Configure Git user
+        run: git config --global user.email "actions@github.com" && git config --global user.name "GitHub Actions"
+      - name: Update Paper and rebuild patches
+        id: update
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: .github/scripts/update-paper.sh
+      - name: Check vanilla parity
+        id: parity
+        if: steps.update.outputs.status == 'updated'
+        continue-on-error: true
+        env:
+          JAVA: java
+        run: |
+          mc="$(grep '^mcVersion=' gradle.properties | cut -d= -f2 | tr -d '[:space:]')"
+          testing/scripts/fetch-vanilla.sh "$mc" vanilla-server.jar
+          testing/scripts/parity.sh vanilla-server.jar kirigami-server/build/libs/kirigami-paperclip-*.jar 2>&1 | tee parity.log
+      - name: Open or update the pull request
+        if: steps.update.outputs.status == 'updated' && steps.parity.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CURRENT: ${{ steps.update.outputs.current }}
+          LATEST: ${{ steps.update.outputs.latest }}
+        run: |
+          branch=update/paper
+          git checkout -B "$branch"
+          git add gradle.properties kirigami-server kirigami-api
+          git commit -m "chore: update Paper to ${LATEST:0:10}"
+          git push -f origin "$branch"
+          {
+            echo "Updates Paper from \`${CURRENT:0:10}\` to \`${LATEST:0:10}\` ([changes](https://github.com/PaperMC/Paper/compare/$CURRENT...$LATEST))."
+            echo
+            echo "All Kirigami patches applied, the server jar built, and the deterministic contraptions match the official Minecraft server:"
+            echo
+            echo '```'
+            tail -1 parity.log
+            echo '```'
+            echo
+            echo "Paper commits:"
+            echo
+            gh api "repos/PaperMC/Paper/compare/$CURRENT...$LATEST" --jq '.commits[] | "- " + (.commit.message | split("\n")[0])'
+          } > pr-body.md
+          if gh pr view "$branch" --json state --jq .state 2>/dev/null | grep -qx OPEN; then
+            gh pr edit "$branch" --title "chore: update Paper to ${LATEST:0:10}" --body-file pr-body.md
+          else
+            gh pr create --head "$branch" --base main --title "chore: update Paper to ${LATEST:0:10}" --body-file pr-body.md
+          fi
+      - name: Report manual work
+        if: >-
+          steps.update.outputs.status == 'new-minecraft' ||
+          steps.update.outcome == 'failure' ||
+          steps.parity.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATUS: ${{ steps.update.outputs.status }}
+          PARITY: ${{ steps.parity.outcome }}
+          CURRENT: ${{ steps.update.outputs.current }}
+          LATEST: ${{ steps.update.outputs.latest }}
+          PAPER_MC: ${{ steps.update.outputs.paper_mc }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ "$STATUS" = new-minecraft ]; then
+            title="Paper moved to Minecraft $PAPER_MC"
+            body="Paper's main branch is on Minecraft $PAPER_MC (commit \`${LATEST:0:10}\`). Porting Kirigami to a new Minecraft version is a manual step, see CONTRIBUTING.md."
+          else
+            title="Paper update needs manual work"
+            case "$STATUS" in
+              apply-failed) reason="Kirigami's patches no longer apply."; log=update-apply.log ;;
+              build-failed) reason="The server jar no longer builds."; log=update-build.log ;;
+              *) reason="The vanilla parity check failed (parity: $PARITY)."; log=parity.log ;;
+            esac
+            {
+              echo "Updating Paper from \`${CURRENT:0:10}\` to \`${LATEST:0:10}\` failed: $reason"
+              echo
+              echo "Run: $RUN_URL"
+              echo
+              echo '```'
+              grep -E "CONFLICT|Patch failed|error:|differs|counters|FAILED" "$log" 2>/dev/null | head -40 || true
+              echo '```'
+            } > issue-body.txt
+            body="$(cat issue-body.txt)"
+          fi
+          existing="$(gh issue list --state open --search "in:title \"$title\"" --json number,title --jq ".[] | select(.title == \"$title\") | .number" | head -1)"
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: update-paper-logs
+          path: |
+            update-*.log
+            parity.log
+          if-no-files-found: ignore

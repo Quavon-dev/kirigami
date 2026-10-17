@@ -64,6 +64,7 @@ Use Paper's recommended G1 flags (see `testing/scripts/bench.sh`). Generational 
 | `testing/` | Test scripts, datapacks, the probe plugin and all recorded results |
 | `docker/` | Dockerfile and entrypoint of the container image |
 | `.github/workflows/build.yml` | Builds every push; publishes releases, the `edge` pre-release and the Docker images |
+| `.github/workflows/update-paper.yml`, `.github/scripts/update-paper.sh` | Weekly Paper update: rebuilds the patches, checks parity and opens a pull request or an issue |
 | `docs/` | Images for this README |
 
 After `applyAllPatches`, edit the generated sources (`kirigami-server/src/minecraft/java` for Minecraft code, `paper-server/` for Paper code), commit there, and run `./gradlew rebuildAllServerPatches` to update the patch files.
