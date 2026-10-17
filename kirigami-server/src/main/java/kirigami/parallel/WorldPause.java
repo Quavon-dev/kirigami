@@ -16,7 +16,7 @@ public final class WorldPause {
     private static final ThreadLocal<Integer> SLOT = ThreadLocal.withInitial(WorldPause::claimSlot);
     private static final ReentrantLock EXCLUSIVE = new ReentrantLock();
     private static final java.util.concurrent.atomic.AtomicLong PAUSES = new java.util.concurrent.atomic.AtomicLong();
-    private static final java.util.Map<Object, long[]> SOURCES = new java.util.HashMap<>();
+    private static final java.util.Map<Object, long[]> SOURCES = new java.util.WeakHashMap<>();
     private static final java.util.concurrent.atomic.AtomicLong PAUSED_NANOS = new java.util.concurrent.atomic.AtomicLong();
     private static volatile boolean requested;
 

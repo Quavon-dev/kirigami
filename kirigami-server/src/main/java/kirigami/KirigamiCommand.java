@@ -84,7 +84,7 @@ public final class KirigamiCommand {
         WorldPause.sources().entrySet().stream()
             .sorted(java.util.Map.Entry.<Object, Long>comparingByValue().reversed())
             .limit(5)
-            .forEach(entry -> text.append(String.format(Locale.ROOT, "%n    %s: %.2f", WorldPause.describe(entry.getKey()), per(entry.getValue(), ticks))));
+            .forEach(entry -> text.append(String.format(Locale.ROOT, "%n    %s: %.3f per tick", WorldPause.describe(entry.getKey()), per(entry.getValue(), ticks))));
         ctx.getSource().getSender().sendMessage(Component.text(text.toString()));
         return Command.SINGLE_SUCCESS;
     }

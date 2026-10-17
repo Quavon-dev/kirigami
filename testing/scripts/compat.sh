@@ -51,8 +51,8 @@ errors() {
 
 mkdir -p "$results"
 run="$root/servers/runs/compat-$name"
-installed="$(($(find "$source_dir/plugins" -maxdepth 1 -name '*.jar' 2>/dev/null | wc -l) + 1))"
 run_server "$run" "$jar"
+installed="$(find "$run/plugins" -maxdepth 1 -name '*.jar' | wc -l | tr -d ' ')"
 log="$run/console.log"
 new_errors="$(errors "$log")"
 if [ -n "${PAPER_JAR:-}" ]; then
