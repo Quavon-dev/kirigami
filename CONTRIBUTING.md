@@ -38,7 +38,7 @@ Run the tests that match your change. The scripts are in `testing/scripts` and w
 |---|---|
 | Anything that can affect gameplay | `parity.sh <official-server.jar> <kirigami.jar>` must report all counters identical to vanilla. CI runs the same check on every pull request. |
 | Spawning, mob AI, block ticks | Farm tests with `farm-matrix.sh` and `farm_stats.py`, within noise of vanilla |
-| Plugin interaction | `det.sh` and farm runs with the `testing/plugins/mtprobe` probe plugin, 0 overlaps |
+| Plugin interaction | `det.sh` and farm runs with the `testing/plugins/mtprobe` probe plugin, 0 overlaps; `compat.sh` with `PAPER_JAR` on a Paper server with plugins |
 | Performance | `bench.sh` numbers before and after, measured on an otherwise idle machine |
 
 `testing/scripts/soak.sh` runs a multi-hour stability test across all three dimensions. The scripts start servers through `testing/scripts/server.sh`, which enables the `/mtbench` benchmark command with `-Dkirigami.benchTools=true`; the command is off on normal servers.

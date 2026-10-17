@@ -23,6 +23,8 @@ Measured on 2026-10-17 in the spread village benchmark (64 bots, 800 villagers) 
 
 Revisit only if a plugin shows up with many more pauses per tick in `/kirigami`.
 
+Pauses are counted per event type, and `/kirigami` lists the top five with the plugins that listen to them. A phase that pauses more than 64 times in one run falls back to serial for 600 ticks.
+
 ## Ticking dimensions in parallel
 
 Measured on 2026-10-17 in the soak scenario (48 bots, about 36/8/4 across overworld, Nether and End at the time of measurement, 800 villagers and the hopper hotspot in the overworld, six plugins): the overworld took 88% of level tick time, the Nether 10% and the End 2%. Overlapping the Nether and End with the overworld would therefore save at most about 12%.
