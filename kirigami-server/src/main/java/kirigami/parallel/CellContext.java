@@ -37,7 +37,6 @@ public final class CellContext {
     private int randValue;
     private final CollectingNeighborUpdater neighborUpdater;
     private final List<Runnable> deferred = new ArrayList<>();
-    private alternate.current.wire.@Nullable WireHandler wireHandler;
     private static final ThreadLocal<net.minecraft.world.level.pathfinder.PathTypeCache> PATH_TYPE_CACHE =
         ThreadLocal.withInitial(net.minecraft.world.level.pathfinder.PathTypeCache::new);
 
@@ -188,13 +187,6 @@ public final class CellContext {
 
     public net.minecraft.world.level.pathfinder.PathTypeCache pathTypeCache() {
         return PATH_TYPE_CACHE.get();
-    }
-
-    public alternate.current.wire.WireHandler wireHandler() {
-        if (this.wireHandler == null) {
-            this.wireHandler = new alternate.current.wire.WireHandler(this.level);
-        }
-        return this.wireHandler;
     }
 
     public CollectingNeighborUpdater neighborUpdater() {
