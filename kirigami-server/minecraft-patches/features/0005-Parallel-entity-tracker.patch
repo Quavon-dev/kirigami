@@ -1,0 +1,73 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Leopold <77323443+MadebyLeopold@users.noreply.github.com>
+Date: Fri, 16 Oct 2026 20:28:00 +0200
+Subject: [PATCH] Parallel entity tracker
+
+
+diff --git a/net/minecraft/server/level/ChunkMap.java b/net/minecraft/server/level/ChunkMap.java
+index fd0b9f20fbdd523d51550fd6009b5011e6e7e6e6..d64c418164f0d70ce7a129f0cd75eb2be988816c 100644
+--- a/net/minecraft/server/level/ChunkMap.java
++++ b/net/minecraft/server/level/ChunkMap.java
+@@ -1098,24 +1098,29 @@ public class ChunkMap extends SimpleRegionStorage implements ChunkHolder.PlayerP
+         try {
+             final ca.spottedleaf.moonrise.common.list.ReferenceList<net.minecraft.world.entity.Entity> trackerEntities = this.trackerEntities;
+             final Entity[] trackerEntitiesRaw = trackerEntities.getRawDataUnchecked();
++            if (!mtserver.parallel.RegionTicking.forEachParallel(this.level, trackerEntitiesRaw, trackerEntities.size(), this::mtTrackEntity)) { // MT
+             for (int i = 0, len = trackerEntities.size(); i < len; ++i) {
+-                final Entity entity = trackerEntitiesRaw[i];
+-                final ChunkMap.TrackedEntity tracker = ((ca.spottedleaf.moonrise.patches.entity_tracker.EntityTrackerEntity)entity).moonrise$getTrackedEntity();
+-                if (tracker == null) {
+-                    continue;
+-                }
+-                ((ca.spottedleaf.moonrise.patches.entity_tracker.EntityTrackerTrackedEntity)tracker).moonrise$tick(((ca.spottedleaf.moonrise.patches.chunk_system.entity.ChunkSystemEntity)entity).moonrise$getChunkData().nearbyPlayers);
+-                if (((ca.spottedleaf.moonrise.patches.entity_tracker.EntityTrackerTrackedEntity)tracker).moonrise$hasPlayers()
+-                    || ((ca.spottedleaf.moonrise.patches.chunk_system.entity.ChunkSystemEntity)entity).moonrise$getChunkStatus().isOrAfter(FullChunkStatus.ENTITY_TICKING)) {
+-                    tracker.serverEntity.sendChanges();
+-                }
++                this.mtTrackEntity(trackerEntitiesRaw[i]); // MT
+             }
++            } // MT
+         } finally {
+             this.iteratingTrackerEntities = false;
+         }
+     }
+     // Paper end - optimise entity tracker
+ 
++    private void mtTrackEntity(final Entity entity) { // MT
++        final ChunkMap.TrackedEntity tracker = ((ca.spottedleaf.moonrise.patches.entity_tracker.EntityTrackerEntity)entity).moonrise$getTrackedEntity();
++        if (tracker == null) {
++            return;
++        }
++        ((ca.spottedleaf.moonrise.patches.entity_tracker.EntityTrackerTrackedEntity)tracker).moonrise$tick(((ca.spottedleaf.moonrise.patches.chunk_system.entity.ChunkSystemEntity)entity).moonrise$getChunkData().nearbyPlayers);
++        if (((ca.spottedleaf.moonrise.patches.entity_tracker.EntityTrackerTrackedEntity)tracker).moonrise$hasPlayers()
++            || ((ca.spottedleaf.moonrise.patches.chunk_system.entity.ChunkSystemEntity)entity).moonrise$getChunkStatus().isOrAfter(FullChunkStatus.ENTITY_TICKING)) {
++            tracker.serverEntity.sendChanges();
++        }
++    } // MT
++
+     protected void tick() {
+         // Paper start - optimise entity tracker
+         if (true) {
+@@ -1400,7 +1405,7 @@ public class ChunkMap extends SimpleRegionStorage implements ChunkHolder.PlayerP
+             if (this.seenBy.remove(player.connection)) {
+                 this.serverEntity.removePairing(player);
+                 if (this.seenBy.isEmpty()) {
+-                    ChunkMap.this.level.debugSynchronizers().dropEntity(this.entity);
++                    synchronized (ChunkMap.this.level.debugSynchronizers()) { ChunkMap.this.level.debugSynchronizers().dropEntity(this.entity); } // MT
+                 }
+             }
+         }
+@@ -1440,11 +1445,13 @@ public class ChunkMap extends SimpleRegionStorage implements ChunkHolder.PlayerP
+                         // Paper start - entity tracking events
+                         if (io.papermc.paper.event.player.PlayerTrackEntityEvent.getHandlerList().getRegisteredListeners().length == 0 || new io.papermc.paper.event.player.PlayerTrackEntityEvent(player.getBukkitEntity(), this.entity.getBukkitEntity()).callEvent()) {
+                         this.serverEntity.addPairing(player);
++                        synchronized (ChunkMap.this.level.debugSynchronizers()) { // MT
+                         if (this.seenBy.size() == 1) {
+                             ChunkMap.this.level.debugSynchronizers().registerEntity(this.entity);
+                         }
+ 
+                         ChunkMap.this.level.debugSynchronizers().startTrackingEntity(player, this.entity);
++                        } // MT
+                         }
+                         // Paper end - entity tracking events
+                         this.serverEntity.onPlayerAdd(); // Paper - fix desync when a player is added to the tracker

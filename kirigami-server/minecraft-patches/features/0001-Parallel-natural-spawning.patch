@@ -1,0 +1,149 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Leopold <77323443+MadebyLeopold@users.noreply.github.com>
+Date: Thu, 15 Oct 2026 16:39:17 +0200
+Subject: [PATCH] Parallel natural spawning
+
+
+diff --git a/net/minecraft/server/level/ServerChunkCache.java b/net/minecraft/server/level/ServerChunkCache.java
+index c4cfb53e145d69666ffc27ef4ee0c50b54eb9143..f4cbc584de92d1e809c3f684d5293831661f0819 100644
+--- a/net/minecraft/server/level/ServerChunkCache.java
++++ b/net/minecraft/server/level/ServerChunkCache.java
+@@ -154,6 +154,7 @@ public class ServerChunkCache extends ChunkSource implements ca.spottedleaf.moon
+             }
+         }
+ 
++        if (load) mtserver.parallel.Speculation.abortIfActive(); // MT
+         return load ? this.syncLoad(chunkX, chunkZ, toStatus) : null;
+     }
+     // Paper end - rewrite chunk system
+@@ -600,9 +601,13 @@ public class ServerChunkCache extends ChunkSource implements ca.spottedleaf.moon
+             // Paper end - chunk tick iteration optimisation
+             profiler.popPush("tickSpawningChunks");
+ 
++            if (mtserver.parallel.ParallelSpawning.ENABLED) { // MT
++                mtserver.parallel.ParallelSpawning.tickSpawningChunks(this.level, spawningChunks, spawningCategories, spawnCookie);
++            } else {
+             for (LevelChunk chunk : spawningChunks) {
+                 this.tickSpawningChunk(chunk, spawningCategories, spawnCookie);
+             }
++            } // MT
+         } finally {
+             spawningChunks.clear();
+         }
+diff --git a/net/minecraft/world/attribute/EnvironmentAttributeSystem.java b/net/minecraft/world/attribute/EnvironmentAttributeSystem.java
+index b4a076292c17a9216764db4e0074315eca3127aa..32824c640792c90a34e9ad1dee29ff5e2b55a2ad 100644
+--- a/net/minecraft/world/attribute/EnvironmentAttributeSystem.java
++++ b/net/minecraft/world/attribute/EnvironmentAttributeSystem.java
+@@ -105,6 +105,10 @@ public class EnvironmentAttributeSystem implements EnvironmentAttributeReader {
+         );
+     }
+ 
++    public void prepareForConcurrentReads() {
++        this.attributeSamplers.values().forEach(EnvironmentAttributeSystem.ValueSampler::getDimensionValue);
++    }
++
+     public void invalidateTickCache() {
+         this.attributeSamplers.values().forEach(EnvironmentAttributeSystem.ValueSampler::invalidateTickCache);
+     }
+diff --git a/net/minecraft/world/level/NaturalSpawner.java b/net/minecraft/world/level/NaturalSpawner.java
+index 06c63a3429d010546c8b9de610cbae7bf6bb6935..890be9c7efe17bc42964737884918a4d2fb36b9e 100644
+--- a/net/minecraft/world/level/NaturalSpawner.java
++++ b/net/minecraft/world/level/NaturalSpawner.java
+@@ -80,6 +80,7 @@ public final class NaturalSpawner {
+         final boolean countMobs
+     ) {
+         // Paper end - Optional per player mob spawns
++        if (mtserver.parallel.ParallelSpawning.ENABLED) return mtserver.parallel.ParallelSpawning.createState(spawnableChunkCount, level, chunkGetter, localMobCapCalculator, countMobs); // MT
+         Iterable<Entity> entities = level.getAllEntities();
+         PotentialCalculator spawnPotential = new PotentialCalculator();
+         Object2IntOpenHashMap<MobCategory> mobCounts = new Object2IntOpenHashMap<>();
+@@ -349,7 +350,7 @@ public final class NaturalSpawner {
+         }
+     }
+ 
+-    private static boolean isRightDistanceToPlayerAndSpawnPoint(
++    public static boolean isRightDistanceToPlayerAndSpawnPoint(
+         final ServerLevel level, final ChunkAccess chunk, final BlockPos.MutableBlockPos pos, final double nearestPlayerDistanceSqr
+     ) {
+         if (nearestPlayerDistanceSqr <= 576.0) {
+@@ -367,7 +368,7 @@ public final class NaturalSpawner {
+     }
+ 
+     // Paper start - PreCreatureSpawnEvent
+-    private enum PreSpawnStatus {
++    public enum PreSpawnStatus {
+         FAIL,
+         SUCCESS,
+         CANCELLED,
+@@ -406,7 +407,7 @@ public final class NaturalSpawner {
+         return success ? PreSpawnStatus.SUCCESS : PreSpawnStatus.FAIL; // Paper - PreCreatureSpawnEvent
+     }
+ 
+-    private static @Nullable Mob getMobForSpawn(final ServerLevel level, final EntityType<?> type) {
++    public static @Nullable Mob getMobForSpawn(final ServerLevel level, final EntityType<?> type) {
+         try {
+             if (type.create(level, EntitySpawnReason.NATURAL) instanceof Mob mob) {
+                 return mob;
+@@ -421,7 +422,7 @@ public final class NaturalSpawner {
+         return null;
+     }
+ 
+-    private static boolean isValidPositionForMob(final ServerLevel level, final Mob mob, final double nearestPlayerDistanceSqr) {
++    public static boolean isValidPositionForMob(final ServerLevel level, final Mob mob, final double nearestPlayerDistanceSqr) {
+         return (
+                 !(nearestPlayerDistanceSqr > mob.getType().getCategory().getDespawnDistance() * mob.getType().getCategory().getDespawnDistance())
+                     || !mob.removeWhenFarAway(nearestPlayerDistanceSqr)
+@@ -430,7 +431,7 @@ public final class NaturalSpawner {
+             && mob.checkSpawnObstruction(level);
+     }
+ 
+-    private static Optional<MobSpawnSettings.SpawnerData> getRandomSpawnMobAt(
++    public static Optional<MobSpawnSettings.SpawnerData> getRandomSpawnMobAt(
+         final ServerLevel level,
+         final StructureManager structureManager,
+         final ChunkGenerator generator,
+@@ -444,7 +445,7 @@ public final class NaturalSpawner {
+             : mobsAt(level, structureManager, generator, mobCategory, pos).getRandom(random);
+     }
+ 
+-    private static boolean canSpawnMobAt(
++    public static boolean canSpawnMobAt(
+         final ServerLevel level,
+         final StructureManager structureManager,
+         final ChunkGenerator generator,
+@@ -618,7 +619,7 @@ public final class NaturalSpawner {
+         private @Nullable EntityType<?> lastCheckedType;
+         private double lastCharge;
+ 
+-        private SpawnState(
++        public SpawnState(
+             final int spawnableChunkCount,
+             final Object2IntOpenHashMap<MobCategory> mobCategoryCounts,
+             final PotentialCalculator spawnPotential,
+@@ -631,7 +632,7 @@ public final class NaturalSpawner {
+             this.unmodifiableMobCategoryCounts = Object2IntMaps.unmodifiable(mobCategoryCounts);
+         }
+ 
+-        private boolean canSpawn(final EntityType<?> type, final Level level, final BlockPos testPos, final ChunkAccess chunk) {
++        public boolean canSpawn(final EntityType<?> type, final Level level, final BlockPos testPos, final ChunkAccess chunk) {
+             this.lastCheckedPos = testPos;
+             this.lastCheckedType = type;
+             MobSpawnSettings naturalMobSpawns = level.environmentAttributes().getValue(EnvironmentAttributes.NATURAL_MOB_SPAWNS, testPos);
+@@ -647,7 +648,7 @@ public final class NaturalSpawner {
+             }
+         }
+ 
+-        private void afterSpawn(final Mob mob, final ChunkAccess chunk) {
++        public void afterSpawn(final Mob mob, final ChunkAccess chunk) {
+             EntityType<?> type = mob.getType();
+             BlockPos pos = mob.blockPosition();
+             double charge;
+@@ -684,7 +685,7 @@ public final class NaturalSpawner {
+             return this.mobCategoryCounts.getInt(mobCategory) < maxMobCount;
+         }
+ 
+-        private boolean canSpawnForCategoryLocal(final MobCategory mobCategory, final ChunkPos chunkPos) {
++        public boolean canSpawnForCategoryLocal(final MobCategory mobCategory, final ChunkPos chunkPos) {
+             return this.localMobCapCalculator.canSpawn(mobCategory, chunkPos) || SharedConstants.DEBUG_IGNORE_LOCAL_MOB_CAP;
+         }
+     }

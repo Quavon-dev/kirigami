@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 500" width="860" height="500" role="img" aria-labelledby="t d">
+<style>
+svg { --surface:#fcfcfb; --plane:#f4f3ef; --ink:#0b0b0b; --ink2:#52514e; --muted:#77756f; --grid:#e1e0d9; --axis:#c3c2b7;
+      --a:#2a78d6; --b:#eb6834; --c:#1baf7a; --d:#eda100; --kiri:#eb6834; --kiri-wash:rgba(235,104,52,.12);
+      --serial:#9b9993; --good:#0ca30c; --idle:#ecebe6; --ring:#fcfcfb; }
+@media (prefers-color-scheme: dark) {
+  svg { --surface:#1a1a19; --plane:#232321; --ink:#f0efec; --ink2:#c3c2b7; --muted:#9a988f; --grid:#2c2c2a; --axis:#383835;
+        --a:#3987e5; --b:#d95926; --c:#199e70; --d:#c98500; --kiri:#d95926; --kiri-wash:rgba(217,89,38,.16);
+        --serial:#6f6e68; --good:#0ca30c; --idle:#2a2a28; --ring:#1a1a19; }
+}
+text { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; fill:var(--ink); }
+.t { font-size:22px; font-weight:650; }
+.s { font-size:13.5px; fill:var(--ink2); }
+.h { font-size:15px; font-weight:650; }
+.l { font-size:13px; }
+.a { font-size:12px; fill:var(--muted); }
+.n { font-size:12px; fill:var(--ink2); font-variant-numeric:tabular-nums; }
+.v { font-size:13px; font-weight:650; }
+.big { font-size:40px; font-weight:700; }
+.cap { font-size:11px; font-weight:650; letter-spacing:.06em; fill:var(--muted); }
+.w { fill:#ffffff; font-weight:700; }
+
+.big { font-size:36px; font-weight:700; }
+.bigl { font-size:13.5px; fill:var(--ink2); }
+.end { font-size:13px; font-weight:650; }
+</style>
+<title id="t">Tick time by CPU core count</title>
+<desc id="d">Median tick time with 64 spread-out players. Serial stays at about 90 ms at every core count. Kirigami: 59.8 ms on 2 cores, 43.2 on 4, 35.5 on 8, 34.6 on 12, 2.6 times faster. A fit of 28.5 ms that stays on one thread plus 61.5 ms spread over the cores matches within 1 ms, which is why gains flatten after 8 cores. 50 ms is the limit for 20 ticks per second.</desc>
+<rect width="860" height="500" rx="14" style="fill:var(--surface)"/>
+<text class="t" x="28" y="42">More cores, shorter ticks</text>
+<text class="s" x="28" y="65">Median milliseconds per tick, 64 spread-out players, lower is better</text>
+<line x1="74" y1="398" x2="552" y2="398" style="stroke:var(--axis)" stroke-width="1"/>
+<text class="n" x="64" y="402" text-anchor="end">0</text>
+<line x1="74" y1="328" x2="552" y2="328" style="stroke:var(--grid)" stroke-width="1"/>
+<text class="n" x="64" y="332" text-anchor="end">25</text>
+<line x1="74" y1="258" x2="552" y2="258" style="stroke:var(--grid)" stroke-width="1"/>
+<text class="n" x="64" y="262" text-anchor="end">50</text>
+<line x1="74" y1="188" x2="552" y2="188" style="stroke:var(--grid)" stroke-width="1"/>
+<text class="n" x="64" y="192" text-anchor="end">75</text>
+<line x1="74" y1="118" x2="552" y2="118" style="stroke:var(--grid)" stroke-width="1"/>
+<text class="n" x="64" y="122" text-anchor="end">100</text>
+<text class="n" x="74" y="418" text-anchor="middle">1</text>
+<text class="n" x="117.5" y="418" text-anchor="middle">2</text>
+<text class="n" x="204.4" y="418" text-anchor="middle">4</text>
+<text class="n" x="291.3" y="418" text-anchor="middle">6</text>
+<text class="n" x="378.2" y="418" text-anchor="middle">8</text>
+<text class="n" x="465.1" y="418" text-anchor="middle">10</text>
+<text class="n" x="552" y="418" text-anchor="middle">12</text>
+<text class="a" x="313" y="438" text-anchor="middle">CPU cores</text>
+<text class="a" x="64" y="104" text-anchor="end">ms</text>
+<line x1="74" y1="258" x2="552" y2="258" style="stroke:var(--ink2)" stroke-width="1.5"/>
+<text class="a" x="552" y="251" text-anchor="end">50 ms = 20 ticks per second</text>
+<line x1="74" y1="318.2" x2="552" y2="318.2" style="stroke:var(--muted)" stroke-width="1" stroke-dasharray="2 4"/>
+<text class="a" x="80" y="334.2">≈ 28.5 ms of every tick still runs on one thread</text>
+<path d="M74 146L84.9 180.4L95.7 203.4L106.6 219.8L117.5 232.1L128.3 241.7L139.2 249.3L150 255.6L160.9 260.8L171.8 265.2L182.6 269L193.5 272.3L204.4 275.1L215.2 277.7L226.1 279.9L237 281.9L247.8 283.8L258.7 285.4L269.5 286.9L280.4 288.3L291.3 289.5L302.1 290.6L313 291.7L323.9 292.7L334.7 293.6L345.6 294.4L356.5 295.2L367.3 296L378.2 296.7L389 297.3L399.9 297.9L410.8 298.5L421.6 299.1L432.5 299.6L443.4 300.1L454.2 300.5L465.1 301L476 301.4L486.8 301.8L497.7 302.2L508.5 302.5L519.4 302.9L530.3 303.2L541.1 303.5L552 303.9" style="fill:none;stroke:var(--muted)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="5 5"/>
+<path d="M117.5 146.3L204.4 145.2L378.2 144.3L552 151" style="fill:none;stroke:var(--serial)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="117.5" cy="146.3" r="7" style="fill:var(--ring)"/>
+<circle cx="117.5" cy="146.3" r="5" style="fill:var(--serial)"/>
+<circle cx="204.4" cy="145.2" r="7" style="fill:var(--ring)"/>
+<circle cx="204.4" cy="145.2" r="5" style="fill:var(--serial)"/>
+<circle cx="378.2" cy="144.3" r="7" style="fill:var(--ring)"/>
+<circle cx="378.2" cy="144.3" r="5" style="fill:var(--serial)"/>
+<circle cx="552" cy="151" r="7" style="fill:var(--ring)"/>
+<circle cx="552" cy="151" r="5" style="fill:var(--serial)"/>
+<path d="M117.5 230.6L204.4 277L378.2 298.6L552 301.1" style="fill:none;stroke:var(--kiri)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="117.5" cy="230.6" r="7" style="fill:var(--ring)"/>
+<circle cx="117.5" cy="230.6" r="5" style="fill:var(--kiri)"/>
+<circle cx="204.4" cy="277" r="7" style="fill:var(--ring)"/>
+<circle cx="204.4" cy="277" r="5" style="fill:var(--kiri)"/>
+<circle cx="378.2" cy="298.6" r="7" style="fill:var(--ring)"/>
+<circle cx="378.2" cy="298.6" r="5" style="fill:var(--kiri)"/>
+<circle cx="552" cy="301.1" r="7" style="fill:var(--ring)"/>
+<circle cx="552" cy="301.1" r="5" style="fill:var(--kiri)"/>
+<text class="end" x="564" y="155">Serial</text>
+<text class="end" x="564" y="305.1">Kirigami</text>
+<text class="v" x="117.5" y="217.6" text-anchor="middle">59.8</text>
+<text class="v" x="204.4" y="264" text-anchor="middle">43.2</text>
+<text class="v" x="378.2" y="285.6" text-anchor="middle">35.5</text>
+<text class="v" x="552" y="288.1" text-anchor="middle">34.6</text>
+<text class="v" x="117.5" y="133.3" text-anchor="middle">89.9</text>
+<rect x="656" y="112" width="184" height="292" rx="12" style="fill:var(--plane)"/>
+<text class="big" x="680" y="160">2.6×</text>
+<text class="bigl" x="680" y="182">faster ticks on 12 cores</text>
+<text class="big" x="680" y="254">20 TPS</text>
+<text class="bigl" x="680" y="276">from 4 cores up;</text>
+<text class="bigl" x="680" y="293">serial manages 11</text>
+<text class="big" x="680" y="348">99 %</text>
+<text class="bigl" x="680" y="370">of ticks within 50 ms on</text>
+<text class="bigl" x="680" y="387">8 and 12 cores; serial 0 %</text>
+<text class="a" x="28" y="460">Docker CPU limits on an M2 Max, Paper 26.3 with vanilla settings; serial is the same server with parallelism off. 8 cores ran with one</text>
+<text class="a" x="28" y="476">worker fewer than today&#x27;s default. Dashed: fit of 28.5 ms on one thread plus 61.5 ms spread over the cores (within 1 ms of every point).</text>
+</svg>

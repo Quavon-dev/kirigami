@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 676" width="860" height="676" role="img" aria-labelledby="t d">
+<style>
+svg { --surface:#fcfcfb; --plane:#f4f3ef; --ink:#0b0b0b; --ink2:#52514e; --muted:#77756f; --grid:#e1e0d9; --axis:#c3c2b7;
+      --a:#2a78d6; --b:#eb6834; --c:#1baf7a; --d:#eda100; --kiri:#eb6834; --kiri-wash:rgba(235,104,52,.12);
+      --serial:#9b9993; --good:#0ca30c; --idle:#ecebe6; --ring:#fcfcfb; }
+@media (prefers-color-scheme: dark) {
+  svg { --surface:#1a1a19; --plane:#232321; --ink:#f0efec; --ink2:#c3c2b7; --muted:#9a988f; --grid:#2c2c2a; --axis:#383835;
+        --a:#3987e5; --b:#d95926; --c:#199e70; --d:#c98500; --kiri:#d95926; --kiri-wash:rgba(217,89,38,.16);
+        --serial:#6f6e68; --good:#0ca30c; --idle:#2a2a28; --ring:#1a1a19; }
+}
+text { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; fill:var(--ink); }
+.t { font-size:22px; font-weight:650; }
+.s { font-size:13.5px; fill:var(--ink2); }
+.h { font-size:15px; font-weight:650; }
+.l { font-size:13px; }
+.a { font-size:12px; fill:var(--muted); }
+.n { font-size:12px; fill:var(--ink2); font-variant-numeric:tabular-nums; }
+.v { font-size:13px; font-weight:650; }
+.big { font-size:40px; font-weight:700; }
+.cap { font-size:11px; font-weight:650; letter-spacing:.06em; fill:var(--muted); }
+.w { fill:#ffffff; font-weight:700; }
+
+.ph { font-size:13px; font-weight:650; }
+.num { font-size:11px; font-weight:700; fill:var(--surface); }
+.li { font-size:12.5px; fill:var(--ink2); }
+.lib { font-size:12.5px; font-weight:650; }
+.seg { font-size:12.5px; font-weight:650; }
+.segw { font-size:12.5px; font-weight:650; fill:#ffffff; }
+</style>
+<title id="t">Inside one tick</title>
+<desc id="d">One world tick in vanilla order. Setup, spawn commit, serial entities and cleanup run on the main thread. Spawn search and the entity tracker run on all threads. Random block ticks, entities and block entities run in four steps, A to D cells, on all threads. Plugin code and blocking chunk loads pause the other threads. Of a 90 ms serial tick, about 28.5 ms still runs on one thread and about 61.5 ms runs in parallel, so 12 cores bring it to 34.6 ms.</desc>
+<rect width="860" height="676" rx="14" style="fill:var(--surface)"/>
+<text class="t" x="28" y="42">Inside one tick</text>
+<text class="s" x="28" y="65">What runs on the main thread and what runs on every core; the order is vanilla&#x27;s</text>
+<text class="l" x="116" y="147" text-anchor="end">Main thread</text>
+<text class="l" x="116" y="186" text-anchor="end">11 workers</text>
+<text class="a" x="116" y="202" text-anchor="end">on 12 cores</text>
+<rect x="128" y="132" width="708" height="22" rx="3" style="fill:var(--idle)"/>
+<rect x="128" y="162" width="708" height="12" rx="3" style="fill:var(--idle)"/>
+<rect x="128" y="180" width="708" height="12" rx="3" style="fill:var(--idle)"/>
+<rect x="128" y="198" width="708" height="12" rx="3" style="fill:var(--idle)"/>
+<circle cx="137" cy="113" r="9" style="fill:var(--ink)"/>
+<text class="num" x="137" y="117" text-anchor="middle">1</text>
+<rect x="128" y="132" width="58" height="22" rx="3" style="fill:var(--serial)"/>
+<circle cx="201" cy="113" r="9" style="fill:var(--ink)"/>
+<text class="num" x="201" y="117" text-anchor="middle">2</text>
+<text class="ph" x="215" y="118">Spawning</text>
+<rect x="192" y="132" width="39.4" height="22" rx="3" style="fill:var(--serial)"/>
+<rect x="192" y="162" width="47.8" height="12" rx="3" style="fill:var(--serial)"/>
+<rect x="192" y="180" width="46.9" height="12" rx="3" style="fill:var(--serial)"/>
+<rect x="192" y="198" width="46.1" height="12" rx="3" style="fill:var(--serial)"/>
+<rect x="248.3" y="132" width="29.7" height="22" rx="3" style="fill:var(--serial)"/>
+<circle cx="293" cy="113" r="9" style="fill:var(--ink)"/>
+<text class="num" x="293" y="117" text-anchor="middle">3</text>
+<text class="ph" x="307" y="118">Random ticks</text>
+<rect x="284" y="132" width="21.2" height="22" rx="2" style="fill:var(--a)"/>
+<rect x="284" y="162" width="17.3" height="12" rx="2" style="fill:var(--a)"/>
+<rect x="284" y="180" width="25.5" height="12" rx="2" style="fill:var(--a)"/>
+<rect x="284" y="198" width="21.6" height="12" rx="2" style="fill:var(--a)"/>
+<rect x="314.2" y="132" width="20.6" height="22" rx="2" style="fill:var(--b)"/>
+<rect x="314.2" y="162" width="16.7" height="12" rx="2" style="fill:var(--b)"/>
+<rect x="314.2" y="180" width="25" height="12" rx="2" style="fill:var(--b)"/>
+<rect x="314.2" y="198" width="21.1" height="12" rx="2" style="fill:var(--b)"/>
+<rect x="344.5" y="132" width="20" height="22" rx="2" style="fill:var(--c)"/>
+<rect x="344.5" y="162" width="16.1" height="12" rx="2" style="fill:var(--c)"/>
+<rect x="344.5" y="180" width="24.4" height="12" rx="2" style="fill:var(--c)"/>
+<rect x="344.5" y="198" width="20.6" height="12" rx="2" style="fill:var(--c)"/>
+<rect x="374.8" y="132" width="19.4" height="22" rx="2" style="fill:var(--d)"/>
+<rect x="374.8" y="162" width="15.5" height="12" rx="2" style="fill:var(--d)"/>
+<rect x="374.8" y="180" width="23.9" height="12" rx="2" style="fill:var(--d)"/>
+<rect x="374.8" y="198" width="20" height="12" rx="2" style="fill:var(--d)"/>
+<circle cx="417" cy="113" r="9" style="fill:var(--ink)"/>
+<text class="num" x="417" y="117" text-anchor="middle">4</text>
+<text class="ph" x="431" y="118">Tracker</text>
+<rect x="408" y="132" width="63" height="22" rx="3" style="fill:var(--serial)"/>
+<rect x="408" y="162" width="51.9" height="12" rx="3" style="fill:var(--serial)"/>
+<rect x="408" y="180" width="50.9" height="12" rx="3" style="fill:var(--serial)"/>
+<rect x="408" y="198" width="49.9" height="12" rx="3" style="fill:var(--serial)"/>
+<circle cx="491" cy="113" r="9" style="fill:var(--ink)"/>
+<text class="num" x="491" y="117" text-anchor="middle">5</text>
+<text class="ph" x="505" y="118">Entities</text>
+<rect x="482" y="132" width="13.2" height="22" rx="2" style="fill:var(--a)"/>
+<rect x="482" y="162" width="20.3" height="12" rx="2" style="fill:var(--a)"/>
+<rect x="482" y="180" width="17.1" height="12" rx="2" style="fill:var(--a)"/>
+<rect x="482" y="198" width="13.5" height="12" rx="2" style="fill:var(--a)"/>
+<rect x="508.8" y="132" width="23.4" height="22" rx="2" style="fill:var(--b)"/>
+<rect x="508.8" y="162" width="19.8" height="12" rx="2" style="fill:var(--b)"/>
+<rect x="508.8" y="180" width="16.6" height="12" rx="2" style="fill:var(--b)"/>
+<rect x="508.8" y="198" width="23.7" height="12" rx="2" style="fill:var(--b)"/>
+<rect x="535.6" y="132" width="22.9" height="22" rx="2" style="fill:var(--c)"/>
+<rect x="535.6" y="162" width="19.3" height="12" rx="2" style="fill:var(--c)"/>
+<rect x="535.6" y="180" width="16.1" height="12" rx="2" style="fill:var(--c)"/>
+<rect x="535.6" y="198" width="23.4" height="12" rx="2" style="fill:var(--c)"/>
+<rect x="562.4" y="132" width="22.4" height="22" rx="2" style="fill:var(--d)"/>
+<rect x="562.4" y="162" width="18.8" height="12" rx="2" style="fill:var(--d)"/>
+<rect x="562.4" y="180" width="15.4" height="12" rx="2" style="fill:var(--d)"/>
+<rect x="562.4" y="198" width="22.9" height="12" rx="2" style="fill:var(--d)"/>
+<rect x="589.2" y="132" width="33.8" height="22" rx="3" style="fill:var(--serial)"/>
+<circle cx="638" cy="113" r="9" style="fill:var(--ink)"/>
+<text class="num" x="638" y="117" text-anchor="middle">6</text>
+<text class="ph" x="652" y="118">Block entities</text>
+<rect x="629" y="132" width="15.9" height="22" rx="2" style="fill:var(--a)"/>
+<rect x="629" y="162" width="23" height="12" rx="2" style="fill:var(--a)"/>
+<rect x="629" y="180" width="14.3" height="12" rx="2" style="fill:var(--a)"/>
+<rect x="629" y="198" width="16.1" height="12" rx="2" style="fill:var(--a)"/>
+<rect x="655.8" y="132" width="20.7" height="22" rx="2" style="fill:var(--b)"/>
+<rect x="655.8" y="162" width="22.5" height="12" rx="2" style="fill:var(--b)"/>
+<rect x="655.8" y="180" width="13.9" height="12" rx="2" style="fill:var(--b)"/>
+<rect x="655.8" y="198" width="21" height="12" rx="2" style="fill:var(--b)"/>
+<rect x="682.6" y="132" width="20.3" height="22" rx="2" style="fill:var(--c)"/>
+<rect x="682.6" y="162" width="22" height="12" rx="2" style="fill:var(--c)"/>
+<rect x="682.6" y="180" width="13.4" height="12" rx="2" style="fill:var(--c)"/>
+<rect x="682.6" y="198" width="20.7" height="12" rx="2" style="fill:var(--c)"/>
+<rect x="709.4" y="132" width="19.7" height="22" rx="2" style="fill:var(--d)"/>
+<rect x="709.4" y="162" width="21.5" height="12" rx="2" style="fill:var(--d)"/>
+<rect x="709.4" y="180" width="18.2" height="12" rx="2" style="fill:var(--d)"/>
+<rect x="709.4" y="198" width="20.3" height="12" rx="2" style="fill:var(--d)"/>
+<rect x="736.2" y="132" width="33.8" height="22" rx="3" style="fill:var(--serial)"/>
+<circle cx="785" cy="113" r="9" style="fill:var(--ink)"/>
+<text class="num" x="785" y="117" text-anchor="middle">7</text>
+<rect x="776" y="132" width="60" height="22" rx="3" style="fill:var(--serial)"/>
+<rect x="128" y="234" width="16" height="12" rx="3" style="fill:var(--a)"/>
+<rect x="150" y="234" width="16" height="12" rx="3" style="fill:var(--b)"/>
+<rect x="172" y="234" width="16" height="12" rx="3" style="fill:var(--c)"/>
+<rect x="194" y="234" width="16" height="12" rx="3" style="fill:var(--d)"/>
+<text class="l" x="220" y="244">cells A to D, four steps</text>
+<rect x="390" y="234" width="16" height="12" rx="3" style="fill:var(--serial)"/>
+<text class="l" x="413" y="244">no cell colour (one lane: serial)</text>
+<rect x="640" y="234" width="16" height="12" rx="3" style="fill:var(--idle)"/>
+<text class="l" x="663" y="244">waiting</text>
+<text class="lib" x="28" y="290">1</text>
+<text class="lib" x="44" y="290">Setup</text>
+<text class="li" x="146" y="290">weather, time, scheduled block ticks, raids</text>
+<text class="lib" x="28" y="312">2</text>
+<text class="lib" x="44" y="312">Spawning</text>
+<text class="li" x="146" y="312">search spots in parallel, commit in vanilla order</text>
+<text class="lib" x="28" y="334">3</text>
+<text class="lib" x="44" y="334">Random ticks</text>
+<text class="li" x="146" y="334">crops, leaves, fluids; 100 % parallel</text>
+<text class="lib" x="28" y="356">4</text>
+<text class="lib" x="44" y="356">Tracker</text>
+<text class="li" x="146" y="356">send entity updates to players, sliced</text>
+<text class="lib" x="458" y="290">5</text>
+<text class="lib" x="474" y="290">Entities</text>
+<text class="li" x="576" y="290">96–99 % parallel; players, vehicles last</text>
+<text class="lib" x="458" y="312">6</text>
+<text class="lib" x="474" y="312">Block entities</text>
+<text class="li" x="576" y="312">99 % parallel; border hopper chains last</text>
+<text class="lib" x="458" y="334">7</text>
+<text class="lib" x="474" y="334">Cleanup</text>
+<text class="li" x="576" y="334">entity management on the main thread</text>
+<rect x="16" y="392" width="828" height="108" rx="12" style="fill:var(--plane)"/>
+<text class="h" x="28" y="418">World pause</text>
+<text class="li" x="28" y="440">A plugin event with listeners or a blocking chunk load comes up:</text>
+<text class="li" x="28" y="457">every other thread finishes its current item and waits, and the code</text>
+<text class="li" x="28" y="474">runs alone as on Paper. About 5 % of worker time with six plugins.</text>
+<rect x="500" y="414" width="328" height="14" rx="3" style="fill:var(--idle)"/>
+<rect x="500" y="414" width="104.2" height="14" rx="2" style="fill:var(--a)"/>
+<rect x="706" y="414" width="122" height="14" rx="2" style="fill:var(--a)"/>
+<rect x="500" y="436" width="328" height="14" rx="3" style="fill:var(--idle)"/>
+<rect x="500" y="436" width="116.8" height="14" rx="2" style="fill:var(--a)"/>
+<rect x="706" y="436" width="122" height="14" rx="2" style="fill:var(--a)"/>
+<rect x="500" y="458" width="328" height="14" rx="3" style="fill:var(--idle)"/>
+<rect x="500" y="458" width="116.3" height="14" rx="2" style="fill:var(--a)"/>
+<rect x="706" y="458" width="122" height="14" rx="2" style="fill:var(--a)"/>
+<rect x="638" y="414" width="62" height="58" rx="4" style="fill:var(--serial)"/>
+<text class="seg" x="669" y="447" text-anchor="middle">plugin</text>
+<text class="a" x="669" y="490" text-anchor="middle">the others wait</text>
+<text class="h" x="28" y="538">Where the 90 ms go</text>
+<text class="l" x="184" y="573" text-anchor="end">Paper, one thread</text>
+<rect x="196" y="556" width="186.1" height="24" rx="4" style="fill:var(--serial)"/>
+<text class="seg" x="206" y="573">28.5 ms on one thread</text>
+<rect x="384.1" y="556" width="403.9" height="24" rx="4" style="fill:var(--kiri)"/>
+<text class="segw" x="394.1" y="573">61.5 ms that can run on every core</text>
+<text class="v" x="798" y="573">90 ms</text>
+<text class="l" x="184" y="609" text-anchor="end">Kirigami, 12 cores</text>
+<rect x="196" y="592" width="186.1" height="24" rx="4" style="fill:var(--serial)"/>
+<text class="seg" x="206" y="609">28.5 ms</text>
+<rect x="384.1" y="592" width="38.3" height="24" rx="4" style="fill:var(--kiri)"/>
+<text class="v" x="432.4" y="609">34.6 ms</text>
+<text class="a" x="28" y="654">Phase widths in the top diagram are schematic. The 28.5 / 61.5 ms split is a fit to the core-count runs and matches every one within 1 ms.</text>
+</svg>

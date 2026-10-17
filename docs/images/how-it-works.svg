@@ -1,0 +1,220 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 676" width="860" height="676" role="img" aria-labelledby="t d">
+<style>
+svg { --surface:#fcfcfb; --plane:#f4f3ef; --ink:#0b0b0b; --ink2:#52514e; --muted:#77756f; --grid:#e1e0d9; --axis:#c3c2b7;
+      --a:#2a78d6; --b:#eb6834; --c:#1baf7a; --d:#eda100; --kiri:#eb6834; --kiri-wash:rgba(235,104,52,.12);
+      --serial:#9b9993; --good:#0ca30c; --idle:#ecebe6; --ring:#fcfcfb; }
+@media (prefers-color-scheme: dark) {
+  svg { --surface:#1a1a19; --plane:#232321; --ink:#f0efec; --ink2:#c3c2b7; --muted:#9a988f; --grid:#2c2c2a; --axis:#383835;
+        --a:#3987e5; --b:#d95926; --c:#199e70; --d:#c98500; --kiri:#d95926; --kiri-wash:rgba(217,89,38,.16);
+        --serial:#6f6e68; --good:#0ca30c; --idle:#2a2a28; --ring:#1a1a19; }
+}
+text { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; fill:var(--ink); }
+.t { font-size:22px; font-weight:650; }
+.s { font-size:13.5px; fill:var(--ink2); }
+.h { font-size:15px; font-weight:650; }
+.l { font-size:13px; }
+.a { font-size:12px; fill:var(--muted); }
+.n { font-size:12px; fill:var(--ink2); font-variant-numeric:tabular-nums; }
+.v { font-size:13px; font-weight:650; }
+.big { font-size:40px; font-weight:700; }
+.cap { font-size:11px; font-weight:650; letter-spacing:.06em; fill:var(--muted); }
+.w { fill:#ffffff; font-weight:700; }
+
+svg { --a-wash:rgba(42,120,214,.16); --b-wash:rgba(235,104,52,.16); --c-wash:rgba(27,175,122,.18); --d-wash:rgba(237,161,0,.2); }
+@media (prefers-color-scheme: dark) { svg { --a-wash:rgba(57,135,229,.22); --b-wash:rgba(217,89,38,.22); --c-wash:rgba(25,158,112,.24); --d-wash:rgba(201,133,0,.26); } }
+.cl { font-size:13px; font-weight:700; }
+.ink-on { fill:#0b0b0b; font-weight:700; }
+.dim { fill:var(--muted); font-weight:600; }
+</style>
+<title id="t">How Kirigami splits the world</title>
+<desc id="d">The world is divided into cells of 8 by 8 chunks, coloured A, B, C and D like a two by two checkerboard. Each phase of a tick runs in four steps: all A cells at once on every core, then all B, C and D cells. Code in a cell writes at most 2 chunks and reads at most 6 chunks beyond its edge; 2 plus 6 is 8, one cell, so what one A cell writes is never read by another A cell in the same step.</desc>
+<rect width="860" height="676" rx="14" style="fill:var(--surface)"/>
+<text class="t" x="28" y="42">How the world is split</text>
+<text class="s" x="28" y="65">Cells of 8 × 8 chunks (128 × 128 blocks), coloured A to D like a checkerboard</text>
+<text class="cap" x="28" y="112">1   EVERY PHASE RUNS IN FOUR STEPS</text>
+<rect x="100" y="130" width="27" height="27" rx="3" style="fill:var(--a)"/>
+<text class="cl w" x="113.5" y="148" text-anchor="middle">A</text>
+<rect x="130" y="130" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="143.5" y="148" text-anchor="middle">B</text>
+<rect x="160" y="130" width="27" height="27" rx="3" style="fill:var(--a)"/>
+<text class="cl w" x="173.5" y="148" text-anchor="middle">A</text>
+<rect x="190" y="130" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="203.5" y="148" text-anchor="middle">B</text>
+<rect x="100" y="160" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="113.5" y="178" text-anchor="middle">C</text>
+<rect x="130" y="160" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="143.5" y="178" text-anchor="middle">D</text>
+<rect x="160" y="160" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="173.5" y="178" text-anchor="middle">C</text>
+<rect x="190" y="160" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="203.5" y="178" text-anchor="middle">D</text>
+<rect x="100" y="190" width="27" height="27" rx="3" style="fill:var(--a)"/>
+<text class="cl w" x="113.5" y="208" text-anchor="middle">A</text>
+<rect x="130" y="190" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="143.5" y="208" text-anchor="middle">B</text>
+<rect x="160" y="190" width="27" height="27" rx="3" style="fill:var(--a)"/>
+<text class="cl w" x="173.5" y="208" text-anchor="middle">A</text>
+<rect x="190" y="190" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="203.5" y="208" text-anchor="middle">B</text>
+<rect x="100" y="220" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="113.5" y="238" text-anchor="middle">C</text>
+<rect x="130" y="220" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="143.5" y="238" text-anchor="middle">D</text>
+<rect x="160" y="220" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="173.5" y="238" text-anchor="middle">C</text>
+<rect x="190" y="220" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="203.5" y="238" text-anchor="middle">D</text>
+<text class="h" x="158.5" y="273" text-anchor="middle">Step 1</text>
+<text class="s" x="158.5" y="292" text-anchor="middle">all A cells at once</text>
+<path d="M240 188.5H256M250 182.5L257 188.5L250 194.5" style="fill:none;stroke:var(--muted)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="281" y="130" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="294.5" y="148" text-anchor="middle">A</text>
+<rect x="311" y="130" width="27" height="27" rx="3" style="fill:var(--b)"/>
+<text class="cl w" x="324.5" y="148" text-anchor="middle">B</text>
+<rect x="341" y="130" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="354.5" y="148" text-anchor="middle">A</text>
+<rect x="371" y="130" width="27" height="27" rx="3" style="fill:var(--b)"/>
+<text class="cl w" x="384.5" y="148" text-anchor="middle">B</text>
+<rect x="281" y="160" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="294.5" y="178" text-anchor="middle">C</text>
+<rect x="311" y="160" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="324.5" y="178" text-anchor="middle">D</text>
+<rect x="341" y="160" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="354.5" y="178" text-anchor="middle">C</text>
+<rect x="371" y="160" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="384.5" y="178" text-anchor="middle">D</text>
+<rect x="281" y="190" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="294.5" y="208" text-anchor="middle">A</text>
+<rect x="311" y="190" width="27" height="27" rx="3" style="fill:var(--b)"/>
+<text class="cl w" x="324.5" y="208" text-anchor="middle">B</text>
+<rect x="341" y="190" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="354.5" y="208" text-anchor="middle">A</text>
+<rect x="371" y="190" width="27" height="27" rx="3" style="fill:var(--b)"/>
+<text class="cl w" x="384.5" y="208" text-anchor="middle">B</text>
+<rect x="281" y="220" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="294.5" y="238" text-anchor="middle">C</text>
+<rect x="311" y="220" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="324.5" y="238" text-anchor="middle">D</text>
+<rect x="341" y="220" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="354.5" y="238" text-anchor="middle">C</text>
+<rect x="371" y="220" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="384.5" y="238" text-anchor="middle">D</text>
+<text class="h" x="339.5" y="273" text-anchor="middle">Step 2</text>
+<text class="s" x="339.5" y="292" text-anchor="middle">all B cells at once</text>
+<path d="M421 188.5H437M431 182.5L438 188.5L431 194.5" style="fill:none;stroke:var(--muted)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="462" y="130" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="475.5" y="148" text-anchor="middle">A</text>
+<rect x="492" y="130" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="505.5" y="148" text-anchor="middle">B</text>
+<rect x="522" y="130" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="535.5" y="148" text-anchor="middle">A</text>
+<rect x="552" y="130" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="565.5" y="148" text-anchor="middle">B</text>
+<rect x="462" y="160" width="27" height="27" rx="3" style="fill:var(--c)"/>
+<text class="cl ink-on" x="475.5" y="178" text-anchor="middle">C</text>
+<rect x="492" y="160" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="505.5" y="178" text-anchor="middle">D</text>
+<rect x="522" y="160" width="27" height="27" rx="3" style="fill:var(--c)"/>
+<text class="cl ink-on" x="535.5" y="178" text-anchor="middle">C</text>
+<rect x="552" y="160" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="565.5" y="178" text-anchor="middle">D</text>
+<rect x="462" y="190" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="475.5" y="208" text-anchor="middle">A</text>
+<rect x="492" y="190" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="505.5" y="208" text-anchor="middle">B</text>
+<rect x="522" y="190" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="535.5" y="208" text-anchor="middle">A</text>
+<rect x="552" y="190" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="565.5" y="208" text-anchor="middle">B</text>
+<rect x="462" y="220" width="27" height="27" rx="3" style="fill:var(--c)"/>
+<text class="cl ink-on" x="475.5" y="238" text-anchor="middle">C</text>
+<rect x="492" y="220" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="505.5" y="238" text-anchor="middle">D</text>
+<rect x="522" y="220" width="27" height="27" rx="3" style="fill:var(--c)"/>
+<text class="cl ink-on" x="535.5" y="238" text-anchor="middle">C</text>
+<rect x="552" y="220" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="565.5" y="238" text-anchor="middle">D</text>
+<text class="h" x="520.5" y="273" text-anchor="middle">Step 3</text>
+<text class="s" x="520.5" y="292" text-anchor="middle">all C cells at once</text>
+<path d="M602 188.5H618M612 182.5L619 188.5L612 194.5" style="fill:none;stroke:var(--muted)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="643" y="130" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="656.5" y="148" text-anchor="middle">A</text>
+<rect x="673" y="130" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="686.5" y="148" text-anchor="middle">B</text>
+<rect x="703" y="130" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="716.5" y="148" text-anchor="middle">A</text>
+<rect x="733" y="130" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="746.5" y="148" text-anchor="middle">B</text>
+<rect x="643" y="160" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="656.5" y="178" text-anchor="middle">C</text>
+<rect x="673" y="160" width="27" height="27" rx="3" style="fill:var(--d)"/>
+<text class="cl ink-on" x="686.5" y="178" text-anchor="middle">D</text>
+<rect x="703" y="160" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="716.5" y="178" text-anchor="middle">C</text>
+<rect x="733" y="160" width="27" height="27" rx="3" style="fill:var(--d)"/>
+<text class="cl ink-on" x="746.5" y="178" text-anchor="middle">D</text>
+<rect x="643" y="190" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="656.5" y="208" text-anchor="middle">A</text>
+<rect x="673" y="190" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="686.5" y="208" text-anchor="middle">B</text>
+<rect x="703" y="190" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="716.5" y="208" text-anchor="middle">A</text>
+<rect x="733" y="190" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="746.5" y="208" text-anchor="middle">B</text>
+<rect x="643" y="220" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="656.5" y="238" text-anchor="middle">C</text>
+<rect x="673" y="220" width="27" height="27" rx="3" style="fill:var(--d)"/>
+<text class="cl ink-on" x="686.5" y="238" text-anchor="middle">D</text>
+<rect x="703" y="220" width="27" height="27" rx="3" style="fill:var(--idle)"/>
+<text class="cl dim" x="716.5" y="238" text-anchor="middle">C</text>
+<rect x="733" y="220" width="27" height="27" rx="3" style="fill:var(--d)"/>
+<text class="cl ink-on" x="746.5" y="238" text-anchor="middle">D</text>
+<text class="h" x="701.5" y="273" text-anchor="middle">Step 4</text>
+<text class="s" x="701.5" y="292" text-anchor="middle">all D cells at once</text>
+<text class="s" x="430" y="330" text-anchor="middle">Random block ticks, entities and block entities each run these four steps.</text>
+<text class="s" x="430" y="350" text-anchor="middle">Within a step every core takes cells from a shared queue; the next step starts when all are done.</text>
+<text class="cap" x="28" y="404">2   WHY TWO CELLS OF ONE COLOUR NEVER COLLIDE</text>
+<text class="l" x="309" y="436" text-anchor="middle">A cell</text>
+<rect x="214" y="446" width="22" height="22" rx="2" style="fill:var(--a-wash)"/>
+<rect x="238" y="446" width="22" height="22" rx="2" style="fill:var(--a-wash)"/>
+<rect x="262" y="446" width="22" height="22" rx="2" style="fill:var(--a-wash)"/>
+<rect x="286" y="446" width="22" height="22" rx="2" style="fill:var(--a-wash)"/>
+<rect x="310" y="446" width="22" height="22" rx="2" style="fill:var(--a-wash)"/>
+<rect x="334" y="446" width="22" height="22" rx="2" style="fill:var(--a-wash)"/>
+<rect x="358" y="446" width="22" height="22" rx="2" style="fill:var(--a-wash)"/>
+<rect x="382" y="446" width="22" height="22" rx="2" style="fill:var(--a-wash)"/>
+<text class="l" x="511" y="436" text-anchor="middle">B cell in between</text>
+<rect x="416" y="446" width="22" height="22" rx="2" style="fill:var(--idle)"/>
+<rect x="440" y="446" width="22" height="22" rx="2" style="fill:var(--idle)"/>
+<rect x="464" y="446" width="22" height="22" rx="2" style="fill:var(--idle)"/>
+<rect x="488" y="446" width="22" height="22" rx="2" style="fill:var(--idle)"/>
+<rect x="512" y="446" width="22" height="22" rx="2" style="fill:var(--idle)"/>
+<rect x="536" y="446" width="22" height="22" rx="2" style="fill:var(--idle)"/>
+<rect x="560" y="446" width="22" height="22" rx="2" style="fill:var(--idle)"/>
+<rect x="584" y="446" width="22" height="22" rx="2" style="fill:var(--idle)"/>
+<text class="l" x="713" y="436" text-anchor="middle">next A cell</text>
+<rect x="618" y="446" width="22" height="22" rx="2" style="fill:var(--a-wash)"/>
+<rect x="642" y="446" width="22" height="22" rx="2" style="fill:var(--a-wash)"/>
+<rect x="666" y="446" width="22" height="22" rx="2" style="fill:var(--a-wash)"/>
+<rect x="690" y="446" width="22" height="22" rx="2" style="fill:var(--a-wash)"/>
+<rect x="714" y="446" width="22" height="22" rx="2" style="fill:var(--a-wash)"/>
+<rect x="738" y="446" width="22" height="22" rx="2" style="fill:var(--a-wash)"/>
+<rect x="762" y="446" width="22" height="22" rx="2" style="fill:var(--a-wash)"/>
+<rect x="786" y="446" width="22" height="22" rx="2" style="fill:var(--a-wash)"/>
+<text class="a" x="198" y="462" text-anchor="end">24 chunks</text>
+<text class="l" x="198" y="497" text-anchor="end">Writes · 2 chunks</text>
+<text class="l" x="198" y="523" text-anchor="end">Reads · 6 chunks</text>
+<rect x="416" y="484" width="46" height="18" rx="4" style="fill:var(--a)"/>
+<text class="cl w" x="439" y="497" text-anchor="middle">A</text>
+<rect x="560" y="484" width="46" height="18" rx="4" style="fill:var(--a)"/>
+<text class="cl w" x="583" y="497" text-anchor="middle">A</text>
+<rect x="416" y="510" width="142" height="18" rx="4" style="fill:var(--a-wash)"/>
+<text class="l" x="470" y="523">first A reads</text>
+<rect x="464" y="532" width="142" height="18" rx="4" style="fill:var(--a-wash)"/>
+<text class="l" x="470" y="545">next A reads</text>
+<line x1="462.5" y1="480" x2="462.5" y2="554" style="stroke:var(--ink2)" stroke-width="1.5"/>
+<line x1="558.5" y1="480" x2="558.5" y2="554" style="stroke:var(--ink2)" stroke-width="1.5"/>
+<text class="s" x="430" y="600" text-anchor="middle">2 + 6 = 8 chunks, exactly one cell. What one A cell writes, no other A cell reads in the same step,</text>
+<text class="s" x="430" y="620" text-anchor="middle">so both run at the same time. Reads may overlap: two threads reading one chunk is safe.</text>
+<text class="a" x="28" y="654">Reach = how far beyond its own edge code in a cell touches the world. It is measured with kirigami.checkReads in tests.</text>
+</svg>

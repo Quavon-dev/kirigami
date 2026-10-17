@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Leopold <77323443+MadebyLeopold@users.noreply.github.com>
+Date: Fri, 16 Oct 2026 22:04:21 +0200
+Subject: [PATCH] Pause world for kill score awarding
+
+
+diff --git a/net/minecraft/world/entity/LivingEntity.java b/net/minecraft/world/entity/LivingEntity.java
+index 23297b54c74684765f90e9e599d051a44357e9a5..4272d410fa8c5d918bea16ac52f21a4541c80a13 100644
+--- a/net/minecraft/world/entity/LivingEntity.java
++++ b/net/minecraft/world/entity/LivingEntity.java
+@@ -1840,7 +1840,7 @@ public abstract class LivingEntity extends Entity implements Attackable, Waypoin
+             LivingEntity killer = this.getKillCredit();
+             Runnable afterEvent = () -> { // Paper
+             if (killer != null) {
+-                killer.awardKillScore(this, source);
++                mtserver.parallel.WorldPause.exclusiveRun(() -> killer.awardKillScore(this, source)); // MT
+             }
+ 
+             if (this.isSleeping()) {

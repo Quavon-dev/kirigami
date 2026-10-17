@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 682" width="860" height="682" role="img" aria-labelledby="t d">
+<style>
+svg { --surface:#fcfcfb; --plane:#f4f3ef; --ink:#0b0b0b; --ink2:#52514e; --muted:#77756f; --grid:#e1e0d9; --axis:#c3c2b7;
+      --a:#2a78d6; --b:#eb6834; --c:#1baf7a; --d:#eda100; --kiri:#eb6834; --kiri-wash:rgba(235,104,52,.12);
+      --serial:#9b9993; --good:#0ca30c; --idle:#ecebe6; --ring:#fcfcfb; }
+@media (prefers-color-scheme: dark) {
+  svg { --surface:#1a1a19; --plane:#232321; --ink:#f0efec; --ink2:#c3c2b7; --muted:#9a988f; --grid:#2c2c2a; --axis:#383835;
+        --a:#3987e5; --b:#d95926; --c:#199e70; --d:#c98500; --kiri:#d95926; --kiri-wash:rgba(217,89,38,.16);
+        --serial:#6f6e68; --good:#0ca30c; --idle:#2a2a28; --ring:#1a1a19; }
+}
+text { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; fill:var(--ink); }
+.t { font-size:22px; font-weight:650; }
+.s { font-size:13.5px; fill:var(--ink2); }
+.h { font-size:15px; font-weight:650; }
+.l { font-size:13px; }
+.a { font-size:12px; fill:var(--muted); }
+.n { font-size:12px; fill:var(--ink2); font-variant-numeric:tabular-nums; }
+.v { font-size:13px; font-weight:650; }
+.big { font-size:40px; font-weight:700; }
+.cap { font-size:11px; font-weight:650; letter-spacing:.06em; fill:var(--muted); }
+.w { fill:#ffffff; font-weight:700; }
+
+.date { font-size:11.5px; font-weight:650; fill:var(--muted); font-variant-numeric:tabular-nums; }
+.ttl { font-size:14px; font-weight:650; }
+.det { font-size:12.5px; fill:var(--ink2); }
+.note { font-size:12.5px; fill:var(--ink2); paint-order:stroke; stroke-width:6px; stroke-linejoin:round; }
+</style>
+<title id="t">How Kirigami came together</title>
+<desc id="d">Milestones over three days with median tick time for 64 spread-out players: Paper 79 ms; parallel spawn search 58 to 61; entities in cells about 40; block ticks and block entities too 32 to 33; vanilla behaviour restored 37; 12 cores 35 ms. Also: a hopper race fixed by serial border chains, parallel villagers and tracker, a world pause for plugins, a four-hour soak with 0 errors, and parallel dimensions rejected because the overworld is 88 percent of the tick.</desc>
+<rect width="860" height="682" rx="14" style="fill:var(--surface)"/>
+<text class="t" x="28" y="42">From one thread to every core</text>
+<text class="s" x="28" y="65">How the idea came together in three days. Bars: median tick time, 64 spread-out players, lower is better</text>
+<line x1="404" y1="120" x2="404" y2="604" style="stroke:var(--grid)" stroke-width="1"/>
+<text class="a" x="404" y="114" text-anchor="middle">0</text>
+<line x1="511.2" y1="120" x2="511.2" y2="604" style="stroke:var(--grid)" stroke-width="1"/>
+<text class="a" x="511.2" y="114" text-anchor="middle">25 ms</text>
+<line x1="618.4" y1="120" x2="618.4" y2="604" style="stroke:var(--grid)" stroke-width="1"/>
+<text class="a" x="618.4" y="114" text-anchor="middle">50 ms</text>
+<line x1="725.7" y1="120" x2="725.7" y2="604" style="stroke:var(--grid)" stroke-width="1"/>
+<text class="a" x="725.7" y="114" text-anchor="middle">75 ms</text>
+<line x1="618.4" y1="120" x2="618.4" y2="604" style="stroke:var(--ink2)" stroke-width="1.5"/>
+<text class="a" x="624.4" y="100">50 ms = 20 ticks per second</text>
+<rect x="16" y="124" width="828" height="44" rx="8" style="fill:var(--plane)"/>
+<text class="date" x="28" y="144">Oct 15</text>
+<text class="ttl" x="80" y="144">Measure Paper first</text>
+<text class="det" x="80" y="161">64 spread-out players, one thread does all</text>
+<path d="M404 137H738.8Q742.8 137 742.8 141V151Q742.8 155 738.8 155H404Z" style="fill:var(--serial)"><title>Measure Paper first: 79 ms</title></path>
+<text class="v" x="750.8" y="150.5">79 ms</text>
+<text class="date" x="28" y="188">Oct 15</text>
+<text class="ttl" x="80" y="188">Spawn search on all cores</text>
+<text class="det" x="80" y="205">search in parallel, commit in vanilla order</text>
+<path d="M404 181H655.2Q659.2 181 659.2 185V195Q659.2 199 655.2 199H404Z" style="fill:var(--kiri)"><title>Spawn search on all cores: 58–61 ms</title></path>
+<text class="v" x="667.2" y="194.5">58–61 ms</text>
+<rect x="16" y="212" width="828" height="44" rx="8" style="fill:var(--plane)"/>
+<text class="date" x="28" y="232">Oct 15</text>
+<text class="ttl" x="80" y="232">Entities tick in cells</text>
+<text class="det" x="80" y="249">8 × 8-chunk cells, checkerboard A to D</text>
+<path d="M404 225H571.6Q575.6 225 575.6 229V239Q575.6 243 571.6 243H404Z" style="fill:var(--kiri)"><title>Entities tick in cells: ~40 ms</title></path>
+<text class="v" x="583.6" y="238.5">~40 ms</text>
+<text class="date" x="28" y="276">Oct 15</text>
+<text class="ttl" x="80" y="276">Block ticks and block entities too</text>
+<text class="det" x="80" y="293">random ticks, hoppers, furnaces per cell</text>
+<path d="M404 269H539.4Q543.4 269 543.4 273V283Q543.4 287 539.4 287H404Z" style="fill:var(--kiri)"><title>Block ticks and block entities too: 32–33 ms</title></path>
+<text class="v" x="551.4" y="282.5">32–33 ms</text>
+<rect x="16" y="300" width="828" height="44" rx="8" style="fill:var(--plane)"/>
+<text class="date" x="28" y="320">Oct 16</text>
+<text class="ttl" x="80" y="320">Vanilla behaviour first</text>
+<text class="det" x="80" y="337">Paper&#x27;s gameplay changes reverted</text>
+<path d="M404 313H558.7Q562.7 313 562.7 317V327Q562.7 331 558.7 331H404Z" style="fill:var(--kiri)"><title>Vanilla behaviour first: 37 ms</title></path>
+<text class="v" x="570.7" y="326.5">37 ms</text>
+<text class="date" x="28" y="364">Oct 16</text>
+<text class="ttl" x="80" y="364">Hopper race found and fixed</text>
+<text class="det" x="80" y="381">chains across a cell border now run serially</text>
+<circle cx="412" cy="366" r="8" style="fill:var(--good)"/>
+<path d="M-4 0L-1 3L4.5 -3.5" transform="translate(412 366)" style="fill:none;stroke:#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text class="note" x="428" y="370.5" style="stroke:var(--surface)">Bit-for-bit tests match vanilla again</text>
+<rect x="16" y="388" width="828" height="44" rx="8" style="fill:var(--plane)"/>
+<text class="date" x="28" y="408">Oct 16</text>
+<text class="ttl" x="80" y="408">Villagers and the entity tracker</text>
+<text class="det" x="80" y="425">job sites and beds claimed atomically</text>
+<circle cx="412" cy="410" r="4" style="fill:var(--muted)"/>
+<text class="note" x="428" y="414.5" style="stroke:var(--plane)">Village benchmark: 67–80 ms → 45 ms</text>
+<text class="date" x="28" y="452">Oct 16</text>
+<text class="ttl" x="80" y="452">Plugins without going serial</text>
+<text class="det" x="80" y="469">the world pauses while plugin code runs</text>
+<circle cx="412" cy="454" r="4" style="fill:var(--muted)"/>
+<text class="note" x="428" y="458.5" style="stroke:var(--surface)">With plugins 46 ms, forcing serial 123 ms</text>
+<rect x="16" y="476" width="828" height="44" rx="8" style="fill:var(--plane)"/>
+<text class="date" x="28" y="496">Oct 17</text>
+<text class="ttl" x="80" y="496">Scale with the cores</text>
+<text class="det" x="80" y="513">12 cores, container limits</text>
+<path d="M404 489H548.4Q552.4 489 552.4 493V503Q552.4 507 548.4 507H404Z" style="fill:var(--kiri)"><title>Scale with the cores: 35 ms</title></path>
+<text class="v" x="560.4" y="502.5">35 ms</text>
+<text class="date" x="28" y="540">Oct 17</text>
+<text class="ttl" x="80" y="540">Four-hour soak</text>
+<text class="det" x="80" y="557">three dimensions, six plugins</text>
+<circle cx="412" cy="542" r="8" style="fill:var(--good)"/>
+<path d="M-4 0L-1 3L4.5 -3.5" transform="translate(412 542)" style="fill:none;stroke:#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text class="note" x="428" y="546.5" style="stroke:var(--surface)">0 errors</text>
+<rect x="16" y="564" width="828" height="44" rx="8" style="fill:var(--plane)"/>
+<text class="date" x="28" y="584">Oct 17</text>
+<text class="ttl" x="80" y="584">Parallel dimensions rejected</text>
+<text class="det" x="80" y="601">the overworld is 88 % of the tick</text>
+<circle cx="412" cy="586" r="8" style="fill:var(--muted)"/>
+<path d="M-3.5 -3.5L3.5 3.5M3.5 -3.5L-3.5 3.5" transform="translate(412 586)" style="fill:none;stroke:#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text class="note" x="428" y="590.5" style="stroke:var(--plane)">At most 12 % faster, too risky</text>
+<rect x="28" y="626" width="12" height="12" rx="3" style="fill:var(--serial)"/>
+<text class="l" x="47" y="636">Paper, one thread</text>
+<rect x="170" y="626" width="12" height="12" rx="3" style="fill:var(--kiri)"/>
+<text class="l" x="189" y="636">Kirigami</text>
+<text class="a" x="28" y="662">Numbers from the commit history, M2 Max. Machine load varied between runs; later runs with vanilla settings put serial at about 90 ms.</text>
+</svg>

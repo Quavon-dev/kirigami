@@ -1,0 +1,32 @@
+time minute heap_used_mb errors regionstats
+14:33:43 1 2822 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:34:43 2 4882 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:35:43 3 3238 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:36:43 4 5923 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:37:44 5 4108 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:38:44 6 3676 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:39:44 7 6348 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:40:44 8 5098 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:41:44 9 3431 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:42:44 10 5733 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:43:44 11 6032 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:44:45 12 5923 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:45:45 13 5415 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:46:45 14 3735 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:47:45 15 3194 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:48:45 16 6066 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:49:46 17 5764 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:50:46 18 5112 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:51:46 19 3959 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:52:46 20 6766 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:53:46 21 6410 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:54:46 22 5463 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:55:47 23 3750 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:56:47 24 6752 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:57:47 25 6431 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:58:47 26 5966 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+14:59:48 27 4602 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+15:00:48 28 3996 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+15:01:48 29 7150 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+15:02:48 30 6530 0 mtbench regionstats ticks=0 entities=0/0 chunks=0/0 blockEntities=0/0 cells=0 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=0
+15:03:02 done errors=0

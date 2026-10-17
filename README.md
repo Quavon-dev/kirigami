@@ -1,0 +1,145 @@
+<h1 align="center">
+  <img src="docs/images/kirigami-logo.svg" alt="Kirigami" width="580">
+</h1>
+
+Kirigami is a Paper 26.3 fork that ticks the world on all CPU cores while behaving like vanilla Minecraft. Vanilla behaviour comes first, Paper's own gameplay changes are switched back to vanilla by default, and plugins keep working.
+
+## The idea
+
+A Minecraft server ticks the whole world on one thread, and with 64 spread-out players that tick took about 80 ms on Paper, well over the 50 ms that 20 ticks per second allow. Most of that work happens in places far apart from each other, so it can run at the same time if the world is cut into pieces that cannot touch within one tick.
+
+![Milestones over three days with median tick time: Paper 79 ms, parallel spawn search 58 to 61, entities in cells about 40, block ticks and block entities too 32 to 33, vanilla behaviour restored 37, 12 cores 35 ms; plus the hopper race fix, parallel villagers and tracker, world pause for plugins, a four-hour soak with 0 errors, and parallel dimensions rejected](docs/images/the-journey.svg)
+
+## How it works
+
+![The world split into cells of 8 by 8 chunks coloured A to D; each phase runs all A cells at once, then B, C and D; code in a cell writes at most 2 chunks and reads at most 6 chunks beyond its edge, 2 plus 6 is one cell, so cells of one colour never collide](docs/images/how-it-works.svg)
+
+- **Region ticking:** the world is divided into cells of 8×8 chunks, coloured like a 2×2 checkerboard. Cells of the same colour are far enough apart that nothing in one can affect another within a tick, so they run in parallel. Each phase (entities, random block ticks, block entities) runs colour by colour.
+- **Vanilla order where it matters:** shared state (scheduled ticks, entity section moves, block entity lists) is locked or deferred and applied in vanilla order. Block entity clusters that cross a cell border (hopper chains, sorters) run serially. Each cell has its own random sources.
+- **Parallel spawning:** spawn positions are searched in parallel without side effects, then committed in vanilla order. Searches whose area changed in the meantime are redone.
+- **Entity tracker and villagers:** sending entity updates to players and villager AI run in parallel. Job-site and bed claims are atomic, and villagers that are trading stay on the main thread.
+- **World pause:** when a worker needs a blocking chunk load, or plugin code runs (events with listeners, custom mob goals), the other workers pause between two items. The plugin code and the load see a world where nothing else runs, as on Paper.
+
+![One tick in vanilla order: setup, spawn commit, serial entities and cleanup on the main thread; spawn search and the entity tracker on all threads; random block ticks, entities and block entities in four steps A to D on all threads; plugin code pauses the other threads; of a 90 ms serial tick about 28.5 ms stays on one thread, so 12 cores bring it to 34.6 ms](docs/images/tick-anatomy.svg)
+
+## Download
+
+| Channel | Jar | Docker image |
+|---|---|---|
+| Latest stable release | [kirigami.jar](https://github.com/Quavon-dev/kirigami/releases/latest/download/kirigami.jar) | `ghcr.io/quavon-dev/kirigami:latest` |
+| Newest build for one Minecraft version | from the [releases](https://github.com/Quavon-dev/kirigami/releases) | `ghcr.io/quavon-dev/kirigami:26.3` |
+| One exact build | from the [releases](https://github.com/Quavon-dev/kirigami/releases) | `ghcr.io/quavon-dev/kirigami:26.3-4` |
+| Every commit on `main` (untested) | [kirigami.jar](https://github.com/Quavon-dev/kirigami/releases/download/edge/kirigami.jar) | `ghcr.io/quavon-dev/kirigami:edge` |
+
+Every jar comes with a `kirigami.jar.sha256` checksum. The jar is a Paperclip jar: on first start it downloads the official Minecraft server from Mojang and patches it locally.
+
+Worlds cannot be moved back to an older Minecraft version. `latest` follows new Minecraft versions automatically, so pin the Minecraft version (for example `:26.3`) if you want to decide yourself when to update.
+
+```bash
+docker run -d --name kirigami -p 25565:25565 -e EULA=true -e MEMORY=8G -v kirigami-data:/data ghcr.io/quavon-dev/kirigami:26.3
+```
+
+`EULA=true` accepts the [Minecraft EULA](https://aka.ms/MinecraftEULA). `MEMORY` sets the heap size, `JAVA_OPTS` replaces the default G1 flags, and Kirigami settings go into `JAVA_OPTS` as well (`-Dkirigami.…`). The server data lives in `/data`.
+
+## Building and running
+
+Kirigami uses Paper's [paperweight](https://github.com/PaperMC/paperweight) fork layout: the repository contains only Kirigami's own changes, applied on top of a pinned Paper commit (`paperRef` in `gradle.properties`). Java 25 is required.
+
+```bash
+./gradlew applyAllPatches
+./gradlew :kirigami-server:createPaperclipJar
+java -jar kirigami-server/build/libs/kirigami-paperclip-26.3.local-SNAPSHOT.jar --nogui
+```
+
+Use Paper's recommended G1 flags (see `testing/scripts/bench.sh`). Generational ZGC performed worse in tests.
+
+## Repository layout
+
+| Path | Content |
+|---|---|
+| `kirigami-server/minecraft-patches/features/` | Changes to Minecraft code, one patch per feature |
+| `kirigami-server/paper-patches/features/` | Changes to Paper's own server code |
+| `kirigami-server/src/main/java/kirigami/` | Kirigami's own code (region ticking, parallel spawning, world pause, bench tools) |
+| `kirigami-server/build.gradle.kts.patch`, `kirigami-api/build.gradle.kts.patch` | Build changes on top of Paper's build files |
+| `testing/` | Test scripts, datapacks, the probe plugin and all recorded results |
+| `docker/` | Dockerfile and entrypoint of the container image |
+| `.github/workflows/build.yml` | Builds every push; publishes releases, the `edge` pre-release and the Docker images |
+| `docs/` | Images for this README |
+
+After `applyAllPatches`, edit the generated sources (`kirigami-server/src/minecraft/java` for Minecraft code, `paper-server/` for Paper code), commit there, and run `./gradlew rebuildAllServerPatches` to update the patch files.
+
+## Releases
+
+Versions are `<Minecraft version>-<build>`, for example `26.3-4`; the build number starts again at 1 for each Minecraft version. Pushing a tag such as `v26.3-4` builds the release, attaches the jar and checksum, and publishes the Docker tags `26.3-4` and `26.3`, plus `latest` if the tag is on `main`. Every push to `main` updates the `edge` pre-release and the `edge` image.
+
+## Settings
+
+All settings are JVM system properties (`-Dname=value`). Defaults are the recommended values.
+
+| Property | Default | Meaning |
+|---|---|---|
+| `kirigami.regionTicking` | `true` | Parallel region ticking |
+| `kirigami.region.entities` / `.chunks` / `.blockEntities` / `.tracker` | `true` | Switch single parallel phases |
+| `kirigami.parallelSpawning` | `true` | Parallel spawn search |
+| `kirigami.regionWorkers` / `kirigami.tickWorkers` | cores − 1 | Worker threads; with 0 the plain serial code paths run |
+| `kirigami.minParallelItems` / `kirigami.minSpeculativeJobs` | `256` / `512` | Below these amounts a phase runs serially |
+| `kirigami.serialWithPlugins` | `false` | Disable parallelism whenever plugins are installed |
+| `kirigami.paper.chestDelay`, `.pathfindingBackoff`, `.fluidRandomTickFix`, `.raidBannerGriefing`, `.boatRiseCollision`, `kirigami.craftbukkit.raidOmenFix` | `false` | Restore Paper or CraftBukkit behaviour instead of vanilla |
+| `kirigami.checkReads`, `kirigami.readReach`, `kirigami.writeReach` | `false`, `6`, `2` | Diagnostics: report accesses outside a cell's reach |
+| `kirigami.verifySpawning`, `kirigami.seedSalt` | off, random | Diagnostics for parallel spawning |
+
+## Differences from vanilla
+
+- Paper's gameplay changes default to vanilla: activation ranges, entity collision limits, per-player mob caps, TNT limits, dupes and bedrock breaking (`unsupported-settings`), phantom rules, player cramming damage, beehive and villager retry delays, raid fixes. Paper's own exploit protections can be re-enabled in `config/paper-global.yml` and `config/paper-world-defaults.yml`.
+- Update suppression does not crash the server: Paper's catch is kept, while vanilla would crash.
+- Within one tick, entities in different cells tick colour by colour instead of in vanilla's global list order. Deterministic contraption tests and statistical farm tests show no measurable difference.
+
+## Testing
+
+| Script | Purpose |
+|---|---|
+| `testing/scripts/det.sh` | Deterministic contraptions (hopper chains, clock, race, sorters, border pickup), compared bit for bit with vanilla |
+| `testing/scripts/farm.sh`, `farm-matrix.sh`, `farm_stats.py` | Statistical farm tests (`testing/farms/mtfarm`, `mtraid`, `mtportal`, `mtvillage`) against Fabric + Carpet vanilla |
+| `testing/scripts/bench.sh` | Tick time benchmarks with bench bots, optional `SETUP` command file and `PLUGIN` jars |
+| `testing/scripts/soak.sh` | Multi-hour stability run across all three dimensions with plugins |
+| `testing/plugins/mtprobe` | Test plugin that detects overlapping or off-thread event calls |
+
+![Five deterministic contraptions across cell borders match vanilla in all 23 runs since the hopper fix; farm rates differ from vanilla by -1.2 to +2.8 percent with every 95 percent interval including zero; 0 mismatches in 103 million parallel spawn searches; 0 overlapping or off-thread plugin events in 33 runs](docs/images/correctness.svg)
+
+Results are in `testing/results/`, open items in `BACKLOG.md`.
+
+## Results
+
+![Tick time by CPU core count: serial about 90 ms at every core count, Kirigami 59.8, 43.2, 35.5 and 34.6 ms on 2, 4, 8 and 12 cores, 2.6 times faster; about 28.5 ms of every tick still runs on one thread, which is why gains flatten after 8 cores](docs/images/tick-time-by-cores.svg)
+
+![Tick time by scenario, serial to Kirigami: 800 villagers 123 to 46 ms, 64 spread-out players 88 to 35, redstone and TNT lab 92 to 49, 64 clustered players 28 to 18, mixed load 124 to 86, 24 clustered players 20 to 15, one busy area 48 to 42](docs/images/tick-time-by-scenario.svg)
+
+![Four-hour soak with 48 players in three dimensions, six plugins and 1600 villagers: median tick time per 10 minutes between 77 and 92 ms against 124 ms serial, 0 errors, flat heap](docs/images/soak.svg)
+
+All numbers from an M2 Max; details and raw data in `testing/results/`.
+
+### Earlier measurements (M2 Max, 64 spread-out bots)
+
+| Setup | Tick time (median) |
+|---|---|
+| Vanilla behaviour, serial | ~90 ms |
+| Fork, 2 / 4 / 8 / 12 cores (container limits) | 60 / 43 / 36 / 35 ms |
+| 800 villagers in 8 villages, fork | ~46 ms (serial 123 ms, both with the mtprobe test plugin) |
+| Same with LuckPerms, EssentialsX, WorldEdit, WorldGuard, CoreProtect, ViaVersion | ~62 ms on a busier machine, ~57 ms without plugins in the same session (plugins forcing serial: 123 ms) |
+
+A single busy area (one farm or trading hall inside one cell) still runs on one thread; see `BACKLOG.md`.
+
+## License
+
+Kirigami is based on [Paper](https://github.com/PaperMC/Paper) and licensed under the GNU General Public License v3.0, like Paper's server code. See [LICENSE.md](LICENSE.md). It is not affiliated with or supported by PaperMC; please report problems here, not to PaperMC.
+
+---
+
+<p align="center">
+  <a href="https://quavon.de">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/images/quavon-banner-dark.svg">
+      <img src="docs/images/quavon-banner-light.svg" alt="Quavon" width="200">
+    </picture>
+  </a>
+</p>

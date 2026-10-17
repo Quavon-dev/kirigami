@@ -1,0 +1,7 @@
+mtbench lab lab ticks=190 telegraph_pulses=0 tnt_remaining=187 tnt_entities=7 grinder_spawned=24 grinder_items={rotten_flesh=20} grinder_alive={zombie=6} items_stored=2437 items_floating=0 items_expected=3000 fight_alive={iron_golem=6, item=28, skeleton=4, snow_golem=2, snowball=1, zombie=7}
+mtbench lab lab ticks=595 telegraph_pulses=0 tnt_remaining=44 tnt_entities=7 grinder_spawned=84 grinder_items={rotten_flesh=74} grinder_alive={zombie=6} items_stored=3000 items_floating=0 items_expected=3000 fight_alive={iron_golem=6, item=35}
+mtbench lab lab ticks=1188 telegraph_pulses=0 tnt_remaining=0 tnt_entities=0 grinder_spawned=174 grinder_items={rotten_flesh=149} grinder_alive={zombie=6} items_stored=3000 items_floating=0 items_expected=3000 fight_alive={iron_golem=6, item=35}
+mtbench lab lab ticks=2389 telegraph_pulses=1 tnt_remaining=0 tnt_entities=0 grinder_spawned=354 grinder_items={rotten_flesh=323} grinder_alive={zombie=6} items_stored=3000 items_floating=0 items_expected=3000 fight_alive={iron_golem=6, item=35}
+mtbench ticks=2389 mean=49.23ms p50=48.82ms p95=54.50ms p99=62.76ms max=117.15ms -> mtbench/lab-region2-r2.csv
+mtbench regionstats ticks=8640 parallelEntities=17077860 serialEntities=394503 cells=633131 violations=0 reads{} writes{} blockingLoads=0
+errors=0

@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 586" width="860" height="586" role="img" aria-labelledby="t d">
+<style>
+svg { --surface:#fcfcfb; --plane:#f4f3ef; --ink:#0b0b0b; --ink2:#52514e; --muted:#77756f; --grid:#e1e0d9; --axis:#c3c2b7;
+      --a:#2a78d6; --b:#eb6834; --c:#1baf7a; --d:#eda100; --kiri:#eb6834; --kiri-wash:rgba(235,104,52,.12);
+      --serial:#9b9993; --good:#0ca30c; --idle:#ecebe6; --ring:#fcfcfb; }
+@media (prefers-color-scheme: dark) {
+  svg { --surface:#1a1a19; --plane:#232321; --ink:#f0efec; --ink2:#c3c2b7; --muted:#9a988f; --grid:#2c2c2a; --axis:#383835;
+        --a:#3987e5; --b:#d95926; --c:#199e70; --d:#c98500; --kiri:#d95926; --kiri-wash:rgba(217,89,38,.16);
+        --serial:#6f6e68; --good:#0ca30c; --idle:#2a2a28; --ring:#1a1a19; }
+}
+text { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; fill:var(--ink); }
+.t { font-size:22px; font-weight:650; }
+.s { font-size:13.5px; fill:var(--ink2); }
+.h { font-size:15px; font-weight:650; }
+.l { font-size:13px; }
+.a { font-size:12px; fill:var(--muted); }
+.n { font-size:12px; fill:var(--ink2); font-variant-numeric:tabular-nums; }
+.v { font-size:13px; font-weight:650; }
+.big { font-size:40px; font-weight:700; }
+.cap { font-size:11px; font-weight:650; letter-spacing:.06em; fill:var(--muted); }
+.w { fill:#ffffff; font-weight:700; }
+
+.ttl { font-size:14px; font-weight:650; }
+.det { font-size:12.5px; fill:var(--ink2); }
+.spd { font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; }
+.vh { font-size:13px; font-weight:650; paint-order:stroke; stroke-width:6px; stroke-linejoin:round; }
+</style>
+<title id="t">Tick time by scenario</title>
+<desc id="d">Median tick time, serial then Kirigami, on 12 cores: 800 villagers in 8 villages 123.2 to 45.6 ms; 64 spread-out players 88.2 to 34.6 ms; Redstone, TNT, mob grinder, 3000 items 92.4 to 48.5 ms; 64 players in one cluster 28.1 to 18.4 ms; Mixed: 3 dimensions, 6 plugins 124.0 to 86.2 ms; 24 players in one cluster 20.1 to 15.3 ms; One busy area 47.9 to 41.6 ms. Load spread over many cells gains most; work packed into one cell gains least.</desc>
+<rect width="860" height="586" rx="14" style="fill:var(--surface)"/>
+<text class="t" x="28" y="42">Where it helps, and where it does not</text>
+<text class="s" x="28" y="65">Median milliseconds per tick on 12 cores, serial → Kirigami, sorted by speedup</text>
+<rect x="28" y="94" width="12" height="12" rx="3" style="fill:var(--serial)"/>
+<text class="l" x="47" y="104">Serial (one thread)</text>
+<rect x="180" y="94" width="12" height="12" rx="3" style="fill:var(--kiri)"/>
+<text class="l" x="199" y="104">Kirigami</text>
+<line x1="384" y1="132" x2="384" y2="484" style="stroke:var(--axis)" stroke-width="1"/>
+<text class="n" x="384" y="126" text-anchor="middle">0</text>
+<line x1="454.8" y1="132" x2="454.8" y2="484" style="stroke:var(--grid)" stroke-width="1"/>
+<text class="n" x="454.8" y="126" text-anchor="middle">25</text>
+<line x1="525.5" y1="132" x2="525.5" y2="484" style="stroke:var(--grid)" stroke-width="1"/>
+<text class="n" x="525.5" y="126" text-anchor="middle">50</text>
+<line x1="596.3" y1="132" x2="596.3" y2="484" style="stroke:var(--grid)" stroke-width="1"/>
+<text class="n" x="596.3" y="126" text-anchor="middle">75</text>
+<line x1="667.1" y1="132" x2="667.1" y2="484" style="stroke:var(--grid)" stroke-width="1"/>
+<text class="n" x="667.1" y="126" text-anchor="middle">100</text>
+<line x1="737.8" y1="132" x2="737.8" y2="484" style="stroke:var(--grid)" stroke-width="1"/>
+<text class="n" x="737.8" y="126" text-anchor="middle">125</text>
+<line x1="525.5" y1="132" x2="525.5" y2="484" style="stroke:var(--ink2)" stroke-width="1.5"/>
+<text class="a" x="530.5" y="104">50 ms = 20 TPS</text>
+<text class="a" x="800" y="126" text-anchor="middle">faster</text>
+<rect x="16" y="138" width="828" height="46" rx="8" style="fill:var(--plane)"/>
+<text class="ttl" x="28" y="158">800 villagers in 8 villages</text>
+<text class="det" x="28" y="175">test plugin installed in both runs</text>
+<line x1="513.1" y1="161" x2="732.9" y2="161" style="stroke:var(--axis)" stroke-width="4" stroke-linecap="round"/>
+<circle cx="732.9" cy="161" r="8" style="fill:var(--ring)"/>
+<circle cx="732.9" cy="161" r="6" style="fill:var(--serial)"/>
+<circle cx="513.1" cy="161" r="8" style="fill:var(--ring)"/>
+<circle cx="513.1" cy="161" r="6" style="fill:var(--kiri)"/>
+<text class="vh" x="745.9" y="165.5" style="stroke:var(--plane)">123</text>
+<text class="vh" x="500.1" y="165.5" text-anchor="end" style="stroke:var(--plane)">46</text>
+<text class="spd" x="800" y="166" text-anchor="middle">2.7×</text>
+<text class="ttl" x="28" y="208">64 spread-out players</text>
+<text class="det" x="28" y="225">12 cores, container limits</text>
+<line x1="481.8" y1="211" x2="633.8" y2="211" style="stroke:var(--axis)" stroke-width="4" stroke-linecap="round"/>
+<circle cx="633.8" cy="211" r="8" style="fill:var(--ring)"/>
+<circle cx="633.8" cy="211" r="6" style="fill:var(--serial)"/>
+<circle cx="481.8" cy="211" r="8" style="fill:var(--ring)"/>
+<circle cx="481.8" cy="211" r="6" style="fill:var(--kiri)"/>
+<text class="vh" x="646.8" y="215.5" style="stroke:var(--surface)">88</text>
+<text class="vh" x="468.8" y="215.5" text-anchor="end" style="stroke:var(--surface)">35</text>
+<text class="spd" x="800" y="216" text-anchor="middle">2.6×</text>
+<rect x="16" y="238" width="828" height="46" rx="8" style="fill:var(--plane)"/>
+<text class="ttl" x="28" y="258">Redstone, TNT, mob grinder, 3000 items</text>
+<text class="det" x="28" y="275">with 64 players around it</text>
+<line x1="521.3" y1="261" x2="645.5" y2="261" style="stroke:var(--axis)" stroke-width="4" stroke-linecap="round"/>
+<circle cx="645.5" cy="261" r="8" style="fill:var(--ring)"/>
+<circle cx="645.5" cy="261" r="6" style="fill:var(--serial)"/>
+<circle cx="521.3" cy="261" r="8" style="fill:var(--ring)"/>
+<circle cx="521.3" cy="261" r="6" style="fill:var(--kiri)"/>
+<text class="vh" x="658.5" y="265.5" style="stroke:var(--plane)">92</text>
+<text class="vh" x="508.3" y="265.5" text-anchor="end" style="stroke:var(--plane)">49</text>
+<text class="spd" x="800" y="266" text-anchor="middle">1.9×</text>
+<text class="ttl" x="28" y="308">64 players in one cluster</text>
+<text class="det" x="28" y="325">everyone close together</text>
+<line x1="435.9" y1="311" x2="463.6" y2="311" style="stroke:var(--axis)" stroke-width="4" stroke-linecap="round"/>
+<circle cx="463.6" cy="311" r="8" style="fill:var(--ring)"/>
+<circle cx="463.6" cy="311" r="6" style="fill:var(--serial)"/>
+<circle cx="435.9" cy="311" r="8" style="fill:var(--ring)"/>
+<circle cx="435.9" cy="311" r="6" style="fill:var(--kiri)"/>
+<text class="vh" x="476.6" y="315.5" style="stroke:var(--surface)">28</text>
+<text class="vh" x="422.9" y="315.5" text-anchor="end" style="stroke:var(--surface)">18</text>
+<text class="spd" x="800" y="316" text-anchor="middle">1.5×</text>
+<rect x="16" y="338" width="828" height="46" rx="8" style="fill:var(--plane)"/>
+<text class="ttl" x="28" y="358">Mixed: 3 dimensions, 6 plugins</text>
+<text class="det" x="28" y="375">1600 villagers, hoppers, 48 players</text>
+<line x1="628" y1="361" x2="735.1" y2="361" style="stroke:var(--axis)" stroke-width="4" stroke-linecap="round"/>
+<circle cx="735.1" cy="361" r="8" style="fill:var(--ring)"/>
+<circle cx="735.1" cy="361" r="6" style="fill:var(--serial)"/>
+<circle cx="628" cy="361" r="8" style="fill:var(--ring)"/>
+<circle cx="628" cy="361" r="6" style="fill:var(--kiri)"/>
+<text class="vh" x="748.1" y="365.5" style="stroke:var(--plane)">124</text>
+<text class="vh" x="615" y="365.5" text-anchor="end" style="stroke:var(--plane)">86</text>
+<text class="spd" x="800" y="366" text-anchor="middle">1.4×</text>
+<text class="ttl" x="28" y="408">24 players in one cluster</text>
+<text class="det" x="28" y="425">small, dense server</text>
+<line x1="427.3" y1="411" x2="440.9" y2="411" style="stroke:var(--axis)" stroke-width="4" stroke-linecap="round"/>
+<circle cx="440.9" cy="411" r="8" style="fill:var(--ring)"/>
+<circle cx="440.9" cy="411" r="6" style="fill:var(--serial)"/>
+<circle cx="427.3" cy="411" r="8" style="fill:var(--ring)"/>
+<circle cx="427.3" cy="411" r="6" style="fill:var(--kiri)"/>
+<text class="vh" x="453.9" y="415.5" style="stroke:var(--surface)">20</text>
+<text class="vh" x="414.3" y="415.5" text-anchor="end" style="stroke:var(--surface)">15</text>
+<text class="spd" x="800" y="416" text-anchor="middle">1.3×</text>
+<rect x="16" y="438" width="828" height="46" rx="8" style="fill:var(--plane)"/>
+<text class="ttl" x="28" y="458">One busy area</text>
+<text class="det" x="28" y="475">800 villagers, cows, hoppers in 64 × 64 blocks</text>
+<line x1="501.8" y1="461" x2="519.7" y2="461" style="stroke:var(--axis)" stroke-width="4" stroke-linecap="round"/>
+<circle cx="519.7" cy="461" r="8" style="fill:var(--ring)"/>
+<circle cx="519.7" cy="461" r="6" style="fill:var(--serial)"/>
+<circle cx="501.8" cy="461" r="8" style="fill:var(--ring)"/>
+<circle cx="501.8" cy="461" r="6" style="fill:var(--kiri)"/>
+<text class="vh" x="532.7" y="465.5" style="stroke:var(--plane)">48</text>
+<text class="vh" x="488.8" y="465.5" text-anchor="end" style="stroke:var(--plane)">42</text>
+<text class="spd" x="800" y="466" text-anchor="middle">1.2×</text>
+<text class="a" x="28" y="520">M2 Max, 12 cores. Spread-out players in a container with 11 workers, the rest on macOS with 10 workers.</text>
+<text class="a" x="28" y="537">Villages: serial means kirigami.serialWithPlugins with the mtprobe test plugin; Kirigami ran with the same plugin.</text>
+<text class="a" x="28" y="554">The mixed load is the soak setup and is deliberately heavier than 20 TPS allows. A single busy cell still runs on one thread.</text>
+</svg>

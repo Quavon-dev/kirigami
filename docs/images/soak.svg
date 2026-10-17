@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 470" width="860" height="470" role="img" aria-labelledby="t d">
+<style>
+svg { --surface:#fcfcfb; --plane:#f4f3ef; --ink:#0b0b0b; --ink2:#52514e; --muted:#77756f; --grid:#e1e0d9; --axis:#c3c2b7;
+      --a:#2a78d6; --b:#eb6834; --c:#1baf7a; --d:#eda100; --kiri:#eb6834; --kiri-wash:rgba(235,104,52,.12);
+      --serial:#9b9993; --good:#0ca30c; --idle:#ecebe6; --ring:#fcfcfb; }
+@media (prefers-color-scheme: dark) {
+  svg { --surface:#1a1a19; --plane:#232321; --ink:#f0efec; --ink2:#c3c2b7; --muted:#9a988f; --grid:#2c2c2a; --axis:#383835;
+        --a:#3987e5; --b:#d95926; --c:#199e70; --d:#c98500; --kiri:#d95926; --kiri-wash:rgba(217,89,38,.16);
+        --serial:#6f6e68; --good:#0ca30c; --idle:#2a2a28; --ring:#1a1a19; }
+}
+text { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; fill:var(--ink); }
+.t { font-size:22px; font-weight:650; }
+.s { font-size:13.5px; fill:var(--ink2); }
+.h { font-size:15px; font-weight:650; }
+.l { font-size:13px; }
+.a { font-size:12px; fill:var(--muted); }
+.n { font-size:12px; fill:var(--ink2); font-variant-numeric:tabular-nums; }
+.v { font-size:13px; font-weight:650; }
+.big { font-size:40px; font-weight:700; }
+.cap { font-size:11px; font-weight:650; letter-spacing:.06em; fill:var(--muted); }
+.w { fill:#ffffff; font-weight:700; }
+
+.big { font-size:30px; font-weight:700; }
+.bigl { font-size:12.5px; fill:var(--ink2); }
+</style>
+<title id="t">Four-hour soak test</title>
+<desc id="d">Kirigami ran for 4 hours with 48 players in three dimensions, six plugins and 1600 villagers: median tick time per 10 minutes stayed between 77 and 92 ms, with 0 errors, no crashes and a flat heap. Serial under the same load: 124 ms.</desc>
+<rect width="860" height="470" rx="14" style="fill:var(--surface)"/>
+<text class="t" x="28" y="42">Four hours under heavy load</text>
+<text class="s" x="28" y="65">Milliseconds per tick per 10-minute window: line = median, band = 95th percentile, lower is better</text>
+<line x1="70" y1="380" x2="560" y2="380" style="stroke:var(--axis)" stroke-width="1"/>
+<text class="n" x="60" y="384" text-anchor="end">0</text>
+<line x1="70" y1="290.7" x2="560" y2="290.7" style="stroke:var(--grid)" stroke-width="1"/>
+<text class="n" x="60" y="294.7" text-anchor="end">50</text>
+<line x1="70" y1="201.3" x2="560" y2="201.3" style="stroke:var(--grid)" stroke-width="1"/>
+<text class="n" x="60" y="205.3" text-anchor="end">100</text>
+<line x1="70" y1="112" x2="560" y2="112" style="stroke:var(--grid)" stroke-width="1"/>
+<text class="n" x="60" y="116" text-anchor="end">150</text>
+<text class="n" x="70" y="400" text-anchor="middle">0 h</text>
+<text class="n" x="192.5" y="400" text-anchor="middle">1 h</text>
+<text class="n" x="315" y="400" text-anchor="middle">2 h</text>
+<text class="n" x="437.5" y="400" text-anchor="middle">3 h</text>
+<text class="n" x="560" y="400" text-anchor="middle">4 h</text>
+<path d="M80.2 216.4L100.6 218.9L121 220.9L141.5 211.1L161.9 199L182.3 192.3L202.7 196.1L223.1 206.2L243.5 213.2L264 212.9L284.4 219.8L304.8 225.9L325.2 231.3L345.6 228.6L366 228.9L386.5 224L406.9 224.3L427.3 225.5L447.7 231.8L468.1 228.1L488.5 222.3L509 225.2L529.4 225.5L549.8 227.2L549.8 240.2L529.4 238.7L509 238.9L488.5 236.1L468.1 240.1L447.7 243.3L427.3 239.8L406.9 236.6L386.5 237.8L366 240.6L345.6 239.4L325.2 242.9L304.8 241L284.4 233.8L264 229.5L243.5 230.9L223.1 226.2L202.7 221.3L182.3 216.1L161.9 219.3L141.5 228.8L121 235.4L100.6 234.2L80.2 234.5Z" style="fill:var(--kiri-wash)"/>
+<path d="M80.2 234.5L100.6 234.2L121 235.4L141.5 228.8L161.9 219.3L182.3 216.1L202.7 221.3L223.1 226.2L243.5 230.9L264 229.5L284.4 233.8L304.8 241L325.2 242.9L345.6 239.4L366 240.6L386.5 237.8L406.9 236.6L427.3 239.8L447.7 243.3L468.1 240.1L488.5 236.1L509 238.9L529.4 238.7L549.8 240.2" style="fill:none;stroke:var(--kiri)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<line x1="70" y1="158.5" x2="560" y2="158.5" style="stroke:var(--serial)" stroke-width="2.5"/>
+<text class="l" x="76" y="150.5">Serial under the same load (30-minute run): 124 ms median</text>
+<text class="l" x="327.2" y="265.7">Kirigami: 77–92 ms median</text>
+<line x1="70" y1="290.7" x2="560" y2="290.7" style="stroke:var(--ink2)" stroke-width="1.5"/>
+<text class="a" x="560" y="306.7" text-anchor="end">50 ms = 20 TPS</text>
+<rect x="594" y="104" width="246" height="284" rx="12" style="fill:var(--plane)"/>
+<text class="big" x="616" y="142">0</text>
+<text class="bigl" x="616" y="162">errors, crashes or watchdog warnings</text>
+<text class="big" x="616" y="210">176,379</text>
+<text class="bigl" x="616" y="230">ticks in 4.0 hours</text>
+<text class="big" x="616" y="278">5.3 → 5.1 GB</text>
+<text class="bigl" x="616" y="298">heap per hour, no growth</text>
+<text class="big" x="616" y="346">0</text>
+<text class="bigl" x="616" y="366">plugin event overlaps (mtprobe)</text>
+<text class="a" x="28" y="420">M2 Max, 12 cores, G1 with a 10 GB heap. 48 players across overworld, Nether and End, LuckPerms, EssentialsX, WorldEdit, WorldGuard,</text>
+<text class="a" x="28" y="437">CoreProtect and ViaVersion, 1600 villagers and hopper lines: heavier than 20 TPS allows on purpose. Kirigami 12.2 TPS, serial 8.0.</text>
+</svg>

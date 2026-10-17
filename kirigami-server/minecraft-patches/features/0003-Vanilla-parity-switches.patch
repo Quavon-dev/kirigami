@@ -1,0 +1,93 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Leopold <77323443+MadebyLeopold@users.noreply.github.com>
+Date: Fri, 16 Oct 2026 00:04:04 +0200
+Subject: [PATCH] Vanilla parity switches
+
+
+diff --git a/ca/spottedleaf/moonrise/paper/PaperHooks.java b/ca/spottedleaf/moonrise/paper/PaperHooks.java
+index 76f990f150f040b1ad6d7d5b91cfb34ebd6f436a..5de2cb17fa37a5062804befd7c1d9cbf2772ae91 100644
+--- a/ca/spottedleaf/moonrise/paper/PaperHooks.java
++++ b/ca/spottedleaf/moonrise/paper/PaperHooks.java
+@@ -164,7 +164,7 @@ public final class PaperHooks extends BaseChunkSystemHooks implements PlatformHo
+ 
+     @Override
+     public boolean configFixMC224294() {
+-        return true;
++        return mtserver.VanillaParity.PAPER_FLUID_RANDOM_TICK_FIX; // MT
+     }
+ 
+     @Override
+diff --git a/net/minecraft/world/entity/ai/navigation/PathNavigation.java b/net/minecraft/world/entity/ai/navigation/PathNavigation.java
+index f042ddf76f3a39c389e099f09dd5cb07483d2046..d8813127b4bbadc99834ef086474723e5b94db3c 100644
+--- a/net/minecraft/world/entity/ai/navigation/PathNavigation.java
++++ b/net/minecraft/world/entity/ai/navigation/PathNavigation.java
+@@ -223,7 +223,7 @@ public abstract class PathNavigation {
+ 
+     public boolean moveTo(final Entity target, final int reachRange, final double speedModifier) {
+         // Paper start - Perf: Optimise pathfinding
+-        if (this.pathfindFailures > 10 && this.path == null && net.minecraft.server.MinecraftServer.currentTick < this.lastFailure + 40) {
++        if (mtserver.VanillaParity.PAPER_PATHFINDING_BACKOFF && this.pathfindFailures > 10 && this.path == null && net.minecraft.server.MinecraftServer.currentTick < this.lastFailure + 40) { // MT
+             return false;
+         }
+         // Paper end - Perf: Optimise pathfinding
+diff --git a/net/minecraft/world/entity/raid/Raider.java b/net/minecraft/world/entity/raid/Raider.java
+index 9d242f24c37fec196f06b8ef6fa29a66b2781c68..7ebbda78a39a4302cf69945ac5461166402abeaf 100644
+--- a/net/minecraft/world/entity/raid/Raider.java
++++ b/net/minecraft/world/entity/raid/Raider.java
+@@ -396,7 +396,7 @@ public abstract class Raider extends PatrollingMonster {
+         }
+ 
+         private boolean cannotPickUpBanner() {
+-            if (!getServerLevel(this.mob).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING)) return true; // Paper - respect game and entity rules for picking up items
++            if (mtserver.VanillaParity.PAPER_RAID_BANNER_GRIEFING && !getServerLevel(this.mob).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING)) return true; // Paper - respect game and entity rules for picking up items // MT
+             if (!this.mob.hasActiveRaid()) {
+                 return true;
+             }
+diff --git a/net/minecraft/world/entity/raid/Raids.java b/net/minecraft/world/entity/raid/Raids.java
+index bc0f31a16f7b055e85f10eda377026a927032535..eab3b1d8c03dcc84c5776c687cecc64bc63e779a 100644
+--- a/net/minecraft/world/entity/raid/Raids.java
++++ b/net/minecraft/world/entity/raid/Raids.java
+@@ -138,7 +138,7 @@ public class Raids extends SavedData {
+         //     this.raidMap.put(this.getUniqueId(), raid);
+         // }
+ 
+-        if (!raid.isStarted() || (raid.isInProgress() && raid.getRaidOmenLevel() < raid.getMaxRaidOmenLevel())) { // CraftBukkit - fixed a bug with raid: players could add up Bad Omen level even when the raid had finished
++        if (!raid.isStarted() || ((!mtserver.VanillaParity.CRAFTBUKKIT_RAID_OMEN_FIX || raid.isInProgress()) && raid.getRaidOmenLevel() < raid.getMaxRaidOmenLevel())) { // CraftBukkit - fixed a bug with raid: players could add up Bad Omen level even when the raid had finished // MT
+             // CraftBukkit start
+             if (!org.bukkit.craftbukkit.event.CraftEventFactory.callRaidTriggerEvent(level, raid, player)) {
+                 player.removeEffect(net.minecraft.world.effect.MobEffects.RAID_OMEN);
+diff --git a/net/minecraft/world/entity/vehicle/boat/AbstractBoat.java b/net/minecraft/world/entity/vehicle/boat/AbstractBoat.java
+index 6c9ec44a46b6f40a2b8b008cc50c0cafe5e909e6..bf46ae1fc567a1d4341304334371ca1fb08801a3 100644
+--- a/net/minecraft/world/entity/vehicle/boat/AbstractBoat.java
++++ b/net/minecraft/world/entity/vehicle/boat/AbstractBoat.java
+@@ -607,7 +607,7 @@ public abstract class AbstractBoat extends VehicleEntity implements Leashable {
+             this.waterLevel = this.getY(1.0);
+             double targetY = this.getWaterLevelAbove() - this.getBbHeight() + 0.101;
+             if (this.level().noCollision(this, this.getBoundingBox().move(0.0, targetY - this.getY(), 0.0))) {
+-                this.move(MoverType.SELF, new Vec3(0.0, targetY - this.getY(), 0.0)); // Paper - Fix some exploit with boats // TODO Still needed?
++                if (mtserver.VanillaParity.PAPER_BOAT_RISE_COLLISION) this.move(MoverType.SELF, new Vec3(0.0, targetY - this.getY(), 0.0)); else this.setPos(this.getX(), targetY, this.getZ()); // Paper - Fix some exploit with boats // TODO Still needed? // MT
+                 this.setDeltaMovement(this.getDeltaMovement().multiply(1.0, 0.0, 1.0));
+                 this.lastYd = 0.0;
+             }
+diff --git a/net/minecraft/world/level/block/entity/ContainerOpenersCounter.java b/net/minecraft/world/level/block/entity/ContainerOpenersCounter.java
+index 52737172ccfa0c7c977e4f2fe1db242e0bb92d25..f168c836899a78079e5099881ad410396ab02cd9 100644
+--- a/net/minecraft/world/level/block/entity/ContainerOpenersCounter.java
++++ b/net/minecraft/world/level/block/entity/ContainerOpenersCounter.java
+@@ -49,7 +49,7 @@ public abstract class ContainerOpenersCounter {
+         final LivingEntity entity, final Level level, final BlockPos pos, final BlockState blockState, final double maxInteractionRange
+     ) {
+         // Paper start - delay open/close callbacks
+-        if (this.delayCallbacks()) {
++        if (this.delayCallbacks() && mtserver.VanillaParity.PAPER_CHEST_DELAY) { // MT
+             scheduleRecheck(level, pos, blockState, 1);
+             return;
+         }
+@@ -79,7 +79,7 @@ public abstract class ContainerOpenersCounter {
+ 
+     public void decrementOpeners(final LivingEntity entity, final Level level, final BlockPos pos, final BlockState blockState) {
+         // Paper start - delay open/close callbacks
+-        if (this.delayCallbacks()) {
++        if (this.delayCallbacks() && mtserver.VanillaParity.PAPER_CHEST_DELAY) { // MT
+             scheduleRecheck(level, pos, blockState, 1);
+             return;
+         }

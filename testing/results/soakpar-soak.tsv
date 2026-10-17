@@ -1,0 +1,32 @@
+time minute heap_used_mb errors regionstats
+15:05:44 1 2599 0 mtbench regionstats ticks=5211 entities=11753770/187633 chunks=17289989/2883 blockEntities=2819163/8482 cells=889677 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=9
+15:06:44 2 4173 0 mtbench regionstats ticks=7254 entities=16275183/324536 chunks=24409991/2883 blockEntities=3896742/12334 cells=1244118 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:07:44 3 5803 0 mtbench regionstats ticks=7254 entities=16275183/324536 chunks=24409991/2883 blockEntities=3896742/12334 cells=1244118 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:08:44 4 2897 0 mtbench regionstats ticks=11376 entities=25263869/585396 chunks=38655408/2883 blockEntities=6061986/20472 cells=1952335 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:09:45 5 4145 0 mtbench regionstats ticks=13428 entities=29665579/707037 chunks=45613939/2883 blockEntities=7112134/24504 cells=2297379 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:10:45 6 5236 0 mtbench regionstats ticks=15513 entities=34109129/834389 chunks=52906244/2883 blockEntities=8238041/28658 cells=2658789 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:11:45 7 6384 0 mtbench regionstats ticks=15513 entities=34109129/834389 chunks=52906244/2883 blockEntities=8238041/28658 cells=2658789 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:12:45 8 6269 0 mtbench regionstats ticks=19653 entities=42945238/1082553 chunks=67098368/2883 blockEntities=10411169/36836 cells=3362316 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:13:45 9 4437 0 mtbench regionstats ticks=21762 entities=47444912/1213976 chunks=74197253/2883 blockEntities=11478623/41054 cells=3715944 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:14:45 10 6970 0 mtbench regionstats ticks=23850 entities=51978157/1343442 chunks=81419347/2883 blockEntities=12607172/45230 cells=4074193 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:15:46 11 5229 0 mtbench regionstats ticks=25881 entities=56341570/1473006 chunks=88641471/2883 blockEntities=13625551/51144 cells=4429479 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:16:46 12 2903 0 mtbench regionstats ticks=27936 entities=60740680/1611989 chunks=95938587/2883 blockEntities=14705461/57309 cells=4788131 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:17:46 13 4595 0 mtbench regionstats ticks=29979 entities=65209067/1742646 chunks=103248352/2883 blockEntities=15718458/63438 cells=5148185 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:18:46 14 6407 0 mtbench regionstats ticks=32061 entities=69726783/1874177 chunks=110626418/2883 blockEntities=16813440/69510 cells=5508764 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:19:46 15 5386 0 mtbench regionstats ticks=34158 entities=74373442/2013964 chunks=118161085/2883 blockEntities=17849911/75801 cells=5878851 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:20:47 16 4258 0 mtbench regionstats ticks=36228 entities=78776761/2144875 chunks=125863064/2883 blockEntities=18916373/81657 cells=6241373 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:21:47 17 6835 0 mtbench regionstats ticks=38286 entities=83186372/2282106 chunks=133556369/2883 blockEntities=19877528/87751 cells=6601982 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:22:47 18 4287 0 mtbench regionstats ticks=40395 entities=87624521/2419844 chunks=141311625/2883 blockEntities=20954354/93618 cells=6965542 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:23:47 19 3324 0 mtbench regionstats ticks=42498 entities=92112044/2556946 chunks=149180736/2883 blockEntities=21939095/99573 cells=7336257 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:24:48 20 5444 0 mtbench regionstats ticks=44589 entities=96473787/2693636 chunks=156799478/2883 blockEntities=22998552/105472 cells=7694248 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:25:48 21 6626 0 mtbench regionstats ticks=46575 entities=100631513/2824005 chunks=164470130/2883 blockEntities=23910210/112132 cells=8048832 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:26:48 22 4068 0 mtbench regionstats ticks=48624 entities=104848628/2961749 chunks=172159199/2883 blockEntities=24920229/119269 cells=8399842 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:27:48 23 7047 0 mtbench regionstats ticks=50745 entities=109283504/3096452 chunks=180322817/2883 blockEntities=25897672/126366 cells=8775906 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:28:49 24 5293 0 mtbench regionstats ticks=52833 entities=113592732/3226123 chunks=188142858/2883 blockEntities=26920087/133706 cells=9133073 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:29:49 25 4110 0 mtbench regionstats ticks=54915 entities=117950191/3361067 chunks=196144781/2883 blockEntities=27881888/140538 cells=9501230 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:30:49 26 6726 0 mtbench regionstats ticks=57027 entities=122251215/3496521 chunks=204496364/2883 blockEntities=28908360/148024 cells=9869432 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:31:50 27 5445 0 mtbench regionstats ticks=59118 entities=126643727/3630844 chunks=213028090/2883 blockEntities=29877617/154741 cells=10246524 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:32:50 28 3444 0 mtbench regionstats ticks=61230 entities=130977346/3764462 chunks=221394499/2883 blockEntities=30900331/162305 cells=10615005 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:33:50 29 4863 0 mtbench regionstats ticks=63282 entities=135259157/3895270 chunks=229772714/2883 blockEntities=31854939/168765 cells=10983537 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:34:51 30 7025 0 mtbench regionstats ticks=65388 entities=139577080/4026798 chunks=238150636/2883 blockEntities=32874478/176367 cells=11353781 boundaryBlockEntities=0 violations=0 reads{} writes{} blockingLoads=16
+15:35:04 done errors=0

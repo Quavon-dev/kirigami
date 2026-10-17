@@ -1,0 +1,7 @@
+name: MtProbe
+version: 1.0.0
+main: mtprobe.ProbePlugin
+api-version: '26.3'
+commands:
+  mtprobe:
+    description: Report probe counters
