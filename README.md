@@ -14,7 +14,8 @@ A Minecraft server ticks the whole world on one thread, and with 64 spread-out p
 
 ![The world split into cells of 8 by 8 chunks coloured A to D; each phase runs all A cells at once, then B, C and D; code in a cell writes at most 2 chunks and reads at most 6 chunks beyond its edge, 2 plus 6 is one cell, so cells of one colour never collide](docs/images/how-it-works.svg)
 
-- **Region ticking:** the world is divided into cells of 8×8 chunks, coloured like a 2×2 checkerboard. Cells of the same colour are far enough apart that nothing in one can affect another within a tick, so they run in parallel. Each phase (entities, random block ticks, block entities) runs colour by colour.
+- **Region ticking:** the world is divided into cells of 8×8 chunks, coloured like a 2×2 checkerboard. Cells of the same colour are far enough apart that nothing in one can affect another within a tick, so they run in parallel. Each phase (entities, random block ticks, block entities, and scheduled block and fluid ticks if switched on) runs colour by colour.
+- **Redstone:** with `parallel.phases.scheduled-ticks: true` (off by default, see [Differences from vanilla](#differences-from-vanilla)), scheduled ticks (repeaters, comparators, observers, water, lava) run in their cells in vanilla order. Ticks that lie within 64 blocks of each other form a group, and groups that reach into more than one cell run serially in vanilla order, so machines on a cell border behave exactly as in vanilla. Vanilla redstone, Alternate Current and Eigencraft (`redstone-implementation` in `paper-world-defaults.yml`) all tick in parallel.
 - **Vanilla order where it matters:** shared state (scheduled ticks, entity section moves, block entity lists) is locked or deferred and applied in vanilla order. Block entity clusters that cross a cell border (hopper chains, sorters) run serially. Each cell has its own random sources.
 - **Parallel spawning:** spawn positions are searched in parallel without side effects, then committed in vanilla order. Searches whose area changed in the meantime are redone.
 - **Entity tracker and villagers:** sending entity updates to players and villager AI run in parallel. Job-site and bed claims are atomic, and villagers that are trading stay on the main thread.
@@ -81,6 +82,7 @@ Kirigami writes `config/kirigami.yml` on first start, next to Paper's configurat
 |---|---|---|---|
 | `parallel.region-ticking` | `kirigami.regionTicking` | `true` | Parallel region ticking |
 | `parallel.phases.entities`, `.random-ticks`, `.block-entities`, `.entity-tracker` | `kirigami.region.entities`, `.chunks`, `.blockEntities`, `.tracker` | `true` | Switch single parallel phases |
+| `parallel.phases.scheduled-ticks` | `kirigami.region.scheduledTicks` | `false` | Parallel scheduled block and fluid ticks; faster redstone, but not fully vanilla order (see below) |
 | `parallel.spawning` | `kirigami.parallelSpawning` | `true` | Parallel spawn search |
 | `parallel.region-workers`, `parallel.spawn-workers` | `kirigami.regionWorkers`, `kirigami.tickWorkers` | `-1` (cores − 1) | Worker threads; with 0 the plain serial code paths run |
 | `parallel.min-parallel-items`, `parallel.min-speculative-jobs` | `kirigami.minParallelItems`, `kirigami.minSpeculativeJobs` | `256`, `512` | Below these amounts a phase runs serially |
@@ -91,20 +93,33 @@ Diagnostic settings exist only as JVM flags: `kirigami.checkReads`, `kirigami.re
 
 ## Status command
 
-`/kirigami` (permission `kirigami.command`, operators by default) shows whether each parallel phase is on, the number of worker threads, TPS and tick time, and per-tick averages of parallel and serial work, cell runs, spawn searches and world pauses, with the five most frequent pause causes (for example a plugin event name). `/kirigami reset` starts a new measurement, for example right before a farm or event you want to look at.
+`/kirigami` (permission `kirigami.command`, operators by default) shows whether each parallel phase is on, the number of worker threads, TPS and tick time, and per-tick averages of parallel and serial work, cell runs, spawn searches and world pauses. It also lists the five events or sources that paused the world most often, with the plugins that listen to them. `/kirigami reset` starts a new measurement, for example right before a farm or event you want to look at.
+
+## Switching from Paper
+
+Stop the Paper server, replace the jar and start Kirigami in the same folder. Worlds, plugins, plugin data and Paper's configuration files are used as they are; Kirigami only adds `config/kirigami.yml`. Plugins see the Paper API: Kirigami reports itself as compatible with the Paper brand, and `Bukkit.isPrimaryThread()` is true wherever plugin code runs.
+
+- Event listeners, custom mob goals and scheduler tasks never run at the same time as other world code. An event fired from a parallel phase pauses the other workers first.
+- If world pauses for plugin events and mob goals take more than half of a parallel phase's time (for example a `BlockPhysicsEvent` listener during heavy redstone), and the phase's last measured serial run was faster, that phase runs serially for the next 30 seconds instead of getting slower than Paper. A phase with many pauses that still beats its serial time stays parallel. A warning in the log and `/kirigami` show which event and plugin cause it.
+- Command blocks and command block minecarts run serially, so commands from plugins and datapacks behave as on Paper.
+- Settings that already differ from vanilla in an existing `paper-world-defaults.yml` or `spigot.yml` are kept; only new files get Kirigami's vanilla defaults.
+
+`testing/scripts/compat.sh <run-name> <kirigami-jar> <paper-server-dir>` copies a Paper server, runs it on Kirigami with bench bots and the probe plugin, and fails if a plugin does not enable, plugin code overlaps or runs off-thread, or new errors appear. With `PAPER_JAR` set it runs the same folder on Paper first and only reports errors that Paper does not show.
 
 ## Differences from vanilla
 
 - Paper's gameplay changes default to vanilla: activation ranges, entity collision limits, per-player mob caps, TNT limits, dupes and bedrock breaking (`unsupported-settings`), phantom rules, player cramming damage, beehive and villager retry delays, raid fixes. Paper's own exploit protections can be re-enabled in `config/paper-global.yml` and `config/paper-world-defaults.yml`.
 - Update suppression does not crash the server: Paper's catch is kept, while vanilla would crash.
-- Within one tick, entities in different cells tick colour by colour instead of in vanilla's global list order. Deterministic contraption tests and statistical farm tests show no measurable difference.
+- Within one tick, entities in different cells tick colour by colour instead of in vanilla's global list order. Deterministic contraption tests and statistical farm tests show no measurable difference. Scheduled ticks run serially in vanilla order by default. With `parallel.phases.scheduled-ticks: true`, scheduled ticks within 64 blocks of each other run serially in vanilla order when their group spans a cell border; groups further apart run colour by colour. Command block and tripwire ticks keep the whole phase serial. This is not fully vanilla: ticks they schedule get sub-tick numbers in the order cells run, so repeaters scheduled by two distant ticks can later race differently; block events (pistons, note blocks) are queued in the order cells run; entities they create (dispensed arrows and TNT, falling blocks, drops) join after the colour finishes; and fire spread and dispenser slot choice use the cell's random source. Not tested: water or lava that breaks tripwire string is a fluid tick, so it does not keep the phase serial, and the hook update it causes can reach about 56 blocks, further than the 64-block grouping assumes for two ticks. Entities spawned during a parallel phase (for example TNT primed by an explosion) join the world after their cell's colour finishes, so explosions later in the same tick do not push them yet; long TNT chains can therefore end at a different point than in vanilla.
 
 ## Testing
 
 | Script | Purpose |
 |---|---|
-| `testing/scripts/det.sh` | Deterministic contraptions across cell borders (hopper chains, observer clock, hopper race, item sorters, item pickup, minecart loop through four cells, piston race, furnace chain) |
+| `testing/scripts/det.sh` | Deterministic contraptions across cell borders (hopper chains, observer clock, hopper race, item sorters, item pickup, minecart loop through four cells, piston race, furnace chain, piston duels on and off a cell border); `REDSTONE_IMPL` selects Alternate Current or Eigencraft |
 | `testing/scripts/parity.sh` | Runs the deterministic contraptions on the official Minecraft server and on Kirigami with parallelism forced on, and fails on any difference; CI runs it on every push and pull request |
+| `testing/scripts/lab.sh` | Lab benchmark (telegraph, TNT, grinder, item floor, fights, village, portal); `REDSTONE=1` adds 400 observer clocks in 16 machines above the lab; the lab's telegraph line crosses two cell borders and links about half of them into serial groups, so it measures a mixed case |
+| `testing/scripts/compat.sh` | Runs a copied Paper server with its plugins on Kirigami and compares the log with Paper |
 | `testing/scripts/farm.sh`, `farm-matrix.sh`, `farm_stats.py` | Statistical farm tests (`testing/farms/mtfarm`, `mtraid`, `mtportal`, `mtvillage`) against Fabric + Carpet vanilla |
 | `testing/scripts/bench.sh` | Tick time benchmarks with bench bots, optional `SETUP` command file and `PLUGIN` jars |
 | `testing/scripts/soak.sh` | Multi-hour stability run across all three dimensions with plugins |

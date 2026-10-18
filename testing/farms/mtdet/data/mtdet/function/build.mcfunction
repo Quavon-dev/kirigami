@@ -131,3 +131,43 @@ setblock 20 102 2 minecraft:hopper[facing=down]
 setblock 20 101 2 minecraft:furnace
 setblock 20 100 2 minecraft:hopper[facing=down]
 setblock 20 99 2 minecraft:chest
+fill -14 99 69 4 99 73 minecraft:stone
+fill -10 100 70 -4 100 70 minecraft:redstone_wire
+fill -5 100 71 -5 100 72 minecraft:redstone_wire
+fill -4 100 72 2 100 72 minecraft:redstone_wire
+setblock -3 100 70 minecraft:repeater[facing=west]
+setblock 2 100 71 minecraft:repeater[facing=south]
+setblock -2 100 70 minecraft:sticky_piston[facing=east]
+setblock 2 100 70 minecraft:sticky_piston[facing=west]
+setblock -1 100 70 minecraft:stone
+setblock 1 100 70 minecraft:cobblestone
+fill -4 99 75 14 99 79 minecraft:stone
+fill 10 100 76 4 100 76 minecraft:redstone_wire
+fill 5 100 77 5 100 78 minecraft:redstone_wire
+fill 4 100 78 -2 100 78 minecraft:redstone_wire
+setblock 3 100 76 minecraft:repeater[facing=east]
+setblock -2 100 77 minecraft:repeater[facing=south]
+setblock 2 100 76 minecraft:sticky_piston[facing=west]
+setblock -2 100 76 minecraft:sticky_piston[facing=east]
+setblock 1 100 76 minecraft:stone
+setblock -1 100 76 minecraft:cobblestone
+fill 178 99 69 196 99 73 minecraft:stone
+fill 182 100 70 188 100 70 minecraft:redstone_wire
+fill 187 100 71 187 100 72 minecraft:redstone_wire
+fill 188 100 72 194 100 72 minecraft:redstone_wire
+setblock 189 100 70 minecraft:repeater[facing=west]
+setblock 194 100 71 minecraft:repeater[facing=south]
+setblock 190 100 70 minecraft:sticky_piston[facing=east]
+setblock 194 100 70 minecraft:sticky_piston[facing=west]
+setblock 191 100 70 minecraft:stone
+setblock 193 100 70 minecraft:cobblestone
+fill 188 99 75 206 99 79 minecraft:stone
+fill 202 100 76 196 100 76 minecraft:redstone_wire
+fill 197 100 77 197 100 78 minecraft:redstone_wire
+fill 196 100 78 190 100 78 minecraft:redstone_wire
+setblock 195 100 76 minecraft:repeater[facing=east]
+setblock 190 100 77 minecraft:repeater[facing=south]
+setblock 194 100 76 minecraft:sticky_piston[facing=west]
+setblock 190 100 76 minecraft:sticky_piston[facing=east]
+setblock 193 100 76 minecraft:stone
+setblock 191 100 76 minecraft:cobblestone

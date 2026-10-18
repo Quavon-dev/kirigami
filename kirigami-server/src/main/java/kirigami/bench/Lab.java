@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.DetectorRailBlock;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.HopperBlock;
 import net.minecraft.world.level.block.NetherPortalBlock;
+import net.minecraft.world.level.block.ObserverBlock;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.RailBlock;
 import net.minecraft.world.level.block.RepeaterBlock;
@@ -82,6 +83,11 @@ final class Lab {
     private static final int PORTAL_MAX_Z = 4066;
     private static final int PORTAL_ZOMBIES = 10;
     private static final int PORTAL_INTERVAL = 100;
+    private static final int CLOCK_Y = Y + 16;
+    private static final int[] MACHINE_ORIGINS = {3910, 4030, 4150, 4280};
+    private static final int MACHINE_CLOCKS = 5;
+    private static final int CLOCK_SPACING = 10;
+    private static final int CLOCK_WIRE = 7;
 
     private boolean running;
     private int ticks;
@@ -97,6 +103,32 @@ final class Lab {
         buildPen(level, ENDER_MIN_X, ENDER_MAX_X, ENDER_MIN_Z, ENDER_MAX_Z, Blocks.GRASS_BLOCK.defaultBlockState(), 3);
         buildVillage(level);
         buildPortal(level);
+    }
+
+    int buildRedstone(final ServerLevel level) {
+        int clocks = 0;
+        for (final int machineX : MACHINE_ORIGINS) {
+            for (final int machineZ : MACHINE_ORIGINS) {
+                for (int i = 0; i < MACHINE_CLOCKS * MACHINE_CLOCKS; i++) {
+                    buildClock(level, machineX + i % MACHINE_CLOCKS * CLOCK_SPACING, machineZ + i / MACHINE_CLOCKS * CLOCK_SPACING);
+                    clocks++;
+                }
+            }
+        }
+        return clocks;
+    }
+
+    private static void buildClock(final ServerLevel level, final int x, final int z) {
+        for (int dx = -1; dx <= CLOCK_WIRE + 1; dx++) {
+            set(level, x + dx, CLOCK_Y - 1, z, Blocks.STONE.defaultBlockState());
+        }
+        set(level, x - 1, CLOCK_Y, z, Blocks.REDSTONE_WIRE.defaultBlockState());
+        for (int dx = 2; dx <= CLOCK_WIRE; dx++) {
+            set(level, x + dx, CLOCK_Y, z, Blocks.REDSTONE_WIRE.defaultBlockState());
+        }
+        set(level, x + CLOCK_WIRE + 1, CLOCK_Y, z, Blocks.REDSTONE_LAMP.defaultBlockState());
+        set(level, x, CLOCK_Y, z, Blocks.OBSERVER.defaultBlockState().setValue(ObserverBlock.FACING, Direction.EAST));
+        set(level, x + 1, CLOCK_Y, z, Blocks.OBSERVER.defaultBlockState().setValue(ObserverBlock.FACING, Direction.WEST));
     }
 
     void start(final ServerLevel level) {

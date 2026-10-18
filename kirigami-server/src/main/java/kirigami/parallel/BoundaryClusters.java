@@ -54,6 +54,70 @@ final class BoundaryClusters {
         return result;
     }
 
+    static Set<net.minecraft.world.ticks.ScheduledTick<?>> spanningClusters(final List<? extends net.minecraft.world.ticks.ScheduledTick<?>> ticks, final int cellShiftBlocks,
+                                                                          final int linkDistance) {
+        final int bucketShift = 4;
+        final int[] bucketOfTick = new int[ticks.size()];
+        final int linkBuckets = (linkDistance + (1 << bucketShift) - 1) >> bucketShift;
+        final Long2IntOpenHashMap buckets = new Long2IntOpenHashMap();
+        buckets.defaultReturnValue(-1);
+        final it.unimi.dsi.fastutil.longs.LongArrayList keys = new it.unimi.dsi.fastutil.longs.LongArrayList();
+        for (int i = 0; i < ticks.size(); i++) {
+            final BlockPos pos = ticks.get(i).pos();
+            final long key = cellOf(pos.getX(), pos.getZ(), bucketShift);
+            int bucket = buckets.get(key);
+            if (bucket < 0) {
+                bucket = keys.size();
+                buckets.put(key, bucket);
+                keys.add(key);
+            }
+            bucketOfTick[i] = bucket;
+        }
+        final int[] parent = new int[keys.size()];
+        for (int i = 0; i < parent.length; i++) {
+            parent[i] = i;
+        }
+        for (int i = 0; i < keys.size(); i++) {
+            final int bucketX = (int) (keys.getLong(i) >> 32);
+            final int bucketZ = (int) keys.getLong(i);
+            for (int dx = -linkBuckets; dx <= linkBuckets; dx++) {
+                for (int dz = -linkBuckets; dz <= linkBuckets; dz++) {
+                    final int other = buckets.get(cellOf(bucketX + dx, bucketZ + dz, 0));
+                    if (other > i) {
+                        parent[find(parent, other)] = find(parent, i);
+                    }
+                }
+            }
+        }
+        final boolean[] rootSpans = new boolean[parent.length];
+        final long[] rootCell = new long[parent.length];
+        final boolean[] rootSeen = new boolean[parent.length];
+        for (int i = 0; i < parent.length; i++) {
+            final int root = find(parent, i);
+            final long cell = cellOf((int) (keys.getLong(i) >> 32), (int) keys.getLong(i), cellShiftBlocks - bucketShift);
+            if (!rootSeen[root]) {
+                rootSeen[root] = true;
+                rootCell[root] = cell;
+            }
+            rootSpans[root] |= rootCell[root] != cell;
+        }
+        final Set<net.minecraft.world.ticks.ScheduledTick<?>> result = new ReferenceOpenHashSet<>();
+        for (int i = 0; i < ticks.size(); i++) {
+            if (rootSpans[find(parent, bucketOfTick[i])]) {
+                result.add(ticks.get(i));
+            }
+        }
+        return result;
+    }
+
+    private static int find(final int[] parent, int index) {
+        while (parent[index] != index) {
+            parent[index] = parent[parent[index]];
+            index = parent[index];
+        }
+        return index;
+    }
+
     private static void mark(final int index, final boolean[] marked, final IntArrayList queue) {
         if (!marked[index]) {
             marked[index] = true;

@@ -12,6 +12,7 @@ import com.destroystokyo.paper.event.entity.PreCreatureSpawnEvent;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -28,6 +29,9 @@ public final class ProbePlugin extends JavaPlugin implements Listener {
     private int overlaps;
     private int offThread;
     private boolean marker;
+    private int scheduled;
+    private int ran;
+    private int commands;
 
     @Override
     public void onEnable() {
@@ -91,15 +95,34 @@ public final class ProbePlugin extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onPhysics(final BlockPhysicsEvent event) {
+        this.count(event);
+    }
+
+    @EventHandler
     public void onDeath(final EntityDeathEvent event) {
         this.count(event);
         this.marker = !this.marker;
         event.getEntity().getWorld().getBlockAt(0, 300, 0).setType(this.marker ? Material.GLASS : Material.AIR);
+        this.scheduled++;
+        Bukkit.getScheduler().runTask(this, () -> this.ran++);
     }
 
     @Override
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
-        this.getLogger().info("mtprobe overlaps=" + this.overlaps + " offThread=" + this.offThread + " counts=" + new TreeMap<>(this.counts));
+        if (args.length > 0 && args[0].equals("tick")) {
+            if (this.inside) {
+                this.overlaps++;
+            }
+            this.inside = true;
+            if (!Bukkit.isPrimaryThread()) {
+                this.offThread++;
+            }
+            this.commands++;
+            this.inside = false;
+            return true;
+        }
+        this.getLogger().info("mtprobe overlaps=" + this.overlaps + " offThread=" + this.offThread + " commands=" + this.commands + " scheduled=" + this.scheduled + " ran=" + this.ran + " counts=" + new TreeMap<>(this.counts));
         return true;
     }
 }

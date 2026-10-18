@@ -48,6 +48,10 @@ if [ "$kind" = paper ] && [ -n "${PLUGIN:-}" ]; then
   cp $PLUGIN "$dir/plugins/"
 fi
 cp -R "$root/farms/mtdet" "$dir/$world/datapacks/mtdet"
+if [ -n "${REDSTONE_IMPL:-}" ]; then
+  mkdir -p "$dir/config"
+  printf 'misc:\n  redstone-implementation: %s\n' "$REDSTONE_IMPL" > "$dir/config/paper-world-defaults.yml"
+fi
 
 srv() {
   "$root/scripts/server.sh" "$@"
@@ -55,9 +59,14 @@ srv() {
 
 srv start "$dir" "$jar" > /dev/null
 trap 'srv stop "$dir"' EXIT
-srv cmd "$dir" "forceload add -32 -16 64 64"
+srv cmd "$dir" "forceload add -32 -16 224 84"
 sleep 8
 srv cmd "$dir" "function mtdet:build"
+if [ "$kind" = paper ] && [ -n "${PLUGIN:-}" ]; then
+  srv cmd "$dir" "setblock 100 99 20 minecraft:redstone_block"
+  srv cmd "$dir" "setblock 100 100 20 minecraft:activator_rail"
+  srv cmd "$dir" "summon minecraft:command_block_minecart 100.5 100.1 20.5 {Command:\"mtprobe tick\"}"
+fi
 sleep 2
 srv cmd "$dir" "scoreboard players set #t mt_det 0"
 srv cmd "$dir" "scoreboard players set #go mt_det 1"

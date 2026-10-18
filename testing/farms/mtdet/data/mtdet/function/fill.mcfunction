@@ -184,3 +184,19 @@ item replace block 20 103 -6 container.0 with minecraft:raw_iron 64
 item replace block 20 103 -6 container.1 with minecraft:raw_iron 64
 item replace block 20 103 -6 container.2 with minecraft:raw_iron 64
 item replace block 20 101 2 container.1 with minecraft:coal 64
+setblock -12 100 70 minecraft:observer[facing=east]
+setblock -11 100 70 minecraft:observer[facing=west]
+scoreboard players set #dbs mt_det 0
+scoreboard players set #dbc mt_det 0
+setblock 12 100 76 minecraft:observer[facing=west]
+setblock 11 100 76 minecraft:observer[facing=east]
+scoreboard players set #dms mt_det 0
+scoreboard players set #dmc mt_det 0
+setblock 180 100 70 minecraft:observer[facing=east]
+setblock 181 100 70 minecraft:observer[facing=west]
+scoreboard players set #dis mt_det 0
+scoreboard players set #dic mt_det 0
+setblock 204 100 76 minecraft:observer[facing=west]
+setblock 203 100 76 minecraft:observer[facing=east]
+scoreboard players set #djs mt_det 0
+scoreboard players set #djc mt_det 0

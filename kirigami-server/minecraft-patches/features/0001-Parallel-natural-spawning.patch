@@ -5,14 +5,14 @@ Subject: [PATCH] Parallel natural spawning
 
 
 diff --git a/net/minecraft/server/level/ServerChunkCache.java b/net/minecraft/server/level/ServerChunkCache.java
-index c4cfb53e145d69666ffc27ef4ee0c50b54eb9143..f4cbc584de92d1e809c3f684d5293831661f0819 100644
+index c4cfb53e145d69666ffc27ef4ee0c50b54eb9143..f72d96b34c14cb37693b6f6899aa5ad27beb1b87 100644
 --- a/net/minecraft/server/level/ServerChunkCache.java
 +++ b/net/minecraft/server/level/ServerChunkCache.java
 @@ -154,6 +154,7 @@ public class ServerChunkCache extends ChunkSource implements ca.spottedleaf.moon
              }
          }
  
-+        if (load) mtserver.parallel.Speculation.abortIfActive(); // MT
++        if (load) kirigami.parallel.Speculation.abortIfActive(); // MT
          return load ? this.syncLoad(chunkX, chunkZ, toStatus) : null;
      }
      // Paper end - rewrite chunk system
@@ -20,8 +20,8 @@ index c4cfb53e145d69666ffc27ef4ee0c50b54eb9143..f4cbc584de92d1e809c3f684d5293831
              // Paper end - chunk tick iteration optimisation
              profiler.popPush("tickSpawningChunks");
  
-+            if (mtserver.parallel.ParallelSpawning.ENABLED) { // MT
-+                mtserver.parallel.ParallelSpawning.tickSpawningChunks(this.level, spawningChunks, spawningCategories, spawnCookie);
++            if (kirigami.parallel.ParallelSpawning.ENABLED) { // MT
++                kirigami.parallel.ParallelSpawning.tickSpawningChunks(this.level, spawningChunks, spawningCategories, spawnCookie);
 +            } else {
              for (LevelChunk chunk : spawningChunks) {
                  this.tickSpawningChunk(chunk, spawningCategories, spawnCookie);
@@ -46,14 +46,14 @@ index b4a076292c17a9216764db4e0074315eca3127aa..32824c640792c90a34e9ad1dee29ff5e
          this.attributeSamplers.values().forEach(EnvironmentAttributeSystem.ValueSampler::invalidateTickCache);
      }
 diff --git a/net/minecraft/world/level/NaturalSpawner.java b/net/minecraft/world/level/NaturalSpawner.java
-index 06c63a3429d010546c8b9de610cbae7bf6bb6935..890be9c7efe17bc42964737884918a4d2fb36b9e 100644
+index 06c63a3429d010546c8b9de610cbae7bf6bb6935..5162dc2fd61a7b14383988ab47263d726086f303 100644
 --- a/net/minecraft/world/level/NaturalSpawner.java
 +++ b/net/minecraft/world/level/NaturalSpawner.java
 @@ -80,6 +80,7 @@ public final class NaturalSpawner {
          final boolean countMobs
      ) {
          // Paper end - Optional per player mob spawns
-+        if (mtserver.parallel.ParallelSpawning.ENABLED) return mtserver.parallel.ParallelSpawning.createState(spawnableChunkCount, level, chunkGetter, localMobCapCalculator, countMobs); // MT
++        if (kirigami.parallel.ParallelSpawning.ENABLED) return kirigami.parallel.ParallelSpawning.createState(spawnableChunkCount, level, chunkGetter, localMobCapCalculator, countMobs); // MT
          Iterable<Entity> entities = level.getAllEntities();
          PotentialCalculator spawnPotential = new PotentialCalculator();
          Object2IntOpenHashMap<MobCategory> mobCounts = new Object2IntOpenHashMap<>();

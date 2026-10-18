@@ -23,6 +23,20 @@ Measured on 2026-10-17 in the spread village benchmark (64 bots, 800 villagers) 
 
 Revisit only if a plugin shows up with many more pauses per tick in `/kirigami`.
 
+Pauses are counted per event type, and `/kirigami` lists the top five with the plugins that listen to them. A phase that spends more than half of its time in plugin pauses, and is slower than its last measured serial run, falls back to serial for 600 ticks. Serial time is measured while the fallback is active; before the first fallback any mostly-paused phase falls back.
+
+## Entities added during a parallel phase
+
+`addFreshEntity` inside a cell is deferred until the colour finishes, because the entity tick list, entity sections and the tracker's entity map are not safe to change from worker threads. A TNT primed by an explosion is therefore not pushed by explosions later in the same tick, as it would be in vanilla. In the redstone lab (`lab.sh` with `REDSTONE=1`) the 240-block TNT line stopped early in about 5 of 22 parallel runs and in 0 of 9 serial runs (measured on 2026-10-18), always after the primed TNT fell through the blown-up floor and exploded below the line. Without the redstone field it never stopped (0 of 6 either way). Adding entities immediately would need those structures to accept concurrent inserts.
+
+## Vanilla order for work queued by parallel scheduled ticks
+
+Scheduled ticks in different groups run colour by colour, so the sub-tick numbers of ticks they schedule (`LevelTicks` `nextSubTickCount`) and the order of block events they queue follow the order cells run, not vanilla order. Two distant ticks that each schedule a repeater can therefore give those repeaters a different order later, when they are close enough to run serially. Possible fix: record each parallel tick's index in the vanilla list with everything it schedules or queues, buffer per cell, and merge by that index after the phase. Reads such as `willTickThisTick` and `hasScheduledTick` would then have to see the buffers.
+
+## Tripwire string broken by fluid ticks
+
+Not tested. With `parallel.phases.scheduled-ticks: true`, tripwire and hook ticks keep the scheduled tick phase serial, but water or lava that flows into tripwire string breaks it from a fluid tick. The string then updates its hooks up to 41 blocks away, and the hook's redstone output reaches about 15 blocks further, so two unlinked fluid ticks in neighbouring cells could affect each other. Possible fix: keep the fluid tick phase serial while a fluid tick is queued next to tripwire string, or test it with a contraption that floods a tripwire on a cell border.
+
 ## Ticking dimensions in parallel
 
 Measured on 2026-10-17 in the soak scenario (48 bots, about 36/8/4 across overworld, Nether and End at the time of measurement, 800 villagers and the hopper hotspot in the overworld, six plugins): the overworld took 88% of level tick time, the Nether 10% and the End 2%. Overlapping the Nether and End with the overworld would therefore save at most about 12%.

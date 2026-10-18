@@ -38,7 +38,7 @@ Run the tests that match your change. The scripts are in `testing/scripts` and w
 |---|---|
 | Anything that can affect gameplay | `parity.sh <official-server.jar> <kirigami.jar>` must report all counters identical to vanilla. CI runs the same check on every pull request. |
 | Spawning, mob AI, block ticks | Farm tests with `farm-matrix.sh` and `farm_stats.py`, within noise of vanilla |
-| Plugin interaction | `det.sh` and farm runs with the `testing/plugins/mtprobe` probe plugin, 0 overlaps |
+| Plugin interaction | `det.sh` and farm runs with the `testing/plugins/mtprobe` probe plugin, 0 overlaps; `compat.sh` with `PAPER_JAR` on a Paper server with plugins |
 | Performance | `bench.sh` numbers before and after, measured on an otherwise idle machine |
 
 `testing/scripts/soak.sh` runs a multi-hour stability test across all three dimensions. The scripts start servers through `testing/scripts/server.sh`, which enables the `/mtbench` benchmark command with `-Dkirigami.benchTools=true`; the command is off on normal servers.
@@ -73,5 +73,6 @@ When Paper moves to a new Minecraft version, the update workflow opens an issue 
 - Commit messages use `<type>: <description>`, for example `fix: keep hopper order across cell borders`. Types: feat, fix, perf, refactor, test, docs, ci, chore.
 - Write code that reads like the surrounding code. Avoid comments other than the `// MT` markers.
 - Behaviour that differs from vanilla must be optional and off by default.
+- Every pull request runs the Build workflow (including the vanilla parity check) and the Security workflow (CodeQL for Java, Python and GitHub Actions, a secret scan and a dependency review). Fix or explain every finding before asking for review.
 
 By contributing, you agree that your contribution is licensed under the GNU General Public License v3.0, like the rest of Kirigami.

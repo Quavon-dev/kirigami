@@ -5,7 +5,7 @@ Subject: [PATCH] Pause world for kill score awarding
 
 
 diff --git a/net/minecraft/world/entity/LivingEntity.java b/net/minecraft/world/entity/LivingEntity.java
-index 23297b54c74684765f90e9e599d051a44357e9a5..4272d410fa8c5d918bea16ac52f21a4541c80a13 100644
+index 23297b54c74684765f90e9e599d051a44357e9a5..1b0759be786c36885bbc492f19c36826a3a8bae3 100644
 --- a/net/minecraft/world/entity/LivingEntity.java
 +++ b/net/minecraft/world/entity/LivingEntity.java
 @@ -1840,7 +1840,7 @@ public abstract class LivingEntity extends Entity implements Attackable, Waypoin
@@ -13,7 +13,7 @@ index 23297b54c74684765f90e9e599d051a44357e9a5..4272d410fa8c5d918bea16ac52f21a45
              Runnable afterEvent = () -> { // Paper
              if (killer != null) {
 -                killer.awardKillScore(this, source);
-+                mtserver.parallel.WorldPause.exclusiveRun(() -> killer.awardKillScore(this, source)); // MT
++                kirigami.parallel.WorldPause.exclusiveRun("kill score awarding", () -> killer.awardKillScore(this, source)); // MT
              }
  
              if (this.isSleeping()) {

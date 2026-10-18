@@ -31,11 +31,12 @@ case "$action" in
     exec 3>&-
     for _ in $(seq 1 120); do
       grep -q "Done (" console.log && { grep "Done (" console.log; exit 0; }
-      alive || { echo "server exited during startup" >&2; tail -20 console.log >&2; exit 1; }
+      alive || { echo "server exited during startup" >&2; tail -20 console.log >&2; kill "$(cat fifo.pid)" 2>/dev/null; exit 1; }
       sleep 1
     done
     echo "server did not start in time" >&2
     tail -20 console.log >&2
+    kill "$(cat fifo.pid)" 2>/dev/null
     exit 1
     ;;
   cmd)
