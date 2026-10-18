@@ -18,7 +18,7 @@ ask() {
   else
     read -r -p "$prompt: " reply < /dev/tty
   fi
-  echo "${reply:-$default}"
+  printf '%s\n' "${reply:-$default}"
 }
 
 confirm() {
@@ -244,7 +244,7 @@ case "$CHANNEL" in
   *)
     TAG="$(ask "Release tag (for example 26.3-4)")"
     [[ "$TAG" =~ ^[0-9]+(\.[0-9]+)*-[0-9]+$ ]] || die "invalid tag '$TAG'"
-    URL="https://github.com/$REPO/releases/download/$TAG"
+    URL="https://github.com/$REPO/releases/download/v$TAG"
     ;;
 esac
 
@@ -254,7 +254,7 @@ ram=$(( ram_mb / 2 / 1024 ))
 [ "$ram" -gt 16 ] && ram=16
 MEMORY="$(ask "Heap size" "${ram}G")"
 [[ "$MEMORY" =~ ^[0-9]+[MG]$ ]] || die "heap size must look like 8G or 4096M"
-heap_mb="${MEMORY%?}"
+heap_mb=$(( 10#${MEMORY%?} ))
 [ "${MEMORY: -1}" = G ] && heap_mb=$(( heap_mb * 1024 ))
 [ "$heap_mb" -lt 1024 ] && die "heap size must be at least 1G"
 [ "$heap_mb" -gt $(( ram_mb * 8 / 10 )) ] && echo "warning: $MEMORY is more than 80% of the ${ram_mb}M RAM in this machine" >&2
@@ -306,9 +306,12 @@ if [[ "$METHOD" == *container ]]; then
   "$ENGINE" pull "$IMAGE:$TAG" || die "no $TAG release found; see https://github.com/$REPO/releases"
   write_server_files "$tmp" 25565 > /dev/null
   chmod -R a+rX "$tmp"
+  seed="$tmp"
+  if [ "$OS" = windows ]; then export MSYS_NO_PATHCONV=1; seed="$(cygpath -w "$tmp")"; fi
   # shellcheck disable=SC2016
-  "$ENGINE" run --rm -v "$VOLUME:/data" -v "$tmp:/seed:ro" --entrypoint sh "$IMAGE:$TAG" \
-    -c 'for f in /seed/*; do [ -e "/data/${f##*/}" ] && echo "Keeping existing ${f##*/}" || cp "$f" /data/; done'
+  "$ENGINE" run --rm --security-opt label=disable -v "$VOLUME:/data" -v "$seed:/seed:ro" --entrypoint sh "$IMAGE:$TAG" \
+    -c 'for f in /seed/*; do [ -e "/data/${f##*/}" ] && echo "Keeping existing ${f##*/}" || cp "$f" /data/; done' \
+    || die "could not write the server settings into the volume"
   "$ENGINE" run -d -it --name "$NAME" --restart unless-stopped -p "$PORT:25565" \
     -e EULA=true -e MEMORY="$MEMORY" -v "$VOLUME:/data" "$IMAGE:$TAG"
   echo
@@ -325,6 +328,7 @@ fi
 info "Using Java $(java_major "$JAVA") at $JAVA"
 
 DIR="$(ask "Server directory" "$HOME/kirigami")"
+DIR="${DIR/#\~/$HOME}"
 mkdir -p "$DIR"
 DIR="$(cd "$DIR" && pwd)"
 if [ -f "$DIR/kirigami.jar" ] && ! confirm "$DIR/kirigami.jar exists. Replace the jar (world data is kept)?"; then
@@ -366,7 +370,7 @@ Wants=network-online.target
 [Service]
 User=$(id -un)
 WorkingDirectory=$DIR
-ExecStart=$DIR/start.sh
+ExecStart="$DIR/start.sh"
 Restart=on-failure
 RestartSec=10
 SuccessExitStatus=0 143
@@ -385,6 +389,7 @@ if confirm "Start the server now?"; then
     as_root systemctl start "$SERVICE"
     info "Started. Follow the log with: journalctl -u $SERVICE -f"
   else
-    exec "$DIR/start.sh"
+    rm -rf "$tmp"
+    exec "$DIR/start.sh" < /dev/tty
   fi
 fi

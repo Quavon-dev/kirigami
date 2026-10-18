@@ -48,6 +48,7 @@ function Find-Java {
 }
 
 function Find-Engine {
+    $ErrorActionPreference = 'Continue'
     foreach ($e in 'docker', 'podman') {
         if (Get-Command $e -ErrorAction SilentlyContinue) {
             & $e info *> $null
@@ -132,14 +133,14 @@ switch -Wildcard ($channel) {
     default {
         $tag = Ask 'Release tag (for example 26.3-4)'
         if ($tag -notmatch '^\d+(\.\d+)*-\d+$') { Fail "invalid tag '$tag'" }
-        $url = "https://github.com/$Repo/releases/download/$tag"
+        $url = "https://github.com/$Repo/releases/download/v$tag"
     }
 }
 
 $totalMb = [math]::Floor((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1MB)
 $ramGb = [math]::Min([math]::Max([math]::Floor($totalMb / 2048), 2), 16)
 $memory = Ask 'Heap size' "${ramGb}G"
-if ($memory -notmatch '^\d{1,7}[MG]$') { Fail 'heap size must look like 8G or 4096M' }
+if ($memory -cnotmatch '^\d{1,7}[MG]$') { Fail 'heap size must look like 8G or 4096M' }
 $heapMb = [int]$memory.Substring(0, $memory.Length - 1)
 if ($memory.EndsWith('G')) { $heapMb *= 1024 }
 if ($heapMb -lt 1024) { Fail 'heap size must be at least 1G' }
@@ -175,7 +176,7 @@ try {
     if ($method -like '*container') {
         $name = Ask 'Container name' 'kirigami'
         if ($name -notmatch '^[a-zA-Z0-9][a-zA-Z0-9_.-]*$') { Fail "invalid container name '$name'" }
-        & $engine container inspect $name *> $null
+        & { $ErrorActionPreference = 'Continue'; & $engine container inspect $name *> $null }
         if ($LASTEXITCODE -eq 0) { Fail "a container named '$name' already exists" }
         $volume = Ask 'Data volume name' "$name-data"
         if ($volume -notmatch '^[a-zA-Z0-9][a-zA-Z0-9_.-]*$') { Fail "invalid volume name '$volume'" }
