@@ -1,0 +1,76 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: rgxdev <hello@d-aaron.dev>
+Date: Sun, 18 Oct 2026 11:13:56 +0200
+Subject: [PATCH] Keep shared redstone and dispenser state safe in parallel
+ cells
+
+
+diff --git a/net/minecraft/core/dispenser/DispenseItemBehavior.java b/net/minecraft/core/dispenser/DispenseItemBehavior.java
+index c650f26d3ecdeb94a4d0f40637c07c59a6cbdfa6..5a32cb68c00dd4da79c582b84a5fa01072958cff 100644
+--- a/net/minecraft/core/dispenser/DispenseItemBehavior.java
++++ b/net/minecraft/core/dispenser/DispenseItemBehavior.java
+@@ -292,6 +292,7 @@ public interface DispenseItemBehavior {
+                     return result;
+                 }
+                 // Paper end - Call BlockDispenseEvent
++                kirigami.parallel.WorldPause.exclusiveRun("dispenser fertilising", () -> { // MT
+                 List<org.bukkit.craftbukkit.block.CraftBlockState> capturedBlockStates; // Paper
+                 org.bukkit.TreeType treeType; // Paper
+                 level.captureTreeGeneration = true; // CraftBukkit
+@@ -333,6 +334,7 @@ public interface DispenseItemBehavior {
+                     }
+                 }
+                 // CraftBukkit end
++                }); // MT
+ 
+                 return dispensed;
+             }
+diff --git a/net/minecraft/world/item/crafting/RecipeCache.java b/net/minecraft/world/item/crafting/RecipeCache.java
+index 08438b48f15912cae0ae56d9d2ec2baf880efd27..d872332f13f4a883e80dc20c853b2dd953d65266 100644
+--- a/net/minecraft/world/item/crafting/RecipeCache.java
++++ b/net/minecraft/world/item/crafting/RecipeCache.java
+@@ -16,7 +16,7 @@ public class RecipeCache {
+         this.entries = new RecipeCache.Entry[capacity];
+     }
+ 
+-    public Optional<RecipeHolder<CraftingRecipe>> get(final ServerLevel level, final CraftingInput input) {
++    public synchronized Optional<RecipeHolder<CraftingRecipe>> get(final ServerLevel level, final CraftingInput input) { // MT
+         if (input.isEmpty()) {
+             return Optional.empty();
+         }
+diff --git a/net/minecraft/world/level/block/RedstoneTorchBlock.java b/net/minecraft/world/level/block/RedstoneTorchBlock.java
+index e6680b9bfa001e6c00598256f13d4e74b64dc32c..7aa8652dc7a5146f6fbff890c887a7f9a8febd42 100644
+--- a/net/minecraft/world/level/block/RedstoneTorchBlock.java
++++ b/net/minecraft/world/level/block/RedstoneTorchBlock.java
+@@ -62,6 +62,7 @@ public class RedstoneTorchBlock extends BaseTorchBlock {
+     protected void tick(final BlockState state, final ServerLevel level, final BlockPos pos, final RandomSource random) {
+         boolean neighborSignal = this.hasNeighborSignal(level, pos, state);
+         // Paper start - Faster redstone torch rapid clock removal
++        synchronized (RedstoneTorchBlock.Toggle.class) { // MT
+         java.util.ArrayDeque<RedstoneTorchBlock.Toggle> toggles = level.redstoneUpdateInfos;
+         if (toggles != null) {
+             RedstoneTorchBlock.Toggle curr;
+@@ -69,6 +70,7 @@ public class RedstoneTorchBlock extends BaseTorchBlock {
+                 toggles.poll();
+             }
+         }
++        } // MT
+         // Paper end - Faster redstone torch rapid clock removal
+ 
+         if (state.getValue(LIT)) {
+@@ -139,6 +141,7 @@ public class RedstoneTorchBlock extends BaseTorchBlock {
+     }
+ 
+     private static boolean isToggledTooFrequently(final Level level, final BlockPos pos, final boolean add) {
++        synchronized (RedstoneTorchBlock.Toggle.class) { // MT
+         // Paper start - Faster redstone torch rapid clock removal
+         java.util.ArrayDeque<RedstoneTorchBlock.Toggle> toggles = level.redstoneUpdateInfos;
+         if (toggles == null) {
+@@ -160,6 +163,7 @@ public class RedstoneTorchBlock extends BaseTorchBlock {
+         }
+ 
+         return false;
++        } // MT
+     }
+ 
+     protected @Nullable Orientation randomOrientation(final Level level, final BlockState state) {
