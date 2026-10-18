@@ -105,8 +105,8 @@ public final class WorldPause {
         }
         final CellContext context = CellContext.detach();
         exitItem();
-        final long start = System.nanoTime();
         EXCLUSIVE.lock();
+        final long start = System.nanoTime();
         PAUSES.incrementAndGet();
         SOURCES.computeIfAbsent(source, unused -> new long[1])[0]++;
         try {
