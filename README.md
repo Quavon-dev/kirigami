@@ -109,7 +109,7 @@ Stop the Paper server, replace the jar and start Kirigami in the same folder. Wo
 
 - Paper's gameplay changes default to vanilla: activation ranges, entity collision limits, per-player mob caps, TNT limits, dupes and bedrock breaking (`unsupported-settings`), phantom rules, player cramming damage, beehive and villager retry delays, raid fixes. Paper's own exploit protections can be re-enabled in `config/paper-global.yml` and `config/paper-world-defaults.yml`.
 - Update suppression does not crash the server: Paper's catch is kept, while vanilla would crash.
-- Within one tick, entities in different cells tick colour by colour instead of in vanilla's global list order. Deterministic contraption tests and statistical farm tests show no measurable difference. Scheduled ticks keep vanilla order wherever they can affect each other.
+- Within one tick, entities in different cells tick colour by colour instead of in vanilla's global list order. Deterministic contraption tests and statistical farm tests show no measurable difference. Scheduled ticks keep vanilla order wherever they can affect each other. Entities spawned during a parallel phase (for example TNT primed by an explosion) join the world after their cell's colour finishes, so explosions later in the same tick do not push them yet; long TNT chains can therefore end at a different point than in vanilla.
 
 ## Testing
 

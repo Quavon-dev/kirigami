@@ -25,6 +25,10 @@ Revisit only if a plugin shows up with many more pauses per tick in `/kirigami`.
 
 Pauses are counted per event type, and `/kirigami` lists the top five with the plugins that listen to them. A phase that spends more than half of its time in world pauses falls back to serial for 600 ticks.
 
+## Entities added during a parallel phase
+
+`addFreshEntity` inside a cell is deferred until the colour finishes, because the entity tick list, entity sections and the tracker's entity map are not safe to change from worker threads. A TNT primed by an explosion is therefore not pushed by explosions later in the same tick, as it would be in vanilla. In the redstone lab (`lab.sh` with `REDSTONE=1`) the 240-block TNT line stopped early in about 5 of 22 parallel runs and in 0 of 9 serial runs (measured on 2026-10-18), always after the primed TNT fell through the blown-up floor and exploded below the line. Without the redstone field it never stopped (0 of 6 either way). Adding entities immediately would need those structures to accept concurrent inserts.
+
 ## Ticking dimensions in parallel
 
 Measured on 2026-10-17 in the soak scenario (48 bots, about 36/8/4 across overworld, Nether and End at the time of measurement, 800 villagers and the hopper hotspot in the overworld, six plugins): the overworld took 88% of level tick time, the Nether 10% and the End 2%. Overlapping the Nether and End with the overworld would therefore save at most about 12%.
