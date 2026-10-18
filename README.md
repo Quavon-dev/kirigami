@@ -42,6 +42,18 @@ docker run -d --name kirigami -p 25565:25565 -e EULA=true -e MEMORY=8G -v kiriga
 
 `EULA=true` accepts the [Minecraft EULA](https://aka.ms/MinecraftEULA). `MEMORY` sets the heap size and `JAVA_OPTS` replaces the default G1 flags. The server data lives in `/data`; Kirigami's settings are in `/data/config/kirigami.yml`, and `-Dkirigami.…` flags in `JAVA_OPTS` override them.
 
+### Setup script
+
+`setup.sh` (macOS, Linux, WSL, Git Bash) and `setup.ps1` (Windows PowerShell) set up a server interactively. They look for a running Docker or Podman and a Java 25 install, then ask for the method, the EULA, the release channel, heap size and port. The plain setup verifies the jar against its `.sha256` file and writes a `start.sh` or `start.bat`.
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/Quavon-dev/kirigami/main/setup.sh && bash setup.sh
+```
+
+```powershell
+irm https://raw.githubusercontent.com/Quavon-dev/kirigami/main/setup.ps1 -OutFile setup.ps1; powershell -ExecutionPolicy Bypass -File setup.ps1
+```
+
 ## Building and running
 
 Kirigami uses Paper's [paperweight](https://github.com/PaperMC/paperweight) fork layout: the repository contains only Kirigami's own changes, applied on top of a pinned Paper commit (`paperRef` in `gradle.properties`). Java 25 is required.
