@@ -33,6 +33,10 @@ Pauses are counted per event type, and `/kirigami` lists the top five with the p
 
 Scheduled ticks in different groups run colour by colour, so the sub-tick numbers of ticks they schedule (`LevelTicks` `nextSubTickCount`) and the order of block events they queue follow the order cells run, not vanilla order. Two distant ticks that each schedule a repeater can therefore give those repeaters a different order later, when they are close enough to run serially. Possible fix: record each parallel tick's index in the vanilla list with everything it schedules or queues, buffer per cell, and merge by that index after the phase. Reads such as `willTickThisTick` and `hasScheduledTick` would then have to see the buffers.
 
+## Tripwire string broken by fluid ticks
+
+Not tested. With `parallel.phases.scheduled-ticks: true`, tripwire and hook ticks keep the scheduled tick phase serial, but water or lava that flows into tripwire string breaks it from a fluid tick. The string then updates its hooks up to 41 blocks away, and the hook's redstone output reaches about 15 blocks further, so two unlinked fluid ticks in neighbouring cells could affect each other. Possible fix: keep the fluid tick phase serial while a fluid tick is queued next to tripwire string, or test it with a contraption that floods a tripwire on a cell border.
+
 ## Ticking dimensions in parallel
 
 Measured on 2026-10-17 in the soak scenario (48 bots, about 36/8/4 across overworld, Nether and End at the time of measurement, 800 villagers and the hopper hotspot in the overworld, six plugins): the overworld took 88% of level tick time, the Nether 10% and the End 2%. Overlapping the Nether and End with the overworld would therefore save at most about 12%.
