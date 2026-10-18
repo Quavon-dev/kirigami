@@ -734,7 +734,7 @@ index 1a50ec0d56bb4b9c3b0958a0281028c8eff1000c..43140ac442bb3369faefc0bf2371d3e3
          return (int)HashCommon.mix(pos) & 4095;
      }
 diff --git a/net/minecraft/world/ticks/LevelTicks.java b/net/minecraft/world/ticks/LevelTicks.java
-index 7bf9e93692debcef511bfa316aeef32ae8a7d3b7..32e6eecad201a58e1462d1de827465c257daaaf5 100644
+index 7bf9e93692debcef511bfa316aeef32ae8a7d3b7..67dfcb340cff4c39b7079ce20924b7172e9586bc 100644
 --- a/net/minecraft/world/ticks/LevelTicks.java
 +++ b/net/minecraft/world/ticks/LevelTicks.java
 @@ -43,8 +43,19 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
@@ -774,11 +774,12 @@ index 7bf9e93692debcef511bfa316aeef32ae8a7d3b7..32e6eecad201a58e1462d1de827465c2
          long chunkKey = ChunkPos.pack(tick.pos());
          LevelChunkTicks<T> tickContainer = this.allContainers.get(chunkKey);
          if (tickContainer == null) {
-@@ -180,6 +201,26 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
+@@ -180,6 +201,29 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
      }
  
      private void runCollectedTicks(final BiConsumer<BlockPos, T> output) {
-+        if (this.mtLevel != null && kirigami.parallel.RegionTicking.ENABLED && kirigami.parallel.RegionTicking.scheduledTicksMayRunParallel(this.mtLevel, this.toRunThisTick.size())) { // MT
++        final boolean mtFluids = this.mtLevel != null && this == this.mtLevel.getFluidTicks(); // MT
++        if (this.mtLevel != null && kirigami.parallel.RegionTicking.ENABLED && kirigami.parallel.RegionTicking.scheduledTicksMayRunParallel(this.mtLevel, this.toRunThisTick, mtFluids)) { // MT
 +            final List<ScheduledTick<T>> ticks = new ArrayList<>(this.toRunThisTick);
 +            this.toRunThisTick.clear();
 +            this.toRunThisTickSet.clear();
@@ -789,7 +790,7 @@ index 7bf9e93692debcef511bfa316aeef32ae8a7d3b7..32e6eecad201a58e1462d1de827465c2
 +            this.alreadyRunThisTick.addAll(ticks);
 +            this.mtPending = pending;
 +            try {
-+                kirigami.parallel.RegionTicking.tickScheduled(this.mtLevel, ticks, this == this.mtLevel.getFluidTicks(), tick -> {
++                kirigami.parallel.RegionTicking.tickScheduled(this.mtLevel, ticks, mtFluids, tick -> { // MT
 +                    pending.remove(new MtTickKey(tick.pos().asLong(), tick.type()));
 +                    output.accept(tick.pos(), tick.type());
 +                });
@@ -798,10 +799,20 @@ index 7bf9e93692debcef511bfa316aeef32ae8a7d3b7..32e6eecad201a58e1462d1de827465c2
 +            }
 +            return;
 +        } // MT
++        final int mtSize = this.toRunThisTick.size(); // MT
++        final long mtStart = System.nanoTime(); // MT
          while (!this.toRunThisTick.isEmpty()) {
              ScheduledTick<T> entry = this.toRunThisTick.poll();
              if (!this.toRunThisTickSet.isEmpty()) {
-@@ -206,6 +247,8 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
+@@ -189,6 +233,7 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
+             this.alreadyRunThisTick.add(entry);
+             output.accept(entry.pos(), entry.type());
+         }
++        if (this.mtLevel != null && kirigami.parallel.RegionTicking.ENABLED) kirigami.parallel.RegionTicking.scheduledTicksRanSerially(this.mtLevel, mtFluids, mtSize, System.nanoTime() - mtStart); // MT
+     }
+ 
+     private void cleanupAfterTick() {
+@@ -206,6 +251,8 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
  
      @Override
      public boolean willTickThisTick(final BlockPos pos, final T type) {

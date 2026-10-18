@@ -166,23 +166,14 @@ public final class RegionTicking {
 
     public static <T> void tickScheduled(final ServerLevel level, final List<net.minecraft.world.ticks.ScheduledTick<T>> ticks, final boolean fluids,
                                          final Consumer<net.minecraft.world.ticks.ScheduledTick<T>> action) {
-        if (needsSerialPhase(ticks)) {
-            STATS.serial[Phase.SCHEDULED_TICKS.ordinal()] += ticks.size();
-            ticks.forEach(action);
-            return;
-        }
         final int fallbackIndex = fluids ? FLUID_TICKS : Phase.SCHEDULED_TICKS.ordinal();
-        java.util.function.Predicate<net.minecraft.world.ticks.ScheduledTick<T>> serial = tick -> true;
-        if (!fallback(level, fallbackIndex).active()) {
-            final java.util.Set<net.minecraft.world.ticks.ScheduledTick<?>> serialTicks = BoundaryClusters.spanningClusters(ticks, CELL_SHIFT + 4, 2 * SCHEDULED_TICK_REACH);
-            STATS.boundaryScheduledTicks += serialTicks.size();
-            serial = serialTicks::contains;
-        }
-        run(level, Phase.SCHEDULED_TICKS, fallbackIndex, ticks, tick -> ChunkPos.pack(tick.pos()), serial, action, level.mtMaxChainedNeighborUpdates,
+        final java.util.Set<net.minecraft.world.ticks.ScheduledTick<?>> serial = BoundaryClusters.spanningClusters(ticks, CELL_SHIFT + 4, 2 * SCHEDULED_TICK_REACH);
+        STATS.boundaryScheduledTicks += serial.size();
+        run(level, Phase.SCHEDULED_TICKS, fallbackIndex, ticks, tick -> ChunkPos.pack(tick.pos()), serial::contains, action, level.mtMaxChainedNeighborUpdates,
             () -> ((ca.spottedleaf.moonrise.patches.chunk_system.server.ChunkSystemMinecraftServer) level.getServer()).moonrise$executeMidTickTasks());
     }
 
-    private static boolean needsSerialPhase(final List<? extends net.minecraft.world.ticks.ScheduledTick<?>> ticks) {
+    private static boolean needsSerialPhase(final java.util.Collection<? extends net.minecraft.world.ticks.ScheduledTick<?>> ticks) {
         for (final net.minecraft.world.ticks.ScheduledTick<?> tick : ticks) {
             if (tick.type() instanceof net.minecraft.world.level.block.CommandBlock
                 || tick.type() instanceof net.minecraft.world.level.block.TripWireHookBlock
@@ -257,8 +248,22 @@ public final class RegionTicking {
         return Thread.currentThread() instanceof Worker;
     }
 
-    public static boolean scheduledTicksMayRunParallel(final ServerLevel level, final int size) {
-        return parallelPossible(Phase.SCHEDULED_TICKS, size);
+    public static boolean scheduledTicksMayRunParallel(final ServerLevel level, final java.util.Collection<? extends net.minecraft.world.ticks.ScheduledTick<?>> ticks,
+                                                       final boolean fluids) {
+        return parallelPossible(Phase.SCHEDULED_TICKS, ticks.size()) && !needsSerialPhase(ticks)
+            && !fallback(level, fluids ? FLUID_TICKS : Phase.SCHEDULED_TICKS.ordinal()).active();
+    }
+
+    public static void scheduledTicksRanSerially(final ServerLevel level, final boolean fluids, final int size, final long nanos) {
+        if (!parallelPossible(Phase.SCHEDULED_TICKS, size)) {
+            return;
+        }
+        STATS.serial[Phase.SCHEDULED_TICKS.ordinal()] += size;
+        final Fallback fallback = fallback(level, fluids ? FLUID_TICKS : Phase.SCHEDULED_TICKS.ordinal());
+        if (fallback.active()) {
+            fallback.serialNanos += nanos;
+            fallback.serialItems += size;
+        }
     }
 
     private static boolean parallelPossible(final Phase phase, final int size) {
