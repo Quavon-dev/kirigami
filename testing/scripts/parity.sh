@@ -13,7 +13,7 @@ trap 'rm -rf "$work"' EXIT
 VANILLA_DIR="$root/servers/runs/$name-vanilla" VANILLA_JAR="$vanilla" PORT=25590 \
   DET_SUMMARY="$work/summary.tsv" "$root/scripts/det.sh" "$name-vanilla" vanilla > "$work/vanilla.out" 2>&1 &
 vanilla_pid=$!
-JAR="$kirigami" PORT=25591 EXTRA_ARGS="-Dkirigami.minParallelItems=0 -Dkirigami.minSpeculativeJobs=0" \
+JAR="$kirigami" PORT=25591 EXTRA_ARGS="-Dkirigami.minParallelItems=0 -Dkirigami.minSpeculativeJobs=0 -Dkirigami.region.scheduledTicks=true" \
   DET_SUMMARY="$work/summary.tsv" "$root/scripts/det.sh" "$name-kirigami" paper > "$work/kirigami.out" 2>&1 &
 kirigami_pid=$!
 status=0

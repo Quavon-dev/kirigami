@@ -25,7 +25,7 @@ public final class KirigamiConfig {
         new Setting("parallel.phases.entities", "kirigami.region.entities", true),
         new Setting("parallel.phases.random-ticks", "kirigami.region.chunks", true),
         new Setting("parallel.phases.block-entities", "kirigami.region.blockEntities", true),
-        new Setting("parallel.phases.scheduled-ticks", "kirigami.region.scheduledTicks", true),
+        new Setting("parallel.phases.scheduled-ticks", "kirigami.region.scheduledTicks", false),
         new Setting("parallel.phases.entity-tracker", "kirigami.region.tracker", true),
         new Setting("parallel.spawning", "kirigami.parallelSpawning", true),
         new Setting("parallel.region-workers", "kirigami.regionWorkers", -1),

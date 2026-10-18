@@ -93,19 +93,19 @@ public final class RegionTicking {
     }
 
     private enum Phase {
-        ENTITIES("entities", 0x9E3779B97F4A7C15L),
-        CHUNKS("chunks", 0xC6BC279692B5C323L),
-        BLOCK_ENTITIES("blockEntities", 0xD6E8FEB86659FD93L),
-        SCHEDULED_TICKS("scheduledTicks", 0xA0761D6478BD642FL);
+        ENTITIES("entities", 0x9E3779B97F4A7C15L, true),
+        CHUNKS("chunks", 0xC6BC279692B5C323L, true),
+        BLOCK_ENTITIES("blockEntities", 0xD6E8FEB86659FD93L, true),
+        SCHEDULED_TICKS("scheduledTicks", 0xA0761D6478BD642FL, false);
 
         private final String label;
         private final long salt;
         private final boolean enabled;
 
-        Phase(final String label, final long salt) {
+        Phase(final String label, final long salt, final boolean enabledByDefault) {
             this.label = label;
             this.salt = salt;
-            this.enabled = Boolean.parseBoolean(System.getProperty("kirigami.region." + label, "true"));
+            this.enabled = Boolean.parseBoolean(System.getProperty("kirigami.region." + label, String.valueOf(enabledByDefault)));
         }
     }
 
