@@ -31,6 +31,12 @@ public final class RegionTicking {
     private static final long MIN_FALLBACK_NANOS = 1_000_000L;
     private static final java.util.Set<String> WARNED = new java.util.HashSet<>();
     private static final int TRACKER = Phase.values().length;
+    private static final class Worker extends TickThread {
+        private Worker(final Runnable runnable) {
+            super(runnable, "Kirigami Region Worker");
+        }
+    }
+
     private static final java.util.Map<ServerLevel, Fallback[]> FALLBACKS = new java.util.WeakHashMap<>();
 
     private static final class Fallback {
@@ -46,7 +52,7 @@ public final class RegionTicking {
     private static final int MIN_PARALLEL_ITEMS = Integer.getInteger("kirigami.minParallelItems", 256);
     private static final int WORKERS = Integer.getInteger("kirigami.regionWorkers", Math.max(0, Runtime.getRuntime().availableProcessors() - 1));
     private static final ExecutorService POOL = WORKERS == 0 ? null : Executors.newFixedThreadPool(WORKERS, runnable -> {
-        final TickThread thread = new TickThread(runnable, "Kirigami Region Worker");
+        final TickThread thread = new Worker(runnable);
         thread.setDaemon(true);
         return thread;
     });
@@ -248,7 +254,7 @@ public final class RegionTicking {
     }
 
     public static boolean onWorker() {
-        return Thread.currentThread() instanceof TickThread && !net.minecraft.server.MinecraftServer.getServer().isSameThread();
+        return Thread.currentThread() instanceof Worker;
     }
 
     public static boolean scheduledTicksMayRunParallel(final ServerLevel level, final int size) {
