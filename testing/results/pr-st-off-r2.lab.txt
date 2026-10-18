@@ -1,0 +1,20 @@
+mtbench lab lab ticks=194 telegraph_pulses=4 tnt_remaining=204 tnt_entities=6 grinder_spawned=24 grinder_items={rotten_flesh=17} grinder_alive={zombie=6} items_stored=2479 items_floating=0 items_expected=3000 fight_alive={iron_golem=6, item=31, skeleton=4, snow_golem=1, zombie=7} ender_alive=10 ender_grass=969 village={villager=8, zombie=3} portal_overworld=8 portal_spawned=1 portal_nether=3
+mtbench lab lab ticks=572 telegraph_pulses=12 tnt_remaining=57 tnt_entities=17 grinder_spawned=84 grinder_items={rotten_flesh=64} grinder_alive={zombie=6} items_stored=3000 items_floating=0 items_expected=3000 fight_alive={iron_golem=6, item=39, snow_golem=1} ender_alive=10 ender_grass=969 village={villager=8, zombie=3} portal_overworld=6 portal_spawned=5 portal_nether=9
+mtbench lab lab ticks=923 telegraph_pulses=19 tnt_remaining=0 tnt_entities=0 grinder_spawned=138 grinder_items={rotten_flesh=115} grinder_alive={zombie=12} items_stored=3000 items_floating=0 items_expected=3000 fight_alive={iron_golem=6, item=39, snow_golem=1} ender_alive=0 ender_grass=969 village={villager=8, zombie=3} portal_overworld=5 portal_spawned=9 portal_nether=14
+mtbench lab lab ticks=1658 telegraph_pulses=35 tnt_remaining=0 tnt_entities=0 grinder_spawned=246 grinder_items={rotten_flesh=231} grinder_alive={zombie=6} items_stored=3000 items_floating=0 items_expected=3000 fight_alive={iron_golem=6, item=39, snow_golem=1} ender_alive=0 ender_grass=969 village={villager=8, zombie=3} portal_overworld=4 portal_spawned=16 portal_nether=22
+mtbench ticks=1658 mean=71.01ms p50=54.65ms p95=176.23ms p99=211.15ms max=420.24ms -> mtbench/pr-st-off-r2.csv
+mtbench regionstats ticks=6783 entities=5951094/1502818 chunks=14090292/13975 blockEntities=1764742/586959 scheduledTicks=0/0 cells=710970 boundaryBlockEntities=558518 boundaryScheduledTicks=0 violations=0 reads{} writes{} blockingLoads=2
+[03:04:55 INFO]: Kirigami 26.3-DEV-9e40e28: 12.2 TPS, 122.5 ms per tick
+Region ticking on, spawning on, entity tracker on, plugins do not limit it
+Workers: 9 region, 9 spawning. Averages per tick since start or the last /kirigami reset (2261 ticks):
+  Entities: 2632 parallel, 665 serial
+  Random ticks: 6232 parallel, 6 serial
+  Block entities: 781 parallel, 260 serial
+  Scheduled ticks: 0 parallel, 0 serial (phase disabled)
+  Cell runs across all phases: 314.4, kept serial at cell borders: 247.0 block entities, 0.0 scheduled ticks
+  Spawn searches: 9351, 97.9% precomputed in parallel, 0 mismatches
+  World pauses (plugin code, blocking chunk loads): 0.01, blocking loads in total: 2, phases switched to serial by pauses: 2
+    blocking chunk loads: 0.010 per tick
+    kill score awarding: 0.003 per tick
+[03:04:58 INFO]: System chat: Stopping the server
+errors=0
