@@ -31,6 +31,7 @@ public final class RegionTicking {
     private static final long MIN_FALLBACK_NANOS = 1_000_000L;
     private static final java.util.Set<String> WARNED = new java.util.HashSet<>();
     private static final int TRACKER = Phase.values().length;
+    private static final int FLUID_TICKS = TRACKER + 1;
     private static final class Worker extends TickThread {
         private Worker(final Runnable runnable) {
             super(runnable, "Kirigami Region Worker");
@@ -134,12 +135,12 @@ public final class RegionTicking {
 
     public static void tickEntities(final ServerLevel level, final Consumer<Entity> vanillaTick, final List<Entity> snapshot, final int maxChainedNeighborUpdates) {
         STATS.ticks++;
-        run(level, Phase.ENTITIES, snapshot, entity -> entity.chunkPosition().pack(), RegionTicking::requiresSerial, vanillaTick, maxChainedNeighborUpdates, null);
+        run(level, Phase.ENTITIES, Phase.ENTITIES.ordinal(), snapshot, entity -> entity.chunkPosition().pack(), RegionTicking::requiresSerial, vanillaTick, maxChainedNeighborUpdates, null);
     }
 
     public static void tickChunks(final ServerLevel level, final LevelChunk[] chunks, final int size, final int randomTickSpeed) {
         final List<LevelChunk> items = java.util.Arrays.asList(chunks).subList(0, size);
-        run(level, Phase.CHUNKS, items, chunk -> chunk.getPos().pack(), chunk -> false, chunk -> level.tickChunk(chunk, randomTickSpeed),
+        run(level, Phase.CHUNKS, Phase.CHUNKS.ordinal(), items, chunk -> chunk.getPos().pack(), chunk -> false, chunk -> level.tickChunk(chunk, randomTickSpeed),
             level.mtMaxChainedNeighborUpdates, () -> ((ca.spottedleaf.moonrise.patches.chunk_system.server.ChunkSystemMinecraftServer) level.getServer()).moonrise$executeMidTickTasks());
     }
 
@@ -157,16 +158,17 @@ public final class RegionTicking {
             ? java.util.Set.of()
             : BoundaryClusters.crossingCells(items, CELL_SHIFT + 4);
         STATS.boundaryBlockEntities += crossing.size();
-        run(level, Phase.BLOCK_ENTITIES, items, ticker -> ChunkPos.pack(ticker.getPos()),
+        run(level, Phase.BLOCK_ENTITIES, Phase.BLOCK_ENTITIES.ordinal(), items, ticker -> ChunkPos.pack(ticker.getPos()),
             ticker -> SERIAL_BLOCK_ENTITIES.contains(ticker.getType()) || crossing.contains(ticker),
             net.minecraft.world.level.block.entity.TickingBlockEntity::tick, level.mtMaxChainedNeighborUpdates,
             () -> ((ca.spottedleaf.moonrise.patches.chunk_system.server.ChunkSystemMinecraftServer) level.getServer()).moonrise$executeMidTickTasks());
     }
 
-    public static <T> void tickScheduled(final ServerLevel level, final List<net.minecraft.world.ticks.ScheduledTick<T>> ticks,
+    public static <T> void tickScheduled(final ServerLevel level, final List<net.minecraft.world.ticks.ScheduledTick<T>> ticks, final boolean fluids,
                                          final Consumer<net.minecraft.world.ticks.ScheduledTick<T>> action) {
+        final int fallbackIndex = fluids ? FLUID_TICKS : Phase.SCHEDULED_TICKS.ordinal();
         final java.util.function.Predicate<net.minecraft.world.ticks.ScheduledTick<T>> serial;
-        if (!scheduledTicksMayRunParallel(level, ticks.size()) || runsCommands(ticks)) {
+        if (fallback(level, fallbackIndex).active() || runsCommands(ticks)) {
             serial = tick -> true;
         } else {
             final int[] bucketOfTick = new int[ticks.size()];
@@ -180,7 +182,7 @@ public final class RegionTicking {
             STATS.boundaryScheduledTicks += serialTicks.size();
             serial = serialTicks::contains;
         }
-        run(level, Phase.SCHEDULED_TICKS, ticks, tick -> ChunkPos.pack(tick.pos()), serial, action, level.mtMaxChainedNeighborUpdates,
+        run(level, Phase.SCHEDULED_TICKS, fallbackIndex, ticks, tick -> ChunkPos.pack(tick.pos()), serial, action, level.mtMaxChainedNeighborUpdates,
             () -> ((ca.spottedleaf.moonrise.patches.chunk_system.server.ChunkSystemMinecraftServer) level.getServer()).moonrise$executeMidTickTasks());
     }
 
@@ -193,10 +195,10 @@ public final class RegionTicking {
         return false;
     }
 
-    private static <T> void run(final ServerLevel level, final Phase phase, final List<T> items, final java.util.function.ToLongFunction<T> chunkKey,
+    private static <T> void run(final ServerLevel level, final Phase phase, final int fallbackIndex, final List<T> items, final java.util.function.ToLongFunction<T> chunkKey,
                                 final java.util.function.Predicate<T> serialPredicate, final Consumer<T> action, final int maxChainedNeighborUpdates,
                                 final @org.jspecify.annotations.Nullable Runnable betweenColors) {
-        final Fallback fallback = fallback(level, phase.ordinal());
+        final Fallback fallback = fallback(level, fallbackIndex);
         if (POOL == null || !PluginGuard.parallelAllowed() || !phase.enabled || items.size() < MIN_PARALLEL_ITEMS) {
             STATS.serial[phase.ordinal()] += items.size();
             items.forEach(action);
@@ -258,13 +260,12 @@ public final class RegionTicking {
     }
 
     public static boolean scheduledTicksMayRunParallel(final ServerLevel level, final int size) {
-        return POOL != null && PluginGuard.parallelAllowed() && Phase.SCHEDULED_TICKS.enabled && size >= MIN_PARALLEL_ITEMS
-            && !fallback(level, Phase.SCHEDULED_TICKS.ordinal()).active();
+        return POOL != null && PluginGuard.parallelAllowed() && Phase.SCHEDULED_TICKS.enabled && size >= MIN_PARALLEL_ITEMS;
     }
 
     private static Fallback fallback(final ServerLevel level, final int index) {
         return FALLBACKS.computeIfAbsent(level, unused -> {
-            final Fallback[] fallbacks = new Fallback[TRACKER + 1];
+            final Fallback[] fallbacks = new Fallback[FLUID_TICKS + 1];
             for (int i = 0; i < fallbacks.length; i++) {
                 fallbacks[i] = new Fallback();
             }

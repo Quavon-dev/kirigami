@@ -117,7 +117,7 @@ Stop the Paper server, replace the jar and start Kirigami in the same folder. Wo
 |---|---|
 | `testing/scripts/det.sh` | Deterministic contraptions across cell borders (hopper chains, observer clock, hopper race, item sorters, item pickup, minecart loop through four cells, piston race, furnace chain, piston duels on and off a cell border); `REDSTONE_IMPL` selects Alternate Current or Eigencraft |
 | `testing/scripts/parity.sh` | Runs the deterministic contraptions on the official Minecraft server and on Kirigami with parallelism forced on, and fails on any difference; CI runs it on every push and pull request |
-| `testing/scripts/lab.sh` | Lab benchmark (telegraph, TNT, grinder, item floor, fights, village, portal); `REDSTONE=1` adds 400 observer clocks in 16 machines |
+| `testing/scripts/lab.sh` | Lab benchmark (telegraph, TNT, grinder, item floor, fights, village, portal); `REDSTONE=1` adds 400 observer clocks in 16 machines above the lab; the lab's telegraph line crosses two cell borders and links about half of them into serial groups, so it measures a mixed case |
 | `testing/scripts/compat.sh` | Runs a copied Paper server with its plugins on Kirigami and compares the log with Paper |
 | `testing/scripts/farm.sh`, `farm-matrix.sh`, `farm_stats.py` | Statistical farm tests (`testing/farms/mtfarm`, `mtraid`, `mtportal`, `mtvillage`) against Fabric + Carpet vanilla |
 | `testing/scripts/bench.sh` | Tick time benchmarks with bench bots, optional `SETUP` command file and `PLUGIN` jars |

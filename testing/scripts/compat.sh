@@ -34,7 +34,7 @@ run_server() {
     mv "$run/server.properties.tmp" "$run/server.properties"
   fi
   srv start "$run" "$server_jar" > /dev/null
-  trap 'srv stop "$run"' EXIT
+  trap "srv stop '$run'" EXIT
   srv cmd "$run" "mtbench bots add ${BOTS:-32} circle 160"
   sleep "$seconds"
   srv cmd "$run" "plugins"

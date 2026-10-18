@@ -105,8 +105,8 @@ public final class WorldPause {
         }
         final CellContext context = CellContext.detach();
         exitItem();
-        EXCLUSIVE.lock();
         final long start = System.nanoTime();
+        EXCLUSIVE.lock();
         PAUSES.incrementAndGet();
         SOURCES.computeIfAbsent(source, unused -> new long[1])[0]++;
         try {
@@ -120,7 +120,9 @@ public final class WorldPause {
             return action.get();
         } finally {
             requested = false;
-            PAUSED_NANOS.addAndGet(System.nanoTime() - start);
+            if (source instanceof Class<?>) {
+                PAUSED_NANOS.addAndGet(System.nanoTime() - start);
+            }
             EXCLUSIVE.unlock();
             enterItem();
             CellContext.attach(context);
