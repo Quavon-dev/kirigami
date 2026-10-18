@@ -44,7 +44,14 @@ docker run -d --name kirigami -p 25565:25565 -e EULA=true -e MEMORY=8G -v kiriga
 
 ### Setup script
 
-`setup.sh` (macOS, Linux, WSL, Git Bash) and `setup.ps1` (Windows PowerShell) set up a server interactively. They look for a running Docker or Podman and a Java 25 install, then ask for the method, the EULA, the release channel, heap size and port. The plain setup verifies the jar against its `.sha256` file and writes a `start.sh` or `start.bat`.
+`setup.sh` (macOS, Linux, WSL, Git Bash) and `setup.ps1` (Windows PowerShell) set up a server interactively:
+
+- **Method:** Docker or Podman if one is running, otherwise a plain jar. A missing Java 25 can be installed through brew, apt, dnf, pacman or winget after you confirm.
+- **Basics:** the EULA, the release channel (stable, edge or an exact tag), heap size (half the RAM by default) and port.
+- **Server settings:** message of the day, max players, difficulty, game mode, PvP, view and simulation distance, seed, online mode and whitelist. Existing `server.properties`, `ops.json` and `whitelist.json` files are never overwritten.
+- **Operators:** player names are looked up with Mojang and written to `ops.json`, and to `whitelist.json` when the whitelist is on.
+- **Plain jar:** the jar is checked against its `.sha256` file, and a `start.sh` or `start.bat` is written. On Linux the script can open the port in ufw or firewalld and install a systemd service; on Windows it can add a firewall rule when run as administrator.
+- **Docker:** the settings are copied into the data volume before the container starts.
 
 ```bash
 curl -fsSLO https://raw.githubusercontent.com/Quavon-dev/kirigami/main/setup.sh && bash setup.sh

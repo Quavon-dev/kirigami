@@ -122,6 +122,103 @@ sha256_of() {
   fi
 }
 
+fetch_text() {
+  if command -v curl > /dev/null; then
+    curl -fsSL --proto '=https' --tlsv1.2 --max-time 15 "$1"
+  else
+    wget --https-only -q -T 15 -O- "$1"
+  fi
+}
+
+lookup_uuid() {
+  local id
+  id="$(fetch_text "https://api.mojang.com/users/profiles/minecraft/$1" 2> /dev/null | grep -o '[0-9a-f]\{32\}' | head -n 1)" || return 1
+  [ "${#id}" -eq 32 ] || return 1
+  echo "${id:0:8}-${id:8:4}-${id:12:4}-${id:16:4}-${id:20:12}"
+}
+
+ask_choice() {
+  local prompt="$1" default="$2" reply
+  shift 2
+  while :; do
+    reply="$(ask "$prompt ($*)" "$default")"
+    for opt in "$@"; do [ "$reply" = "$opt" ] && { echo "$reply"; return; }; done
+    echo "Pick one of: $*" > /dev/tty
+  done
+}
+
+ask_number() {
+  local prompt="$1" default="$2" min="$3" max="$4" reply
+  while :; do
+    reply="$(ask "$prompt ($min-$max)" "$default")"
+    [[ "$reply" =~ ^[0-9]+$ ]] && [ "$reply" -ge "$min" ] && [ "$reply" -le "$max" ] && { echo "$reply"; return; }
+    echo "Enter a number from $min to $max." > /dev/tty
+  done
+}
+
+ask_text() {
+  local reply
+  while :; do
+    reply="$(ask "$1" "${2:-}")"
+    [[ "$reply" =~ [[:cntrl:]] ]] || { echo "${reply//\\/\\\\}"; return; }
+    echo "Control characters are not allowed." > /dev/tty
+  done
+}
+
+write_server_files() {
+  local dir="$1" port="$2" i sep
+  if [ -f "$dir/server.properties" ]; then
+    info "Keeping existing server.properties"
+  else
+    {
+      echo "server-port=$port"
+      echo "motd=$MOTD"
+      echo "max-players=$MAX_PLAYERS"
+      echo "difficulty=$DIFFICULTY"
+      echo "gamemode=$GAMEMODE"
+      echo "pvp=$PVP"
+      echo "online-mode=$ONLINE_MODE"
+      echo "view-distance=$VIEW_DISTANCE"
+      echo "simulation-distance=$SIM_DISTANCE"
+      echo "level-seed=$SEED"
+      echo "white-list=$WHITELIST"
+      echo "enforce-whitelist=$WHITELIST"
+    } > "$dir/server.properties"
+  fi
+  [ "${#OP_NAMES[@]}" -gt 0 ] || return 0
+  if [ -f "$dir/ops.json" ]; then
+    info "Keeping existing ops.json"
+  else
+    sep=""
+    { echo "["; for i in "${!OP_NAMES[@]}"; do
+        printf '%s  {"uuid": "%s", "name": "%s", "level": 4, "bypassesPlayerLimit": false}' "$sep" "${OP_UUIDS[$i]}" "${OP_NAMES[$i]}"
+        sep=$',\n'
+      done; printf '\n]\n'; } > "$dir/ops.json"
+  fi
+  if [ "$WHITELIST" = true ] && [ ! -f "$dir/whitelist.json" ]; then
+    sep=""
+    { echo "["; for i in "${!OP_NAMES[@]}"; do
+        printf '%s  {"uuid": "%s", "name": "%s"}' "$sep" "${OP_UUIDS[$i]}" "${OP_NAMES[$i]}"
+        sep=$',\n'
+      done; printf '\n]\n'; } > "$dir/whitelist.json"
+  fi
+}
+
+as_root() {
+  if [ "$(id -u)" -eq 0 ]; then "$@"; else sudo "$@"; fi
+}
+
+open_firewall() {
+  if command -v ufw > /dev/null; then
+    confirm "Allow port $PORT/tcp in ufw?" && as_root ufw allow "$PORT/tcp"
+  elif command -v firewall-cmd > /dev/null && firewall-cmd --state > /dev/null 2>&1; then
+    confirm "Allow port $PORT/tcp in firewalld?" && as_root firewall-cmd --permanent --add-port="$PORT/tcp" && as_root firewall-cmd --reload
+  else
+    info "Open port $PORT/tcp in your firewall if players connect from outside."
+  fi
+  return 0
+}
+
 echo "Kirigami server setup"
 echo
 
@@ -151,13 +248,53 @@ case "$CHANNEL" in
     ;;
 esac
 
-ram=$(( $(total_ram_mb) / 2 / 1024 ))
+ram_mb="$(total_ram_mb)"
+ram=$(( ram_mb / 2 / 1024 ))
 [ "$ram" -lt 2 ] && ram=2
 [ "$ram" -gt 16 ] && ram=16
 MEMORY="$(ask "Heap size" "${ram}G")"
 [[ "$MEMORY" =~ ^[0-9]+[MG]$ ]] || die "heap size must look like 8G or 4096M"
-PORT="$(ask "Port" 25565)"
-[[ "$PORT" =~ ^[0-9]+$ ]] && [ "$PORT" -ge 1 ] && [ "$PORT" -le 65535 ] || die "invalid port '$PORT'"
+heap_mb="${MEMORY%?}"
+[ "${MEMORY: -1}" = G ] && heap_mb=$(( heap_mb * 1024 ))
+[ "$heap_mb" -lt 1024 ] && die "heap size must be at least 1G"
+[ "$heap_mb" -gt $(( ram_mb * 8 / 10 )) ] && echo "warning: $MEMORY is more than 80% of the ${ram_mb}M RAM in this machine" >&2
+PORT="$(ask_number "Port" 25565 1 65535)"
+
+echo
+echo "Server settings (press Enter to keep a default):"
+MOTD="$(ask_text "Message of the day" "A Kirigami Server")"
+MAX_PLAYERS="$(ask_number "Max players" 20 1 1000)"
+DIFFICULTY="$(ask_choice "Difficulty" normal peaceful easy normal hard)"
+GAMEMODE="$(ask_choice "Game mode" survival survival creative adventure spectator)"
+PVP="$(ask_choice "PvP" true true false)"
+VIEW_DISTANCE="$(ask_number "View distance" 10 3 32)"
+SIM_DISTANCE="$(ask_number "Simulation distance" 10 3 32)"
+SEED="$(ask_text "World seed (empty for random)")"
+ONLINE_MODE="$(ask_choice "Online mode (verify accounts with Mojang)" true true false)"
+[ "$ONLINE_MODE" = false ] && echo "warning: offline mode lets anyone join with any name; only use it behind a proxy that authenticates players" >&2
+WHITELIST="$(ask_choice "Whitelist (only listed players can join)" false true false)"
+
+OP_NAMES=()
+OP_UUIDS=()
+if [ "$ONLINE_MODE" = true ]; then
+  op_input="$(ask "Operator player names, separated by spaces (empty for none)")"
+  read -r -a op_list <<< "${op_input//,/ }"
+  for name in ${op_list[@]+"${op_list[@]}"}; do
+    [[ "$name" =~ ^[A-Za-z0-9_]{3,16}$ ]] || { echo "warning: skipping invalid player name '$name'" >&2; continue; }
+    if uuid="$(lookup_uuid "$name")"; then
+      OP_NAMES+=("$name")
+      OP_UUIDS+=("$uuid")
+      info "Operator $name ($uuid)"
+    else
+      echo "warning: no Minecraft account named '$name' found; run 'op $name' in the console later" >&2
+    fi
+  done
+else
+  info "Offline mode: add operators with 'op <name>' in the server console."
+fi
+
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
 
 if [[ "$METHOD" == *container ]]; then
   NAME="$(ask "Container name" kirigami)"
@@ -167,11 +304,17 @@ if [[ "$METHOD" == *container ]]; then
   [[ "$VOLUME" =~ ^[a-zA-Z0-9][a-zA-Z0-9_.-]*$ ]] || die "invalid volume name '$VOLUME'"
   info "Pulling $IMAGE:$TAG"
   "$ENGINE" pull "$IMAGE:$TAG" || die "no $TAG release found; see https://github.com/$REPO/releases"
+  write_server_files "$tmp" 25565 > /dev/null
+  chmod -R a+rX "$tmp"
+  # shellcheck disable=SC2016
+  "$ENGINE" run --rm -v "$VOLUME:/data" -v "$tmp:/seed:ro" --entrypoint sh "$IMAGE:$TAG" \
+    -c 'for f in /seed/*; do [ -e "/data/${f##*/}" ] && echo "Keeping existing ${f##*/}" || cp "$f" /data/; done'
   "$ENGINE" run -d -it --name "$NAME" --restart unless-stopped -p "$PORT:25565" \
     -e EULA=true -e MEMORY="$MEMORY" -v "$VOLUME:/data" "$IMAGE:$TAG"
   echo
   info "Server is starting. Console log: $ENGINE logs -f $NAME"
-  info "Commands: $ENGINE attach $NAME (detach with Ctrl-P Ctrl-Q), stop with $ENGINE stop $NAME"
+  info "Console: $ENGINE attach $NAME (detach with Ctrl-P Ctrl-Q), stop with $ENGINE stop $NAME"
+  info "Settings live in the '$VOLUME' volume (server.properties, config/kirigami.yml)."
   exit 0
 fi
 
@@ -188,8 +331,6 @@ if [ -f "$DIR/kirigami.jar" ] && ! confirm "$DIR/kirigami.jar exists. Replace th
   die "aborted"
 fi
 
-tmp="$(mktemp -d)"
-trap 'rm -rf "$tmp"' EXIT
 info "Downloading kirigami.jar ($TAG)"
 download "$URL/kirigami.jar" "$tmp/kirigami.jar" || die "no $TAG release found; see https://github.com/$REPO/releases"
 download "$URL/kirigami.jar.sha256" "$tmp/kirigami.jar.sha256" || die "no $TAG release found; see https://github.com/$REPO/releases"
@@ -199,11 +340,7 @@ info "Checksum verified"
 mv "$tmp/kirigami.jar" "$DIR/kirigami.jar"
 
 echo "eula=true" > "$DIR/eula.txt"
-if [ -f "$DIR/server.properties" ]; then
-  info "Keeping existing server.properties"
-else
-  echo "server-port=$PORT" > "$DIR/server.properties"
-fi
+write_server_files "$DIR" "$PORT"
 
 cat > "$DIR/start.sh" <<EOF
 #!/usr/bin/env bash
@@ -214,7 +351,40 @@ chmod 755 "$DIR/start.sh"
 
 echo
 info "Installed to $DIR. Start it with: $DIR/start.sh"
-info "Open port $PORT/tcp in your firewall if players connect from outside."
+[ "$OS" = linux ] && open_firewall
+
+SERVICE=""
+if [ "$OS" = linux ] && [ -d /run/systemd/system ] && confirm "Create a systemd service so the server starts on boot?"; then
+  SERVICE="kirigami-$(basename "$DIR" | tr -c 'A-Za-z0-9_.\n-' '-')"
+  [ -e "/etc/systemd/system/$SERVICE.service" ] && die "/etc/systemd/system/$SERVICE.service already exists"
+  as_root tee "/etc/systemd/system/$SERVICE.service" > /dev/null <<EOF
+[Unit]
+Description=Kirigami Minecraft server ($DIR)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=$(id -un)
+WorkingDirectory=$DIR
+ExecStart=$DIR/start.sh
+Restart=on-failure
+RestartSec=10
+SuccessExitStatus=0 143
+TimeoutStopSec=120
+
+[Install]
+WantedBy=multi-user.target
+EOF
+  as_root systemctl daemon-reload
+  as_root systemctl enable "$SERVICE"
+  info "Service $SERVICE installed. Logs: journalctl -u $SERVICE -f"
+fi
+
 if confirm "Start the server now?"; then
-  exec "$DIR/start.sh"
+  if [ -n "$SERVICE" ]; then
+    as_root systemctl start "$SERVICE"
+    info "Started. Follow the log with: journalctl -u $SERVICE -f"
+  else
+    exec "$DIR/start.sh"
+  fi
 fi
