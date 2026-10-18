@@ -23,7 +23,7 @@ Measured on 2026-10-17 in the spread village benchmark (64 bots, 800 villagers) 
 
 Revisit only if a plugin shows up with many more pauses per tick in `/kirigami`.
 
-Pauses are counted per event type, and `/kirigami` lists the top five with the plugins that listen to them. A phase that spends more than half of its time in world pauses falls back to serial for 600 ticks.
+Pauses are counted per event type, and `/kirigami` lists the top five with the plugins that listen to them. A phase that spends more than half of its time in plugin pauses, and is slower than its last measured serial run, falls back to serial for 600 ticks. Serial time is measured while the fallback is active; before the first fallback any mostly-paused phase falls back.
 
 ## Entities added during a parallel phase
 
