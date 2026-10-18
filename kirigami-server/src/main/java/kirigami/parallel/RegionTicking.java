@@ -168,7 +168,7 @@ public final class RegionTicking {
                                          final Consumer<net.minecraft.world.ticks.ScheduledTick<T>> action) {
         final int fallbackIndex = fluids ? FLUID_TICKS : Phase.SCHEDULED_TICKS.ordinal();
         final java.util.function.Predicate<net.minecraft.world.ticks.ScheduledTick<T>> serial;
-        if (fallback(level, fallbackIndex).active() || runsCommands(ticks)) {
+        if (fallback(level, fallbackIndex).active() || needsSerialPhase(ticks)) {
             serial = tick -> true;
         } else {
             final int[] bucketOfTick = new int[ticks.size()];
@@ -186,9 +186,11 @@ public final class RegionTicking {
             () -> ((ca.spottedleaf.moonrise.patches.chunk_system.server.ChunkSystemMinecraftServer) level.getServer()).moonrise$executeMidTickTasks());
     }
 
-    private static boolean runsCommands(final List<? extends net.minecraft.world.ticks.ScheduledTick<?>> ticks) {
+    private static boolean needsSerialPhase(final List<? extends net.minecraft.world.ticks.ScheduledTick<?>> ticks) {
         for (final net.minecraft.world.ticks.ScheduledTick<?> tick : ticks) {
-            if (tick.type() instanceof net.minecraft.world.level.block.CommandBlock) {
+            if (tick.type() instanceof net.minecraft.world.level.block.CommandBlock
+                || tick.type() instanceof net.minecraft.world.level.block.TripWireHookBlock
+                || tick.type() instanceof net.minecraft.world.level.block.TripWireBlock) {
                 return true;
             }
         }
