@@ -166,19 +166,15 @@ public final class RegionTicking {
 
     public static <T> void tickScheduled(final ServerLevel level, final List<net.minecraft.world.ticks.ScheduledTick<T>> ticks, final boolean fluids,
                                          final Consumer<net.minecraft.world.ticks.ScheduledTick<T>> action) {
+        if (needsSerialPhase(ticks)) {
+            STATS.serial[Phase.SCHEDULED_TICKS.ordinal()] += ticks.size();
+            ticks.forEach(action);
+            return;
+        }
         final int fallbackIndex = fluids ? FLUID_TICKS : Phase.SCHEDULED_TICKS.ordinal();
-        final java.util.function.Predicate<net.minecraft.world.ticks.ScheduledTick<T>> serial;
-        if (fallback(level, fallbackIndex).active() || needsSerialPhase(ticks)) {
-            serial = tick -> true;
-        } else {
-            final int[] bucketOfTick = new int[ticks.size()];
-            final boolean[] spanning = BoundaryClusters.spanningClusters(ticks, CELL_SHIFT + 4, 2 * SCHEDULED_TICK_REACH, bucketOfTick);
-            final java.util.Set<net.minecraft.world.ticks.ScheduledTick<T>> serialTicks = new it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet<>();
-            for (int i = 0; i < ticks.size(); i++) {
-                if (spanning[bucketOfTick[i]]) {
-                    serialTicks.add(ticks.get(i));
-                }
-            }
+        java.util.function.Predicate<net.minecraft.world.ticks.ScheduledTick<T>> serial = tick -> true;
+        if (!fallback(level, fallbackIndex).active()) {
+            final java.util.Set<net.minecraft.world.ticks.ScheduledTick<?>> serialTicks = BoundaryClusters.spanningClusters(ticks, CELL_SHIFT + 4, 2 * SCHEDULED_TICK_REACH);
             STATS.boundaryScheduledTicks += serialTicks.size();
             serial = serialTicks::contains;
         }
@@ -201,7 +197,7 @@ public final class RegionTicking {
                                 final java.util.function.Predicate<T> serialPredicate, final Consumer<T> action, final int maxChainedNeighborUpdates,
                                 final @org.jspecify.annotations.Nullable Runnable betweenColors) {
         final Fallback fallback = fallback(level, fallbackIndex);
-        if (POOL == null || !PluginGuard.parallelAllowed() || !phase.enabled || items.size() < MIN_PARALLEL_ITEMS) {
+        if (!parallelPossible(phase, items.size())) {
             STATS.serial[phase.ordinal()] += items.size();
             items.forEach(action);
             return;
@@ -254,7 +250,7 @@ public final class RegionTicking {
             action.accept(item);
         }
 
-        checkFallback(fallback, startNanos, pausedBefore, items.size(), phase.label);
+        checkFallback(fallback, startNanos, pausedBefore, items.size(), fallbackIndex == FLUID_TICKS ? "fluidTicks" : phase.label);
     }
 
     public static boolean onWorker() {
@@ -262,7 +258,11 @@ public final class RegionTicking {
     }
 
     public static boolean scheduledTicksMayRunParallel(final ServerLevel level, final int size) {
-        return POOL != null && PluginGuard.parallelAllowed() && Phase.SCHEDULED_TICKS.enabled && size >= MIN_PARALLEL_ITEMS;
+        return parallelPossible(Phase.SCHEDULED_TICKS, size);
+    }
+
+    private static boolean parallelPossible(final Phase phase, final int size) {
+        return POOL != null && PluginGuard.parallelAllowed() && phase.enabled && size >= MIN_PARALLEL_ITEMS;
     }
 
     private static Fallback fallback(final ServerLevel level, final int index) {

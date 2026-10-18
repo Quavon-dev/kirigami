@@ -54,9 +54,10 @@ final class BoundaryClusters {
         return result;
     }
 
-    static boolean[] spanningClusters(final List<? extends net.minecraft.world.ticks.ScheduledTick<?>> ticks, final int cellShiftBlocks, final int linkDistance,
-                                      final int[] bucketOfTick) {
+    static Set<net.minecraft.world.ticks.ScheduledTick<?>> spanningClusters(final List<? extends net.minecraft.world.ticks.ScheduledTick<?>> ticks, final int cellShiftBlocks,
+                                                                          final int linkDistance) {
         final int bucketShift = 4;
+        final int[] bucketOfTick = new int[ticks.size()];
         final int linkBuckets = (linkDistance + (1 << bucketShift) - 1) >> bucketShift;
         final Long2IntOpenHashMap buckets = new Long2IntOpenHashMap();
         buckets.defaultReturnValue(-1);
@@ -100,9 +101,11 @@ final class BoundaryClusters {
             }
             rootSpans[root] |= rootCell[root] != cell;
         }
-        final boolean[] result = new boolean[parent.length];
-        for (int i = 0; i < parent.length; i++) {
-            result[i] = rootSpans[find(parent, i)];
+        final Set<net.minecraft.world.ticks.ScheduledTick<?>> result = new ReferenceOpenHashSet<>();
+        for (int i = 0; i < ticks.size(); i++) {
+            if (rootSpans[find(parent, bucketOfTick[i])]) {
+                result.add(ticks.get(i));
+            }
         }
         return result;
     }
@@ -127,7 +130,7 @@ final class BoundaryClusters {
         return local < LINK || local >= cellSize - LINK;
     }
 
-    static long cellOf(final int x, final int z, final int cellShiftBlocks) {
+    private static long cellOf(final int x, final int z, final int cellShiftBlocks) {
         return ((long) (x >> cellShiftBlocks) << 32) | ((z >> cellShiftBlocks) & 0xFFFFFFFFL);
     }
 

@@ -71,7 +71,7 @@ error_count="$(echo -n "$new_errors" | grep -c . || true)"
 status=pass
 [ "${enabled:-0}" = "$installed" ] || status=fail
 [ "${overlaps:-1}" = 0 ] && [ "${off_thread:-1}" = 0 ] || status=fail
-[ "$((scheduled - ran))" -le 1 ] || status=fail
+[[ "$scheduled" =~ ^[0-9]+$ && "$ran" =~ ^[0-9]+$ ]] && [ "$((scheduled - ran))" -le 1 ] || status=fail
 [ "$error_count" = 0 ] || status=fail
 [ -n "$new_errors" ] && echo "$new_errors" >&2
 printf "%s\t%s\tplugins=%s/%s new-errors=%s %s\n" "$name" "$status" "${enabled:-0}" "$installed" "$error_count" "$probe_line" | tee -a "$results/summary.tsv"
