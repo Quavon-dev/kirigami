@@ -5,10 +5,10 @@ Subject: [PATCH] Kirigami branding
 
 
 diff --git a/net/minecraft/server/MinecraftServer.java b/net/minecraft/server/MinecraftServer.java
-index c3bf41af0273e902f881cc070fcef6dd64abb063..d3d9976e071eee864d8fba3ac59bccf22d16e3b2 100644
+index 7517b872794f3bbe556f3abbeb294f426c8da899..96193cf1dda3f334ec51f57b35a8d019f0c5bf12 100644
 --- a/net/minecraft/server/MinecraftServer.java
 +++ b/net/minecraft/server/MinecraftServer.java
-@@ -1278,11 +1278,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -1280,11 +1280,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
                  LOGGER.info("*************************************************************************************");
              }
              // Paper end - Add onboarding message for initial server start

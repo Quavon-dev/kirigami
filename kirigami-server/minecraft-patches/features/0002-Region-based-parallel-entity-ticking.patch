@@ -5,7 +5,7 @@ Subject: [PATCH] Region based parallel entity ticking
 
 
 diff --git a/ca/spottedleaf/moonrise/patches/chunk_system/level/entity/EntityLookup.java b/ca/spottedleaf/moonrise/patches/chunk_system/level/entity/EntityLookup.java
-index 328784ba08236553e49d62320b79f7222292412f..2bf6bd2f833cc2e675fbc5d43252e5edda5d86aa 100644
+index 99b5026d8dfa9668caf15e9ae27619d9d433b441..74bf47f8955b52b34d1070237d953e6571034f1c 100644
 --- a/ca/spottedleaf/moonrise/patches/chunk_system/level/entity/EntityLookup.java
 +++ b/ca/spottedleaf/moonrise/patches/chunk_system/level/entity/EntityLookup.java
 @@ -534,6 +534,16 @@ public abstract class EntityLookup implements LevelEntityGetter<Entity> {
@@ -95,7 +95,7 @@ index f7820568b78f630e4d234d3dfb36c2167149777a..d0f747c183e55f5c7da61d8e3d09b581
          // The variable 'k' holds the maximum redstone power value of any adjacent blocks.
          // If 'k' has the highest level of all neighbors, then the power level of this
 diff --git a/net/minecraft/server/level/ServerChunkCache.java b/net/minecraft/server/level/ServerChunkCache.java
-index f72d96b34c14cb37693b6f6899aa5ad27beb1b87..59b009829edc63c7abb92e840a9aec53f01f5ba5 100644
+index 95ed049dbd8c30f9bf527f4d9ec49250159a6033..3fbcaded195f3069dfcf75ff54098bb7bdf9cc77 100644
 --- a/net/minecraft/server/level/ServerChunkCache.java
 +++ b/net/minecraft/server/level/ServerChunkCache.java
 @@ -104,6 +104,7 @@ public class ServerChunkCache extends ChunkSource implements ca.spottedleaf.moon
@@ -303,7 +303,7 @@ index ea4cc487002a0edc54cc49bfbecf72be156b6af7..9e46a613ca9c15f33f502b419e512041
      }
      // Paper end - optimize redstone (Alternate Current)
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index 5cc94652112c67ca4e7ae6e8b324e9c9f8908d7d..8ddde8fdf8d9ef7019dc6202302f594fcad28c4f 100644
+index 267be9e775b8bb8c816c79fb4357a3ef23317b40..57daee986a45700e52c6a30fe3f6ae104c4d6f3b 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
 @@ -301,7 +301,7 @@ public abstract class Entity
@@ -315,7 +315,7 @@ index 5cc94652112c67ca4e7ae6e8b324e9c9f8908d7d..8ddde8fdf8d9ef7019dc6202302f594f
      public int tickCount;
      private int remainingFireTicks;
      private final EntityFluidInteraction fluidInteraction = new EntityFluidInteraction(FLUIDS_WITH_CURRENT);
-@@ -5334,6 +5334,17 @@ public abstract class Entity
+@@ -5335,6 +5335,17 @@ public abstract class Entity
  
      @Override
      public final void setRemoved(final Entity.RemovalReason reason, org.bukkit.event.entity.EntityRemoveEvent.@Nullable Cause cause) { // CraftBukkit - add Bukkit remove cause
@@ -362,7 +362,7 @@ index 3b07e731e8d16c2b71cb55b85163029cf56fd02e..824e9faaee081773936b9f7d99d13598
              }
          }
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index 21878bd770f6c0bc10dd0a67be5bd94d7e16f741..ebac07948da060343ae63e3f21545114cbeefa0c 100644
+index c14996f1d8a9ed77a845a464c1789bab0715741b..1319ec626e91db9477c62a3b279f11d4f58370d2 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
 @@ -119,6 +119,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
