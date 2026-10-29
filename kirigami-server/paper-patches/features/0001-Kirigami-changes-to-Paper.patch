@@ -155,10 +155,10 @@ index 2625ff0d8fa1fb2b5166326dc729bc41b054779b..bfd829562c2415bbb18b649164161236
  
      public Goal<T> getHandle() {
 diff --git a/src/main/java/io/papermc/paper/PaperServerInternalAPIBridge.java b/src/main/java/io/papermc/paper/PaperServerInternalAPIBridge.java
-index 24721e4b0128faa4f85d69ec92c4a6f012f70ef9..8f83f7f1f200e94c8ddbf1e9b1f07ad2e58b28ba 100644
+index 1f0ad3f6855adbc65a2f975e83846d0a3fd271c6..c2fc06fb63615ac5a756f9ddea958ca68f2b9e26 100644
 --- a/src/main/java/io/papermc/paper/PaperServerInternalAPIBridge.java
 +++ b/src/main/java/io/papermc/paper/PaperServerInternalAPIBridge.java
-@@ -192,7 +192,7 @@ public class PaperServerInternalAPIBridge implements InternalAPIBridge {
+@@ -203,7 +203,7 @@ public class PaperServerInternalAPIBridge implements InternalAPIBridge {
  
      @Override
      public VersionFetcher getVersionFetcher() {
@@ -219,10 +219,10 @@ index 0b35a293f3436bcf8a39c4f07a88340cd9d33bcb..1483691e2e462719fb5e4d106cecf510
          public boolean skipVanillaDamageTickWhenShieldBlocked = false;
          @Comment("This setting controls if equipment should be updated when handling certain player actions.")
 diff --git a/src/main/java/io/papermc/paper/configuration/WorldConfiguration.java b/src/main/java/io/papermc/paper/configuration/WorldConfiguration.java
-index c710819bcd422f062a10127090ecfa6b222fe4f7..a6b2e098812a88f3c0492841ca707a4efef4dd79 100644
+index 748f0e667a5468335e546e846e59dc5d0c63a15b..36e7e283e65ff9861cdade8a94b92d7db8cac4c8 100644
 --- a/src/main/java/io/papermc/paper/configuration/WorldConfiguration.java
 +++ b/src/main/java/io/papermc/paper/configuration/WorldConfiguration.java
-@@ -176,7 +176,7 @@ public class WorldConfiguration extends ConfigurationPart {
+@@ -177,7 +177,7 @@ public class WorldConfiguration extends ConfigurationPart {
              public boolean filterBadTileEntityNbtFromFallingBlocks = true;
              public List<NbtPathArgument.NbtPath> filteredEntityTagNbtPaths = NbtPathSerializer.fromString(List.of("Pos", "Motion", "sleeping_pos"));
              public boolean disableMobSpawnerSpawnEggTransformation = false;
@@ -231,7 +231,7 @@ index c710819bcd422f062a10127090ecfa6b222fe4f7..a6b2e098812a88f3c0492841ca707a4e
              public boolean scanForLegacyEnderDragon = true;
              @MergeMap
              public Reference2IntMap<MobCategory> spawnLimits = Util.make(new Reference2IntOpenHashMap<>(NaturalSpawner.SPAWNING_CATEGORIES.length), map -> Arrays.stream(NaturalSpawner.SPAWNING_CATEGORIES).forEach(mobCategory -> map.put(mobCategory, -1)));
-@@ -250,7 +250,7 @@ public class WorldConfiguration extends ConfigurationPart {
+@@ -251,7 +251,7 @@ public class WorldConfiguration extends ConfigurationPart {
              @BelowZeroToEmpty
              public DoubleOr.Default skeletonHorseThunderSpawnChance = DoubleOr.Default.USE_DEFAULT;
              public boolean ironGolemsCanSpawnInAir = false;
@@ -240,7 +240,7 @@ index c710819bcd422f062a10127090ecfa6b222fe4f7..a6b2e098812a88f3c0492841ca707a4e
              @BelowZeroToEmpty
              public IntOr.Default monsterSpawnMaxLightLevel = IntOr.Default.USE_DEFAULT;
              public DuplicateUUID duplicateUuid;
-@@ -294,8 +294,8 @@ public class WorldConfiguration extends ConfigurationPart {
+@@ -295,8 +295,8 @@ public class WorldConfiguration extends ConfigurationPart {
  
              public boolean disableCreeperLingeringEffect = false;
              public boolean enderDragonsDeathAlwaysPlacesDragonEgg = false;
@@ -251,7 +251,7 @@ index c710819bcd422f062a10127090ecfa6b222fe4f7..a6b2e098812a88f3c0492841ca707a4e
              public int playerInsomniaStartTicks = 72000;
              public int phantomsSpawnAttemptMinSeconds = 60;
              public int phantomsSpawnAttemptMaxSeconds = 119;
-@@ -333,9 +333,9 @@ public class WorldConfiguration extends ConfigurationPart {
+@@ -334,9 +334,9 @@ public class WorldConfiguration extends ConfigurationPart {
              }
  
              @Comment("Adds a cooldown to bees being released after a failed release, which can occur if the hive is blocked or it being night.")
@@ -263,7 +263,7 @@ index c710819bcd422f062a10127090ecfa6b222fe4f7..a6b2e098812a88f3c0492841ca707a4e
              @Comment("If specified, this setting controls how often to tick inactive mobs' goal selectors. Higher values reduce the performance impact of ticking mobs that are far away. Measured in ticks.")
              public IntOr.Disabled inactiveMobGoalSelectorThrottleRate = IntOr.Disabled.DISABLED;
          }
-@@ -478,7 +478,7 @@ public class WorldConfiguration extends ConfigurationPart {
+@@ -479,7 +479,7 @@ public class WorldConfiguration extends ConfigurationPart {
      public UnsupportedSettings unsupportedSettings;
  
      public class UnsupportedSettings extends ConfigurationPart {
@@ -272,7 +272,7 @@ index c710819bcd422f062a10127090ecfa6b222fe4f7..a6b2e098812a88f3c0492841ca707a4e
          public boolean disableWorldTickingWhenEmpty = false;
          public Ticking ticking;
  
-@@ -503,8 +503,8 @@ public class WorldConfiguration extends ConfigurationPart {
+@@ -504,8 +504,8 @@ public class WorldConfiguration extends ConfigurationPart {
          public boolean allowVehicleCollisions = true;
          public boolean fixClimbingBypassingCrammingRule = false;
          @RequiresSpigotInitialization(MaxEntityCollisionsInitializer.class)
