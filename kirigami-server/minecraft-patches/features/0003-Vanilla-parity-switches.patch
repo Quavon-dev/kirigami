@@ -5,10 +5,10 @@ Subject: [PATCH] Vanilla parity switches
 
 
 diff --git a/ca/spottedleaf/moonrise/paper/PaperHooks.java b/ca/spottedleaf/moonrise/paper/PaperHooks.java
-index 76f990f150f040b1ad6d7d5b91cfb34ebd6f436a..09151a64b85702ad0f007c83a69e53eb2a9ee1a2 100644
+index 26e252d229dd1a63afa70b41299bc92fc367afdf..fa90aa67aab442ca3d9292bfe3094d32974f0f51 100644
 --- a/ca/spottedleaf/moonrise/paper/PaperHooks.java
 +++ b/ca/spottedleaf/moonrise/paper/PaperHooks.java
-@@ -164,7 +164,7 @@ public final class PaperHooks extends BaseChunkSystemHooks implements PlatformHo
+@@ -170,7 +170,7 @@ public final class PaperHooks extends BaseChunkSystemHooks implements PlatformHo
  
      @Override
      public boolean configFixMC224294() {

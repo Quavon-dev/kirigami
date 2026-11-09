@@ -5,10 +5,10 @@ Subject: [PATCH] Pause world for kill score awarding
 
 
 diff --git a/net/minecraft/world/entity/LivingEntity.java b/net/minecraft/world/entity/LivingEntity.java
-index 23297b54c74684765f90e9e599d051a44357e9a5..1b0759be786c36885bbc492f19c36826a3a8bae3 100644
+index a0d10e4c3f78128029125bae8e8e476208f28d42..5799f9cc34215a56cea3879658e603267f8fa9e8 100644
 --- a/net/minecraft/world/entity/LivingEntity.java
 +++ b/net/minecraft/world/entity/LivingEntity.java
-@@ -1840,7 +1840,7 @@ public abstract class LivingEntity extends Entity implements Attackable, Waypoin
+@@ -1851,7 +1851,7 @@ public abstract class LivingEntity extends Entity implements Attackable, Waypoin
              LivingEntity killer = this.getKillCredit();
              Runnable afterEvent = () -> { // Paper
              if (killer != null) {
