@@ -303,7 +303,7 @@ index ea4cc487002a0edc54cc49bfbecf72be156b6af7..9e46a613ca9c15f33f502b419e512041
      }
      // Paper end - optimize redstone (Alternate Current)
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index 267be9e775b8bb8c816c79fb4357a3ef23317b40..57daee986a45700e52c6a30fe3f6ae104c4d6f3b 100644
+index bea975af0b8be42883bac92d0366cf93ebadc0fc..8def501ad283fdacbfa8adf110977af0d29bb53d 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
 @@ -301,7 +301,7 @@ public abstract class Entity
@@ -315,7 +315,7 @@ index 267be9e775b8bb8c816c79fb4357a3ef23317b40..57daee986a45700e52c6a30fe3f6ae10
      public int tickCount;
      private int remainingFireTicks;
      private final EntityFluidInteraction fluidInteraction = new EntityFluidInteraction(FLUIDS_WITH_CURRENT);
-@@ -5335,6 +5335,17 @@ public abstract class Entity
+@@ -5340,6 +5340,17 @@ public abstract class Entity
  
      @Override
      public final void setRemoved(final Entity.RemovalReason reason, org.bukkit.event.entity.EntityRemoveEvent.@Nullable Cause cause) { // CraftBukkit - add Bukkit remove cause
@@ -362,7 +362,7 @@ index 3b07e731e8d16c2b71cb55b85163029cf56fd02e..824e9faaee081773936b9f7d99d13598
              }
          }
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index c14996f1d8a9ed77a845a464c1789bab0715741b..1319ec626e91db9477c62a3b279f11d4f58370d2 100644
+index ab49bb83b51a3ac210f4c51ec48c11036912149e..f5279334928545c8235cff415f896f5d07889d33 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
 @@ -119,6 +119,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl

@@ -193,7 +193,7 @@ index e81dcd83d0e74969a7bab09ea09d349be5f0a741..353cd66915b6a95bf6c66e368a535fe1
  
      private static void registerInternalCommand(final LiteralCommandNode<CommandSourceStack> node, final String namespace, final String description, final List<String> aliases, final Set<CommandRegistrationFlag> flags) {
 diff --git a/src/main/java/io/papermc/paper/configuration/GlobalConfiguration.java b/src/main/java/io/papermc/paper/configuration/GlobalConfiguration.java
-index 0b35a293f3436bcf8a39c4f07a88340cd9d33bcb..1483691e2e462719fb5e4d106cecf510201bd1de 100644
+index 014f8488af19ba4c95365d6867784e76406c9165..e1f39a6d51ec64485e3699811d5106acf8849f9c 100644
 --- a/src/main/java/io/papermc/paper/configuration/GlobalConfiguration.java
 +++ b/src/main/java/io/papermc/paper/configuration/GlobalConfiguration.java
 @@ -169,16 +169,16 @@ public class GlobalConfiguration extends ConfigurationPart {
@@ -219,7 +219,7 @@ index 0b35a293f3436bcf8a39c4f07a88340cd9d33bcb..1483691e2e462719fb5e4d106cecf510
          public boolean skipVanillaDamageTickWhenShieldBlocked = false;
          @Comment("This setting controls if equipment should be updated when handling certain player actions.")
 diff --git a/src/main/java/io/papermc/paper/configuration/WorldConfiguration.java b/src/main/java/io/papermc/paper/configuration/WorldConfiguration.java
-index 748f0e667a5468335e546e846e59dc5d0c63a15b..36e7e283e65ff9861cdade8a94b92d7db8cac4c8 100644
+index f5005cc53cf0b9f85006e403302d3610ee1cadc8..e58de004e59aad5778cc4b3e9eae84e2218dca5b 100644
 --- a/src/main/java/io/papermc/paper/configuration/WorldConfiguration.java
 +++ b/src/main/java/io/papermc/paper/configuration/WorldConfiguration.java
 @@ -177,7 +177,7 @@ public class WorldConfiguration extends ConfigurationPart {
@@ -263,7 +263,7 @@ index 748f0e667a5468335e546e846e59dc5d0c63a15b..36e7e283e65ff9861cdade8a94b92d7d
              @Comment("If specified, this setting controls how often to tick inactive mobs' goal selectors. Higher values reduce the performance impact of ticking mobs that are far away. Measured in ticks.")
              public IntOr.Disabled inactiveMobGoalSelectorThrottleRate = IntOr.Disabled.DISABLED;
          }
-@@ -479,7 +479,7 @@ public class WorldConfiguration extends ConfigurationPart {
+@@ -481,7 +481,7 @@ public class WorldConfiguration extends ConfigurationPart {
      public UnsupportedSettings unsupportedSettings;
  
      public class UnsupportedSettings extends ConfigurationPart {
@@ -272,7 +272,7 @@ index 748f0e667a5468335e546e846e59dc5d0c63a15b..36e7e283e65ff9861cdade8a94b92d7d
          public boolean disableWorldTickingWhenEmpty = false;
          public Ticking ticking;
  
-@@ -504,8 +504,8 @@ public class WorldConfiguration extends ConfigurationPart {
+@@ -506,8 +506,8 @@ public class WorldConfiguration extends ConfigurationPart {
          public boolean allowVehicleCollisions = true;
          public boolean fixClimbingBypassingCrammingRule = false;
          @RequiresSpigotInitialization(MaxEntityCollisionsInitializer.class)
